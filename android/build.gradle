@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        google()  // ← これがないと依存関係が解決できない
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1' // ← 最新の安定バージョンを指定
+    }
+}
+
 allprojects {
     repositories {
         google()
