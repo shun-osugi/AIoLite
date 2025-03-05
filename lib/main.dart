@@ -51,35 +51,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            IconButton(
-              onPressed: () async {
-                /*Step 1:Pick image*/
-                //Install image_picker
-                //Import the corresponding library
-
-                file = await FilePicker.platform.pickFiles(
-                  type:  FileType.image, //写真ファイルのみ抽出
-                  // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
-                );
-                // Web上での実行時の処理
-
-                filename = file!.files.first.name;
-                print(filename);
-
-                // File型に変換
-                File putfile = File(file!.files.first.path!);
-                // ml-kitで画像を読み込む
-                final inputImage = InputImage.fromFile(putfile);
-                // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
-                final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
-                // 画像から文字を読み取る（OCR処理）
-                final recognizedText = await textRecognizer.processImage(inputImage);
-                str = recognizedText.text;
-                // print('OCRで取得したテキスト：${recognizedText.text}');
-
-                setState((){});
+            CameraButton(
+              onImagePicked: (String text) {
+                setState(() {
+                  str = text;
+                  // print('OCRで取得したテキスト：${text}');
+                });
               },
-              icon: const Icon(Icons.camera_alt)
             ),
             str != ""
             ? Text(str) //ファイルを選択したならファイル名を表示
@@ -91,9 +69,72 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           Navigator.pushNamed(context, '/chat');
         },
-        tooltip: 'Increment',
         child: const Icon(Icons.navigate_next),
       ),// This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class CameraButton extends StatelessWidget {
+  final Function(String) onImagePicked;
+  const CameraButton({Key? key, required this.onImagePicked}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () async {
+        /*Step 1:Pick image*/
+        //Install image_picker
+        //Import the corresponding library
+
+        FilePickerResult? file = await FilePicker.platform.pickFiles(
+          type:  FileType.image, //写真ファイルのみ抽出
+          // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
+        );
+        // Web上での実行時の処理
+
+        if (file != null) {
+          String filename = file.files.first.name;
+          print(filename);
+
+          // File型に変換
+          File putfile = File(file!.files.first.path!);
+          // ml-kitで画像を読み込む
+          final inputImage = InputImage.fromFile(putfile);
+          // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
+          final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
+          // 画像から文字を読み取る（OCR処理）
+          final recognizedText = await textRecognizer.processImage(inputImage);
+
+          onImagePicked(recognizedText.text);
+        }
+      },
+        icon: const Icon(Icons.camera_alt)
+    );
+  }
+}
+
+
+
+class DifficultyDropdown extends StatefulWidget {
+  @override
+  _DifficultyDropdownState createState() => _DifficultyDropdownState();
+}
+
+class _DifficultyDropdownState extends State<DifficultyDropdown> {
+  String selectedDifficulty = '○○';
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      value: selectedDifficulty,
+      items: ['○○', '△△', '□□']
+          .map((level) => DropdownMenuItem(value: level, child: Text('難易度: $level')))
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          selectedDifficulty = value!;
+        });
+      },
     );
   }
 }
