@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 // import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
@@ -173,6 +174,16 @@ class CameraButton extends StatelessWidget {
   final Function(String) onImagePicked;
   const CameraButton({Key? key, required this.onImagePicked}) : super(key: key);
 
+  void file_to_text(File putfile) async {
+    final inputImage = InputImage.fromFile(putfile);
+    // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
+    // 画像から文字を読み取る（OCR処理）
+    final recognizedText = await textRecognizer.processImage(inputImage);
+
+    onImagePicked(recognizedText.text);
+  }
+
   @override
   Widget build(BuildContext context) {
     return IconButton(
@@ -181,27 +192,51 @@ class CameraButton extends StatelessWidget {
         //Install image_picker
         //Import the corresponding library
 
-        FilePickerResult? file = await FilePicker.platform.pickFiles(
-          type:  FileType.image, //写真ファイルのみ抽出
-          // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
+        showDialog(
+          context: context,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('選んでね'),
+              children: [
+                SimpleDialogOption(
+                  child: Text('写真ライブラリから選択'),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    FilePickerResult? file = await FilePicker.platform.pickFiles(
+                      type:  FileType.image, //写真ファイルのみ抽出
+                      // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
+                    );
+
+                    if (file != null) {
+                      String filename = file.files.first.name;
+                      print(filename);
+
+                      // File型に変換し文字に変換
+                      file_to_text(File(file.files.first.path!));
+                    }
+                  },
+                ),
+                SimpleDialogOption(
+                  child: Text('写真を撮影'),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    ImagePicker picker = ImagePicker();
+                    //写真を撮る
+                    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+                    if (pickedFile != null) {
+                      print(pickedFile.path);
+                      // File型に変換し文字に変換
+                      file_to_text(File(pickedFile.path));
+                    }
+                  },
+                )
+              ],
+            );
+          }
         );
-        // Web上での実行時の処理
 
-        if (file != null) {
-          String filename = file.files.first.name;
-          print(filename);
-
-          // File型に変換
-          File putfile = File(file.files.first.path!);
-          // ml-kitで画像を読み込む
-          final inputImage = InputImage.fromFile(putfile);
-          // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
-          final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
-          // 画像から文字を読み取る（OCR処理）
-          final recognizedText = await textRecognizer.processImage(inputImage);
-
-          onImagePicked(recognizedText.text);
-        }
+        
       },
         icon: const Icon(Icons.camera_alt, size: 30,)
     );
