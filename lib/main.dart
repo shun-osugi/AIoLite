@@ -47,30 +47,124 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     file = null;
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            CameraButton(
-              onImagePicked: (String text) {
-                setState(() {
-                  str = text;
-                  // print('OCRで取得したテキスト：${text}');
-                });
-              },
-            ),
-            str != ""
-            ? Text(str) //ファイルを選択したならファイル名を表示
-            : Container(),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/chat');
-        },
-        child: const Icon(Icons.navigate_next),
-      ),// This trailing comma makes auto-formatting nicer for build methods.
+        body: Stack(
+            children: [
+              // ヘルプボタン
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 40, right: 20), // 上と右に余白を設定
+                  child: IconButton(
+                    icon: Icon(Icons.help_outline, size: 50),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('ヘルプ'),
+                            content: Text('ここにヘルプの内容を記載'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text('閉じる'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              // メインUI
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
+                      Image.asset('assets/logo.png', height: MediaQuery.of(context).size.height * 0.2), // ロゴ画像
+                      DifficultyDropdown(),
+                      Stack(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            height: MediaQuery.of(context).size.width * 0.4,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.pink[100],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text('アバター', style: TextStyle(fontSize: 20)),
+                          ),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: IconButton(
+                              icon: Icon(Icons.refresh, size: 50),
+                              onPressed: () {},
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.mic, size: 30),
+                                  onPressed: () {
+                                    // マイクボタンの処理（音声入力など）
+                                  },
+                                ),
+                                CameraButton(
+                                  onImagePicked: (String text) {
+                                    setState(() {
+                                      str = text;
+                                      // print('OCRで取得したテキスト：${text}');
+                                    });
+                                  },
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 24,
+                                  color: Colors.black,
+                                )
+                              ],
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  '問題を送って始める',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (str.isNotEmpty)
+                        Text(str, style: TextStyle(fontSize: 16)),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/chat');
+                          },
+                        child: Text('START', style: TextStyle(fontSize: 18)),
+                      ),
+                      SizedBox (height: MediaQuery.of(context).size.height * 0.05,)
+                    ],
+                  ),
+                ),
+              ),
+            ]
+        )
     );
   }
 }
@@ -98,7 +192,7 @@ class CameraButton extends StatelessWidget {
           print(filename);
 
           // File型に変換
-          File putfile = File(file!.files.first.path!);
+          File putfile = File(file.files.first.path!);
           // ml-kitで画像を読み込む
           final inputImage = InputImage.fromFile(putfile);
           // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
@@ -109,12 +203,10 @@ class CameraButton extends StatelessWidget {
           onImagePicked(recognizedText.text);
         }
       },
-        icon: const Icon(Icons.camera_alt)
+        icon: const Icon(Icons.camera_alt, size: 30,)
     );
   }
 }
-
-
 
 class DifficultyDropdown extends StatefulWidget {
   @override
@@ -127,8 +219,15 @@ class _DifficultyDropdownState extends State<DifficultyDropdown> {
   Widget build(BuildContext context) {
     return DropdownButton<String>(
       value: selectedDifficulty,
+      style: TextStyle(fontSize: 20, color: Colors.black),
       items: ['○○', '△△', '□□']
-          .map((level) => DropdownMenuItem(value: level, child: Text('難易度: $level')))
+          .map((level) => DropdownMenuItem(
+          value: level,
+          child: Text(
+              '難易度: $level',
+            style: TextStyle(fontSize: 20, color: Colors.black),
+          ),
+      ))
           .toList(),
       onChanged: (value) {
         setState(() {
