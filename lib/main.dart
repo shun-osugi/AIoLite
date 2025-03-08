@@ -172,6 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     onImagePicked: (String text) {
                                       setState(() {
                                         str = text;
+                                        _textController.text = str;
                                         // print('OCRで取得したテキスト：${text}');
                                       });
                                     },
@@ -194,8 +195,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                           ),
                         ),
-                        if (str.isNotEmpty)
-                          Text(str, style: TextStyle(fontSize: 16)),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.pushNamed(context, '/chat');
