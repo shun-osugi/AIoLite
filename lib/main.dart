@@ -56,33 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
         body: SingleChildScrollView(
           child: Stack(
               children: [
-                // ヘルプボタン
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 40, right: 20), // 上と右に余白を設定
-                    child: IconButton(
-                      icon: Icon(Icons.help_outline, size: 50),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text('ヘルプ'),
-                              content: Text('ここにヘルプの内容を記載'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('閉じる'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                const HelpButton(),
 
                 // メインUI
                 Center(
@@ -105,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               height: MediaQuery.of(context).size.width * 0.4,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 shape: BoxShape.circle,
                               ),
                               child: Text('アバター', style: TextStyle(fontSize: 20)),
@@ -130,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.subColor,
-                            foregroundColor: Colors.black87,
+                            foregroundColor: AppColors.black,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50),
                             ),
@@ -162,6 +136,45 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+// ヘルプボタン
+class HelpButton extends StatelessWidget {
+  const HelpButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 40, right: 20),
+        child: IconButton(
+          icon: Icon(Icons.help_outline, size: 50, color: AppColors.white),
+          onPressed: () {
+            _showHelpDialog(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('ヘルプ'),
+          content: Text('ここにヘルプの内容を記載'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('閉じる'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 // 音声入力を行うボタン（未実装）
 class AudioButton extends StatelessWidget {
   final Function(String) onTextPicked;
@@ -176,9 +189,9 @@ class AudioButton extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black87, width: 2,),
+          border: Border.all(color: AppColors.black, width: 2,),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.5),
@@ -187,7 +200,7 @@ class AudioButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(Icons.mic, size: 64, color: Colors.black87),
+        child: Icon(Icons.mic, size: 64, color: AppColors.black),
       ),
     );
   }
@@ -262,18 +275,18 @@ class CameraButton extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black87, width: 2,),
+          border: Border.all(color: AppColors.black, width: 2,),
           boxShadow: [
             BoxShadow(
-              color: Colors.white54, // 影の色
+              color: AppColors.background, // 影の色
               blurRadius: 6, // ぼかしの強さ
               offset: Offset(2, 2), // 影の位置
             ),
           ],
         ),
-        child: Icon(Icons.camera_alt, size: 64, color: Colors.black87),
+        child: Icon(Icons.camera_alt, size: 64, color: AppColors.black),
       ),
     );
   }
@@ -292,9 +305,9 @@ class EmptyTextButton extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black87, width: 2,),
+          border: Border.all(color: AppColors.black, width: 2,),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.5),
@@ -303,7 +316,7 @@ class EmptyTextButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(Icons.text_snippet_outlined, size: 64, color: Colors.black87),
+        child: Icon(Icons.text_snippet_outlined, size: 64, color: AppColors.black),
       ),
     );
   }
@@ -321,19 +334,19 @@ class _DifficultyDropdownState extends State<DifficultyDropdown> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.mainColor,
-        border: Border.all(color: Colors.black87, width: 2),
+        color: AppColors.white,
+        border: Border.all(color: AppColors.black, width: 2),
         borderRadius: BorderRadius.circular(16),
       ),
       child: DropdownButton<String>(
         value: selectedDifficulty,
-        style: TextStyle(fontSize: 28, color: Colors.black87, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 28, color: AppColors.black, fontWeight: FontWeight.bold),
         items: ['○○', '△△', '□□']
             .map((level) => DropdownMenuItem(
           value: level,
           child: Text(
             '難易度: $level',
-            style: TextStyle(fontSize: 28, color: Colors.black87, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 28, color: AppColors.black, fontWeight: FontWeight.bold),
           ),
         ))
             .toList(),
@@ -419,7 +432,7 @@ class SendDialog extends StatelessWidget {
       children: [
         sendButton,
         SizedBox(height: 8),
-        Text(label, style: TextStyle(fontSize: 20, color: Colors.black87, fontWeight: FontWeight.bold),),
+        Text(label, style: TextStyle(fontSize: 20, color: AppColors.black, fontWeight: FontWeight.bold),),
       ],
     );
   }
@@ -486,20 +499,20 @@ class _EditDialogState extends State<EditDialog> {
                     Container(
                       height: MediaQuery.of(context).size.height * 0.5,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.black87, width: 2,),
+                        border: Border.all(color: AppColors.black, width: 2,),
                       ),
                       child: SingleChildScrollView(
                         child: TextField(
                           controller: _textController,
                           focusNode: _focusNode, // FocusNodeを設定
-                          style: TextStyle(color: Colors.black87),
+                          style: TextStyle(color: AppColors.black),
                           minLines: null,
                           maxLines: null,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: AppColors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
@@ -740,15 +753,15 @@ class _LabelDialogState extends State<LabelDialog> {
                     width: MediaQuery.of(context).size.width * 0.8,
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black87, width: 2,),
+                      border: Border.all(color: AppColors.black, width: 2,),
                     ),
                     child: Column(
                       children: [
                         buildDropdownPair(0),
                         for (int i = 1; i < 4; i++) ...[
-                          Divider(color: Colors.black87,),
+                          Divider(color: AppColors.black,),
                           buildDropdownPair(i),
                         ],
                       ],
