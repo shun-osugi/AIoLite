@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => MyHomePage(),
         '/chat': (context) => ChatPage(),
-        '/result': (context) => ResultPage(),
+        '/result': (context) => ResultPage(text: '対象のテキスト',),
       },
     );
   }
@@ -665,7 +665,8 @@ class _LabelDialogState extends State<LabelDialog> {
                   value: null,
                   child: Text("未選択"), // デフォルトのnull選択肢
                 ),
-                ...subjectCategories.keys.map((String subject) {
+                ...subjectCategories.keys.toSet().toList().map((String subject) { // 重複を削除
+                  print("DropdownMenuItem value: $subject"); // デバッグ出力
                   return DropdownMenuItem<String>(
                     value: subject,
                     child: Text(subject),

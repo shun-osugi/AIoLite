@@ -1,40 +1,31 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart';  // ApiService をインポート
-import 'colors.dart';
-
-void main() {
-  runApp(ResultPage());
-}
+import 'api_service.dart'; // ApiService をインポート
 
 class ResultPage extends StatefulWidget {
-  const ResultPage({super.key});
+  final String text; // 類題を検索する元のテキスト
+
+  const ResultPage({super.key, required this.text});
 
   @override
   _ResultPageState createState() => _ResultPageState();
 }
 
 class _ResultPageState extends State<ResultPage> {
-  bool _isLoading = false; // ローディング状態
-  List<String> _suggestedLabels = []; // APIから取得したラベル
+  late Future<List<String>> _suggestedLabelsFuture;
 
-  // APIからデータを取得するメソッド
-  Future<void> _getSuggestedLabels(String text) async {
-    setState(() {
-      _isLoading = true; // ローディング開始
-    });
+  @override
+  void initState() {
+    super.initState();
+    _suggestedLabelsFuture = _getSuggestedLabels(widget.text);
+  }
 
+  // APIから類題のラベルを取得する
+  Future<List<String>> _getSuggestedLabels(String text) async {
     try {
-      List<String> labels = await ApiService.classifyText(text);
-      setState(() {
-        _suggestedLabels = labels;
-        _isLoading = false; // ローディング終了
-      });
+      return await ApiService.classifyText(text);
     } catch (e) {
-      setState(() {
-        _isLoading = false; // エラー発生時もローディング終了
-      });
-      // エラーハンドリング（UIでエラーメッセージを表示する場合など）
       print("Error: $e");
+      return []; // エラー時は空リストを返す
     }
   }
 
@@ -46,29 +37,26 @@ class _ResultPageState extends State<ResultPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ローディング中の表示
-            if (_isLoading)
-              Center(child: CircularProgressIndicator()),
-
-            // 類題の表示
-            if (!_isLoading && _suggestedLabels.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _suggestedLabels.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(_suggestedLabels[index]),
-                    );
-                  },
-                ),
-              ),
-            // ラベルがない場合のメッセージ
-            if (!_isLoading && _suggestedLabels.isEmpty)
-              Center(child: Text("類題がありません")),
-          ],
+        child: FutureBuilder<List<String>>(
+          future: _suggestedLabelsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator()); // ローディング表示
+            } else if (snapshot.hasError) {
+              return Center(child: Text("エラーが発生しました"));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text("類題がありません"));
+            } else {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(snapshot.data![index]),
+                  );
+                },
+              );
+            }
+          },
         ),
       ),
     );
