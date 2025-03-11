@@ -9,21 +9,23 @@ class ApiService {
   // 推奨ラベルを返すAPIを呼び出す
   static Future<List<String>> classifyText(String text) async {
     final url = Uri.parse("$API_BASE_URL/classify"); // APIのエンドポイント
+    final headers = {"Content-Type": "application/json"};
+    final body = jsonEncode({"text": text});
 
     print("Sending request to: $url");
     print("Request body: ${jsonEncode({"text": text})}");
+    print("送信リクエスト: $body");  // 送信するデータを確認
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"text": text}),
-    );
+    final response = await http.post(url, headers: headers, body: body);
 
-    print("Response status: ${response.statusCode}");
-    print("Response body: ${response.body}");
+    print("受信レスポンス: ${response.body}"); // API の返答を確認
+
+    //print("Response status: ${response.statusCode}");
+    //print("Response body: ${response.body}");
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      print("APIから取得した類題ラベル: ${data['suggested_labels']}");
       return List<String>.from(data["suggested_labels"]); // 推奨ラベルを返す
     } else {
       throw Exception("Failed to classify text");
