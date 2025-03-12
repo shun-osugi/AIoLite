@@ -57,8 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
         body: SingleChildScrollView(
           child: Stack(
               children: [
-                const HelpButton(),
-
                 // アバター表示
                 Center(
                   child: Column(
@@ -68,21 +66,20 @@ class _MyHomePageState extends State<MyHomePage> {
                       height: MediaQuery.of(context).size.height * 0.2,
                       child: Container(
                         child: ModelViewer(
-                          src: 'assets/avatar0_bow.glb',
+                          src: 'assets/avatar0.glb',
                           alt: 'A 3D model of AI avatar',
+                          cameraOrbit: "0deg 90deg 0deg",
                           ar: false,
                           autoRotate: false,
                           disableZoom: true,
+                          disableTap: true,
+                          cameraControls: false,
+                          interactionPrompt: null,
+                          interactionPromptThreshold: 0,
+                          autoPlay: true,
+                          animationName: 'wait',
                         ),
                       ),
-                      /*Positioned(
-                                right: 0,
-                                top: 0,
-                                child: IconButton(
-                                  icon: Icon(Icons.refresh, size: 50),
-                                  onPressed: () {},
-                                ),
-                              ),*/
                     ),
                   ],
                   ),
@@ -102,38 +99,62 @@ class _MyHomePageState extends State<MyHomePage> {
                         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
 
                         // STARTボタン
-                        ElevatedButton(
-                          onPressed: () {
-                            showSendDialog(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.subColor,
-                            foregroundColor: AppColors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.subColor, AppColors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            padding: EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-                            elevation: 8,
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(color: AppColors.white, width: 5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.subColor.withOpacity(0.7),
+                                offset: Offset(0, 4),
+                                blurRadius: 10,
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            'START',
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 64,
-                              fontWeight: FontWeight.bold,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showSendDialog(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              padding: EdgeInsets.symmetric(horizontal: 48, vertical: 24),
                             ),
-                          ),
-                        ),
+                            child: Text(
+                              'START',
+                              style: TextStyle(
+                                color: AppColors.white,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 20,
+                                    color: AppColors.black,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                                fontSize: 64,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),),
 
                         SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
-                        DifficultyDropdown(), // 難易度選択
+                        //DifficultyDropdown(), // 難易度選択
 
                         SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                       ],
                     ),
                   ),
                 ),
+                const HelpButton(), // ヘルプを表示するボタン
               ]
           )
         )
@@ -141,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// ヘルプボタン
+// ヘルプを表示するボタン
 class HelpButton extends StatelessWidget {
   const HelpButton({Key? key}) : super(key: key);
 
