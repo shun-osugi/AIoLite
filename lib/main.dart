@@ -175,16 +175,38 @@ class HelpButton extends StatelessWidget {
   }
 }
 
-// 音声入力を行うボタン（未実装）
-class AudioButton extends StatelessWidget {
-  final Function(String) onTextPicked;
-  const AudioButton({Key? key, required this.onTextPicked}) : super(key: key);
+// 写真フォルダを参照するボタン
+class ImageReferenceButton extends StatelessWidget {
+  final Function(String) onImagePicked;
+  const ImageReferenceButton({Key? key, required this.onImagePicked}) : super(key: key);
+
+  Future<void> file_to_text(File putfile) async {
+    final inputImage = InputImage.fromFile(putfile);
+    // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
+    // 画像から文字を読み取る（OCR処理）
+    final recognizedText = await textRecognizer.processImage(inputImage);
+
+    onImagePicked(recognizedText.text);
+    textRecognizer.close();
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        onTextPicked("");
+      onTap: () async {
+        FilePickerResult? file = await FilePicker.platform.pickFiles(
+          type:  FileType.image, //写真ファイルのみ抽出
+          // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
+        );
+
+        if (file != null) {
+          String filename = file.files.first.name;
+          print(filename);
+
+          // File型に変換し文字に変換
+          file_to_text(File(file.files.first.path!));
+        }
       },
       child: Container(
         padding: EdgeInsets.all(12),
@@ -194,13 +216,13 @@ class AudioButton extends StatelessWidget {
           border: Border.all(color: AppColors.black, width: 2,),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              blurRadius: 6,
-              offset: Offset(2, 2),
+              color: AppColors.background, // 影の色
+              blurRadius: 6, // ぼかしの強さ
+              offset: Offset(2, 2), // 影の位置
             ),
           ],
         ),
-        child: Icon(Icons.mic, size: 64, color: AppColors.black),
+        child: Icon(Icons.image, size: 64, color: AppColors.black),
       ),
     );
   }
@@ -225,52 +247,15 @@ class CameraButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        /*Step 1:Pick image*/
-        //Install image_picker
-        //Import the corresponding library
-        showDialog(
-          context: context,
-          builder: (context) {
-            return SimpleDialog(
-              title: Text('選択：', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),),
-              children: [
-                SimpleDialogOption(
-                  child: Text('写真ライブラリから選択', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    FilePickerResult? file = await FilePicker.platform.pickFiles(
-                      type:  FileType.image, //写真ファイルのみ抽出
-                      // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
-                    );
+        ImagePicker picker = ImagePicker();
+        //写真を撮る
+        final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
-                    if (file != null) {
-                      String filename = file.files.first.name;
-                      print(filename);
-
-                      // File型に変換し文字に変換
-                      file_to_text(File(file.files.first.path!));
-                    }
-                  },
-                ),
-                SimpleDialogOption(
-                  child: Text('写真を撮影', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    ImagePicker picker = ImagePicker();
-                    //写真を撮る
-                    final pickedFile = await picker.pickImage(source: ImageSource.camera);
-
-                    if (pickedFile != null) {
-                      print(pickedFile.path);
-                      // File型に変換し文字に変換
-                      file_to_text(File(pickedFile.path));
-                    }
-                  },
-                )
-              ],
-            );
-          }
-        );
+        if (pickedFile != null) {
+          print(pickedFile.path);
+          // File型に変換し文字に変換
+          file_to_text(File(pickedFile.path));
+        }
       },
       child: Container(
         padding: EdgeInsets.all(12),
@@ -396,13 +381,13 @@ class SendDialog extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // マイクボタン
-                      _sendOption(AudioButton(onTextPicked: (String text) {},), "音声入力"),
+                      _sendOption(ImageReferenceButton(onImagePicked: (String text) {},), "画像を選択"),
                       _sendOption(CameraButton(onImagePicked: (String text) {
                         if (text.isNotEmpty) {
                           Navigator.pop(context);
                           showEditDialog(context, text);
                         }
-                      },), "画像入力"),
+                      },), "写真を撮影"),
                       _sendOption(EmptyTextButton(onTextPicked: (String text) {
                         Navigator.pop(context);
                         showEditDialog(context, text);
