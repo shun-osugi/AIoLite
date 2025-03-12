@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 import 'ui_chat.dart';
 import 'ui_result.dart';
@@ -58,6 +59,35 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 const HelpButton(),
 
+                // アバター表示
+                Center(
+                  child: Column(
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.4,),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: Container(
+                        child: ModelViewer(
+                          src: 'assets/avatar0_bow.glb',
+                          alt: 'A 3D model of AI avatar',
+                          ar: false,
+                          autoRotate: false,
+                          disableZoom: true,
+                        ),
+                      ),
+                      /*Positioned(
+                                right: 0,
+                                top: 0,
+                                child: IconButton(
+                                  icon: Icon(Icons.refresh, size: 50),
+                                  onPressed: () {},
+                                ),
+                              ),*/
+                    ),
+                  ],
+                  ),
+                ),
+
                 // メインUI
                 Center(
                   child: Padding(
@@ -65,37 +95,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.12,),
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
 
-                        Image.asset('assets/logo.png', height: MediaQuery.of(context).size.height * 0.2), // ロゴ画像
+                        Image.asset('assets/logo.png', height: MediaQuery.of(context).size.height * 0.4), // ロゴ画像
 
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.06),
-
-                        // アバター表示
-                        Stack(
-                          children: [
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              height: MediaQuery.of(context).size.width * 0.4,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text('アバター', style: TextStyle(fontSize: 20)),
-                            ),
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: IconButton(
-                                icon: Icon(Icons.refresh, size: 50),
-                                onPressed: () {},
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.06),
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
 
                         // STARTボタン
                         ElevatedButton(
@@ -104,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.subColor,
-                            foregroundColor: AppColors.black,
+                            foregroundColor: AppColors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50),
                             ),
@@ -114,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Text(
                             'START',
                             style: TextStyle(
+                              color: AppColors.white,
                               fontSize: 64,
                               fontWeight: FontWeight.bold,
                             ),
