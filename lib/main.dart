@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-
+import 'package:speech_to_text/speech_to_text.dart';
 import 'ui_chat.dart';
 import 'ui_result.dart';
 import 'colors.dart';
@@ -302,6 +302,84 @@ class CameraButton extends StatelessWidget {
     );
   }
 }
+
+// 音声入力を行うボタン
+class AudioButton extends StatefulWidget {
+  final Function(String) onTextPicked;
+
+  const AudioButton({Key? key, required this.onTextPicked}) : super(key: key);
+
+  @override
+  _AudioButtonState createState() => _AudioButtonState();
+}
+class _AudioButtonState extends State<AudioButton> {
+  SpeechToText _speech = SpeechToText();
+  bool _isListening = false;
+
+  // 音声認識開始・停止の制御
+  void _startListening() async {
+    bool available = await _speech.initialize();
+    if (available) {
+      setState(() {
+        _isListening = true;
+      });
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            var speechText = result.recognizedWords;
+            print(speechText);
+            widget.onTextPicked(speechText); // 音声認識結果をコールバックに渡す
+          });
+        },
+      );
+    } else {
+      print("失敗");
+      widget.onTextPicked("音声認識の初期化に失敗しました");
+    }
+  }
+  //音声認識停止
+  void _stopListening() {
+    _speech.stop();
+    setState(() {
+      _isListening = false;
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (_isListening) {
+          _stopListening(); // すでに認識中なら停止
+          print("停止");
+        } else {
+          _startListening(); // 音声認識を開始
+          print("開始");
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.background, // 影の色
+              blurRadius: 6, // ぼかしの強さ
+              offset: Offset(2, 2), // 影の位置
+            ),
+          ],
+        ),
+        child: Icon(
+          _isListening ? Icons.stop : Icons.mic, // 音声認識中は停止ボタン、認識していないときはマイクボタン
+          size: 64,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+}
+
 // 空の文字列を返すボタン
 class EmptyTextButton extends StatelessWidget {
   final Function(String) onTextPicked;
@@ -406,8 +484,16 @@ class SendDialog extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // 画像ボタン
+                      //_sendOption(ImageReferenceButton(onImagePicked: (String text) {},), "画像を選択"),
                       // マイクボタン
-                      _sendOption(ImageReferenceButton(onImagePicked: (String text) {},), "画像を選択"),
+                      _sendOption(AudioButton(onTextPicked: (String text) {
+                        print("音声認識: $text"); //デバック
+                        if (text.isNotEmpty) {
+                          Navigator.pop(context);
+                          showEditDialog(context, text);
+                        }
+                      },), "音声入力"),
                       _sendOption(CameraButton(onImagePicked: (String text) {
                         if (text.isNotEmpty) {
                           Navigator.pop(context);
