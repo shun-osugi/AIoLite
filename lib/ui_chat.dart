@@ -41,6 +41,26 @@ class _ChatPageState extends State<ChatPage> {
     AI.sendMessage(Content.text('口調は友達のような感じで大丈夫だよ！'));
   }
 
+  void _sendMessage() {
+    String text = _textController.text.trim(); // 入力値を取得し、前後の空白を削除
+    if (text.isEmpty) return; // 入力が空の場合は送信しない
+
+    setState(() {
+      chats.add(chat(0, text)); // ユーザーのメッセージを会話リストに追加
+      _textController.clear(); // 入力欄をクリア
+    });
+    _getAIResponse(text); // AIからの応答を取得
+  }
+
+  void _getAIResponse(String userMessage) async {
+    final response = await AI.sendMessage(Content.text(userMessage)); // AIにメッセージを送信
+    String aiMessage = response.text ?? 'AIの返答に失敗しました'; // AIの返答を取得
+
+    setState(() {
+      chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -55,115 +75,72 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                height: MediaQuery.of(context).size.height * 0.6,
-                decoration: const BoxDecoration(//角を丸くする
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  border: Border(
-                    top:    BorderSide(color: Colors.black, width: 2),
-                    right:  BorderSide(color: Colors.black, width: 2),
-                    bottom: BorderSide(color: Colors.black, width: 2),
-                    left:   BorderSide(color: Colors.black, width: 2),
+      appBar: AppBar(
+        title: Text("AI チャット"),
+        backgroundColor: Colors.deepPurple,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.lightbulb_outline, color: Colors.white),
+            tooltip: "類題の提示",
+            onPressed: () {
+              Navigator.pushNamed(context, '/result');
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              reverse: true,
+              padding: EdgeInsets.all(10),
+              itemCount: chats.length,
+              itemBuilder: (context, index) {
+                final chat = chats[chats.length - 1 - index];
+                return Align(
+                  alignment: chat.p == 0 ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: chat.p == 0 ? Colors.deepPurple[300] : Colors.grey[300],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      chat.str,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _textController,
+                    decoration: InputDecoration(
+                      hintText: "メッセージを入力...",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
-                alignment: Alignment.center,
-                child: ListView.builder(
-                  itemCount: chats.length,
-                  //itemCount分表示
-                  itemBuilder: (context, index) {
-                    int p=chats[index].p;
-                    String str=chats[index].str;
-                    return Row(
-                      children:[
-                        Container(
-                          child: Flexible(
-                            child: p == 0 ?
-                            Text('自分 ') :
-                            Text('相手 '),
-                          ),
-                        ),
-                        Container(
-                          child: Flexible(
-                            child:Text(str),
-                          ),
-                        ),
-                      ]
-                    );
-                  },
+                SizedBox(width: 8),
+                FloatingActionButton(
+                  onPressed: _sendMessage,
+                  child: Icon(Icons.send, color: Colors.white),
+                  backgroundColor: Colors.deepPurple,
                 ),
-              ),
-
-              TextField(
-                controller: _textController,
-                decoration: const InputDecoration(
-                  labelText: "テキストを入力",
-                  border: OutlineInputBorder(),  // 境界線を追加
-                ),
-                maxLines: 4,  // 複数行対応
-              ),
-
-              ElevatedButton(
-                onPressed: onchat,
-                child: Text('START'),
-              ),
-            ]
+              ],
+            ),
           ),
-        ),
-        // child: Text(
-        //   inputText, // 受け取ったテキストを表示
-        //   style: Theme.of(context).textTheme.headlineMedium,
-        //   textAlign: TextAlign.center,
-        // ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/result');
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.navigate_next),
+        ],
       ),
     );
   }
-
-  void onchat(){
-    chats.add(chat(
-      0,
-      _textController.text,
-    ));
-    setState((){});
-    AIchat();
-  }
-
-  void AIchat() async {
-    // GenerativeModel AI = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
-    // String apiKey = dotenv.get('GEMINI_API_KEY');
-    // if (apiKey == null) {
-    //   print('API Key取得失敗');
-    //   return;
-    // }
-    // final genModel = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
-    final content = Content.text(_textController.text);
-    final response = await AI.sendMessage(content);
-    String resText = response.text ?? 'Gemini返答失敗';
-    chats.add(chat(
-      1,
-      resText,
-    ));
-
-    setState((){
-      _textController.text = "";
-    });
-  }
 }
-
-/*
-
-*/
