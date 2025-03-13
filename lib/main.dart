@@ -825,29 +825,15 @@ class _LabelDialogState extends State<LabelDialog> {
   }
 
   // テキストを保存し、類似検索
-  Future<void> _storeText(String inputText) async {
-    if (inputText.isEmpty) return;
+  Future<void> _storeText(String inputText, List<String> editedLabels) async {
+    if (inputText.isEmpty || editedLabels.isEmpty) return;
 
-    try {
-      // 保存形式に変換
-      List<String> editedLabels = [];
-      for (int i = 0; i < 4; i++) {
-        if (selectedSubjects[i] != null && selectedCategories[i] != null) {
-          editedLabels.add("${selectedSubjects[i]} - ${selectedCategories[i]}");
-        }
-      }
+    // 保存処理
+    await ApiService.storeText(inputText, editedLabels);
 
-      if (editedLabels.isEmpty) return;
-
-      // 保存処理
-      await ApiService.storeText(inputText, editedLabels);
-
-      // ログ出力
-      debugPrint("テキストを保存: $inputText");
-      debugPrint("保存したラベル: $editedLabels");
-    } catch (e) {
-      debugPrint("エラー: $e");
-    }
+    // ログ出力
+    debugPrint("テキストを保存: $inputText");
+    debugPrint("保存したラベル: $editedLabels");
   }
 
   // 教科と分類のドロップダウンペア
@@ -972,8 +958,22 @@ class _LabelDialogState extends State<LabelDialog> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          _storeText(widget.editedText);
-                          Navigator.pushNamed(context, '/chat', arguments: widget.editedText);
+                          List<String> editedLabels = [];
+                          for (int i = 0; i < 4; i++) {
+                            if (selectedSubjects[i] != null && selectedCategories[i] != null) {
+                              editedLabels.add("${selectedSubjects[i]} - ${selectedCategories[i]}");
+                            }
+                          }
+                          _storeText(widget.editedText, editedLabels);
+
+                          Navigator.pushNamed(
+                            context,
+                            '/chat',
+                            arguments: {
+                              'editedText': widget.editedText,
+                              'editedLabels': editedLabels,
+                            },
+                          );
                         },
                         child: Text("開始 →", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                       ),
