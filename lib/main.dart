@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => MyHomePage(),
         '/chat': (context) => ChatPage(),
-        '/result': (context) => ResultPage(text: '対象のテキスト',),
+        '/result': (context) => ResultPage(),
       },
     );
   }
@@ -461,7 +461,7 @@ class _AudioButtonState extends State<AudioButton> {
         ),
         child: Icon(
           _isListening ? Icons.stop : Icons.mic, // 音声認識中は停止ボタン、認識していないときはマイクボタン
-          size: 64,
+          size: screenWidth * 0.15,
           color: Colors.black,
         ),
       ),
@@ -495,7 +495,7 @@ class EmptyTextButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(Icons.text_snippet_outlined, size: 64, color: AppColors.black),
+        child: Icon(Icons.text_snippet_outlined, size: screenWidth * 0.15, color: AppColors.black),
       ),
     );
   }
@@ -971,8 +971,8 @@ class _LabelDialogState extends State<LabelDialog> {
                             context,
                             '/chat',
                             arguments: {
-                              'editedText': widget.editedText,
-                              'editedLabels': editedLabels,
+                              'inputText': widget.editedText,
+                              'labels': editedLabels,
                             },
                           );
                         },

@@ -5,29 +5,50 @@ import 'colors.dart';
 
 
 class ResultPage extends StatefulWidget {
-  final String text;
-
-  const ResultPage({Key? key, required this.text}) : super(key: key);
 
   @override
   _ResultPageState createState() => _ResultPageState();
 }
 
 class _ResultPageState extends State<ResultPage> {
+  String feedbackText = "";
+  List<String> labels = [];
+
   late Future<List<String>> _suggestedDataFuture;
+  late Future<String> _getFeedbackData;
 
   @override
   void initState() {
     super.initState();
-    // APIからフィードバック用テキスト＆類題ラベルのリスト を取得する想定
-    _suggestedDataFuture = _fetchData(widget.text);
+    // 類題ラベルのリスト を取得する
+    _suggestedDataFuture = _fetchData(labels);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 引数を受け取る
+    final Object? args = ModalRoute.of(context)?.settings.arguments;
+
+    if (args is Map<String, dynamic>) {
+      setState(() {
+      // feedbackTextを取得
+      feedbackText = args['feedbackText']?.toString() ?? "";
+
+      // labelsを取得
+      labels = (args['labels'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList() ?? [];
+      });
+    }
   }
 
   //APIからデータ取得
-  Future<List<String>> _fetchData(String text) async {
+  Future<List<String>> _fetchData(List<String> labels) async {
     try {
-      // ApiService.classifyText が List<String> を返す前提
-      return await ApiService.classifyText(text);
+      // labelsを基にした類題取得処理,0番目に問題文,1~4番目にラベルが入ることを想定
+      List<String> SAMPLE = ["1+1=", "数学 - 式と計算"];
+      return SAMPLE;
     } catch (e) {
       // エラーの場合は投げ直す（FutureBuilder 側で捕捉し表示）
       throw Exception("データ取得時にエラー: $e");
@@ -73,42 +94,18 @@ class _ResultPageState extends State<ResultPage> {
               ),
 
               //フィードバックを表示する吹き出し
-              FutureBuilder<List<String>>(
-                future: _suggestedDataFuture,
-                builder: (context, snapshot) {
-                  Widget feedbackWidget;
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    // ローディング中
-                    feedbackWidget = const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError) {
-                    // エラー発生時
-                    feedbackWidget = Text(
-                      snapshot.error.toString(),
-                      style: const TextStyle(color: Colors.red),
-                    );
-                  } else {
-                    // 正常にデータ取得できた場合
-                    final data = snapshot.data ?? [];
-                    // 先頭をフィードバック用テキストとみなす
-                    final feedbackText = data.isNotEmpty
-                        ? data.first
-                        : 'フィードバック内容がありません';
-
-                    feedbackWidget = ChatBubble(text: feedbackText);
-                  }
-                  return Container(
+                  Container(
                     margin: const EdgeInsets.symmetric(vertical: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: AppColors.background,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: feedbackWidget,
-                  );
-                },
-              ),
+                    child: ChatBubble(
+                        text: feedbackText.isEmpty
+                            ? feedbackText = 'フィードバック内容がありません。'
+                            : feedbackText),
+                  ),
 
               //類題の提示
               Container(
@@ -139,7 +136,35 @@ class _ResultPageState extends State<ResultPage> {
                       if (labels.isEmpty) {
                         return const Text('類題のラベルがありません');
                       }
-                      return Text(labels.join('\n'));
+                      return Center(
+                        child: Column(
+                          children: [
+                            Text(data.first + ''),
+                            SizedBox(height: 16),  // ボタンのスペース
+                            ElevatedButton(
+                              onPressed: () {
+                                // ボタンを押した時に渡すデータ
+                                if (labels.isNotEmpty) {
+                                  final inputText = data[0];  // 1番目のラベルをinputTextに
+                                  final remainingLabels = labels.length > 1 ? labels.sublist(1) : []; // labelsが1つ以上あれば、1番目から残りを渡す
+                                  List<String> typedLabels = List<String>.from(remainingLabels);
+
+                                  // '/chat' 画面に遷移し、必要なデータを渡す
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/chat',
+                                    arguments: {
+                                      'inputText': inputText,
+                                      'labels': typedLabels,
+                                    },
+                                  );
+                                }
+                              },
+                              child: const Text('類題をチャットで解く'),
+                            ),
+                          ],
+                        ),
+                      );
                     }
                   },
                 ),
@@ -176,6 +201,7 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
+      size: Size(double.infinity, 60), // 高さを設定（適切なサイズを指定）
       painter: BubblePainter(color: AppColors.background),
       child: Container(
         margin: const EdgeInsets.only(top: 10), // 三角形の分の余白
@@ -205,9 +231,9 @@ class BubblePainter extends CustomPainter {
     final double triangleHeight = 10;
 
     final Path path = Path()
-      ..moveTo((size.width - triangleWidth) / 2, 0) // 三角形左端
-      ..lineTo(size.width / 2, -triangleHeight) // 三角形の頂点（中央上）
-      ..lineTo((size.width + triangleWidth) / 2, 0) // 三角形右端
+      ..moveTo((size.width - triangleWidth) / 2, size.height) // 三角形左端
+      ..lineTo(size.width / 2, size.height - triangleHeight) // 三角形の頂点（中央下）
+      ..lineTo((size.width + triangleWidth) / 2, size.height) // 三角形右端
       ..close();
 
     canvas.drawPath(path, paint);
