@@ -80,10 +80,12 @@ class _ChatPageState extends State<ChatPage> {
         backgroundColor: AppColors.mainColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.lightbulb_outline, color: AppColors.white),
-            tooltip: "類題の提示",
-            onPressed: () {
-              Navigator.pushNamed(context, '/result');
+            icon: Icon(Icons.exit_to_app, color: Colors.white),
+            tooltip: "会話の終了",
+            onPressed: () async { //フィードバックへ遷移
+              final feedback = await AI.sendMessage(Content.text('今回の会話はどうだった？私が苦手なところとか分かったら短く一文で教えてほしいな。またね！'));
+              final feedbackMessage = feedback.text ?? 'フィードバックの作成に失敗しました';
+              Navigator.pushNamed(context, '/result', arguments: feedbackMessage);
             },
           ),
         ],
