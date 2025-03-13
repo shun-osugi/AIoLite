@@ -191,23 +191,21 @@ class HelpButton extends StatelessWidget {
     );
   }
 }
-
 class HelpDialog extends StatefulWidget {
   @override
   _HelpDialogState createState() => _HelpDialogState();
 }
-
 class _HelpDialogState extends State<HelpDialog> {
   PageController _pageController = PageController();
   int _currentPage = 0;
 
   // ヘルプ内容
-  final List<String> helpPages = [
-    "まずは、画面下のSTARTボタンを押して、問題の送信方法を選ぼう！\n送信方法は、音声入力、画像入力(画像ファイルからor写真を撮影)、テキスト入力から選べます。\n音声や画像を送信した場合は、自動でテキストに変換されます。",
-    "問題の送信方法を選んだら、問題文の編集をしよう！\nテキスト入力の場合はここで入力、音声や画像で入力した場合は、問題文を修正できます。",
-    "問題文を決定したら、ラベルの編集をしよう！\n自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。",
-    "ラベルを決定したら、AIとのチャットを開始！\nAIの質問に答えながら、問題を解いていこう！\n問題が解けたら、電球マークのボタンでチャットが終了できます。",
-    "チャットを終えると、AIからのフィードバックと類題が表示されるよ！\nフィードバックを参考にして、類題から次の問題を始めてみよう！",
+  final List<Map<String, String>> helpPages = [
+    {"image": "assets/help1.png", "head": "まずは、画面下のSTARTボタンを押して、問題の送信方法を選ぼう！", "text": "送信方法は、音声入力、画像入力(画像ファイルからor写真を撮影)、テキスト入力から選べます。\n音声や画像を送信した場合は、自動でテキストに変換されます。"},
+    {"image": "assets/help2.png", "head": "問題の送信方法を選んだら、問題文の編集をしよう！", "text": "テキスト入力の場合はここで入力、音声や画像で入力した場合は、問題文を修正できます。"},
+    {"image": "assets/help3.png", "head": "問題文を決定したら、ラベルの編集をしよう！", "text": "\n送信された問題文を元に、自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。"},
+    {"image": "assets/help4.png", "head": "ラベルを決定したら、AIとのチャットを開始！\nAIの質問に答えながら、問題を解いていこう！", "text": "下のテキストボックスからAIへメッセージを送信すると、AIから返事が返ってきます。\n問題が解けたら、右上のボタンでチャットが終了できます。"},
+    {"image": "assets/help5.png", "head": "チャットを終えると、AIからのフィードバックと類題が表示されるよ！\nフィードバックを参考にして、類題から次の問題を始めてみよう！", "text": "類題を選択することで、新たにAIとのチャットを開始できます。"},
   ];
 
   @override
@@ -221,21 +219,55 @@ class _HelpDialogState extends State<HelpDialog> {
           children: [
             Text("使い方", style: TextStyle(color: AppColors.black, fontSize: 22, fontWeight: FontWeight.bold)),
 
-            SizedBox(height: 16),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
 
             Container(
-              height: 150,
+              height: MediaQuery.of(context).size.height * 0.5,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: helpPages.length,
+                physics: AlwaysScrollableScrollPhysics(),
                 onPageChanged: (index) {
                   setState(() {
                     _currentPage = index;
                   });
                 },
                 itemBuilder: (context, index) {
-                  return Center(
-                    child: Text(helpPages[index], textAlign: TextAlign.left, style: TextStyle(color: AppColors.black, fontSize: 14)),
+                  return SingleChildScrollView( // スクロールを可能にする
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Image.asset(
+                              helpPages[index]['image']!,
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
+                          Text(
+                            helpPages[index]['head'].toString(),
+                            textAlign: TextAlign.left,
+                            style: TextStyle(color: AppColors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                          Text(
+                            helpPages[index]['text'].toString(),
+                            textAlign: TextAlign.left,
+                            style: TextStyle(color: AppColors.black, fontSize: 14),
+                          ),
+
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                        ],
+                      ),
+                    ),
                   );
                 },
               ),
