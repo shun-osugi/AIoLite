@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-
+import 'package:speech_to_text/speech_to_text.dart';
 import 'ui_chat.dart';
 import 'ui_result.dart';
 import 'colors.dart';
@@ -57,8 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
         body: SingleChildScrollView(
           child: Stack(
               children: [
-                const HelpButton(),
-
                 // アバター表示
                 Center(
                   child: Column(
@@ -68,21 +66,20 @@ class _MyHomePageState extends State<MyHomePage> {
                       height: MediaQuery.of(context).size.height * 0.2,
                       child: Container(
                         child: ModelViewer(
-                          src: 'assets/avatar0_bow.glb',
+                          src: 'assets/avatar0.glb',
                           alt: 'A 3D model of AI avatar',
+                          cameraOrbit: "0deg 90deg 0deg",
                           ar: false,
                           autoRotate: false,
                           disableZoom: true,
+                          disableTap: true,
+                          cameraControls: false,
+                          interactionPrompt: null,
+                          interactionPromptThreshold: 0,
+                          autoPlay: true,
+                          animationName: 'wait',
                         ),
                       ),
-                      /*Positioned(
-                                right: 0,
-                                top: 0,
-                                child: IconButton(
-                                  icon: Icon(Icons.refresh, size: 50),
-                                  onPressed: () {},
-                                ),
-                              ),*/
                     ),
                   ],
                   ),
@@ -102,38 +99,62 @@ class _MyHomePageState extends State<MyHomePage> {
                         SizedBox(height: MediaQuery.of(context).size.height * 0.2),
 
                         // STARTボタン
-                        ElevatedButton(
-                          onPressed: () {
-                            showSendDialog(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.subColor,
-                            foregroundColor: AppColors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.subColor, AppColors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            padding: EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-                            elevation: 8,
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(color: AppColors.white, width: 5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.subColor.withOpacity(0.7),
+                                offset: Offset(0, 4),
+                                blurRadius: 10,
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            'START',
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 64,
-                              fontWeight: FontWeight.bold,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showSendDialog(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              padding: EdgeInsets.symmetric(horizontal: 48, vertical: 24),
                             ),
-                          ),
-                        ),
+                            child: Text(
+                              'START',
+                              style: TextStyle(
+                                color: AppColors.white,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 20,
+                                    color: AppColors.black,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                                fontSize: 64,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),),
 
                         SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
-                        DifficultyDropdown(), // 難易度選択
+                        //DifficultyDropdown(), // 難易度選択
 
                         SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                       ],
                     ),
                   ),
                 ),
+                const HelpButton(), // ヘルプを表示するボタン
               ]
           )
         )
@@ -141,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// ヘルプボタン
+// ヘルプを表示するボタン
 class HelpButton extends StatelessWidget {
   const HelpButton({Key? key}) : super(key: key);
 
@@ -180,58 +201,6 @@ class HelpButton extends StatelessWidget {
   }
 }
 
-// 写真フォルダを参照するボタン
-class ImageReferenceButton extends StatelessWidget {
-  final Function(String) onImagePicked;
-  const ImageReferenceButton({Key? key, required this.onImagePicked}) : super(key: key);
-
-  Future<void> file_to_text(File putfile) async {
-    final inputImage = InputImage.fromFile(putfile);
-    // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
-    final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
-    // 画像から文字を読み取る（OCR処理）
-    final recognizedText = await textRecognizer.processImage(inputImage);
-
-    onImagePicked(recognizedText.text);
-    textRecognizer.close();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        FilePickerResult? file = await FilePicker.platform.pickFiles(
-          type:  FileType.image, //写真ファイルのみ抽出
-          // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
-        );
-
-        if (file != null) {
-          String filename = file.files.first.name;
-          print(filename);
-
-          // File型に変換し文字に変換
-          file_to_text(File(file.files.first.path!));
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.black, width: 2,),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.background, // 影の色
-              blurRadius: 6, // ぼかしの強さ
-              offset: Offset(2, 2), // 影の位置
-            ),
-          ],
-        ),
-        child: Icon(Icons.image, size: 64, color: AppColors.black),
-      ),
-    );
-  }
-}
 // カメラを起動するボタン
 class CameraButton extends StatelessWidget {
   final Function(String) onImagePicked;
@@ -252,15 +221,52 @@ class CameraButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        ImagePicker picker = ImagePicker();
-        //写真を撮る
-        final pickedFile = await picker.pickImage(source: ImageSource.camera);
+        /*Step 1:Pick image*/
+        //Install image_picker
+        //Import the corresponding library
+        showDialog(
+            context: context,
+            builder: (context) {
+              return SimpleDialog(
+                title: Text('選択：', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),),
+                children: [
+                  SimpleDialogOption(
+                    child: Text('写真ライブラリから選択', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      FilePickerResult? file = await FilePicker.platform.pickFiles(
+                        type:  FileType.image, //写真ファイルのみ抽出
+                        // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
+                      );
 
-        if (pickedFile != null) {
-          print(pickedFile.path);
-          // File型に変換し文字に変換
-          file_to_text(File(pickedFile.path));
-        }
+                      if (file != null) {
+                        String filename = file.files.first.name;
+                        print(filename);
+
+                        // File型に変換し文字に変換
+                        file_to_text(File(file.files.first.path!));
+                      }
+                    },
+                  ),
+                  SimpleDialogOption(
+                    child: Text('写真を撮影', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      ImagePicker picker = ImagePicker();
+                      //写真を撮る
+                      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+                      if (pickedFile != null) {
+                        print(pickedFile.path);
+                        // File型に変換し文字に変換
+                        file_to_text(File(pickedFile.path));
+                      }
+                    },
+                  )
+                ],
+              );
+            }
+        );
       },
       child: Container(
         padding: EdgeInsets.all(12),
@@ -281,6 +287,84 @@ class CameraButton extends StatelessWidget {
     );
   }
 }
+
+// 音声入力を行うボタン
+class AudioButton extends StatefulWidget {
+  final Function(String) onTextPicked;
+
+  const AudioButton({Key? key, required this.onTextPicked}) : super(key: key);
+
+  @override
+  _AudioButtonState createState() => _AudioButtonState();
+}
+class _AudioButtonState extends State<AudioButton> {
+  SpeechToText _speech = SpeechToText();
+  bool _isListening = false;
+
+  // 音声認識開始・停止の制御
+  void _startListening() async {
+    bool available = await _speech.initialize();
+    if (available) {
+      setState(() {
+        _isListening = true;
+      });
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            var speechText = result.recognizedWords;
+            print(speechText);
+            widget.onTextPicked(speechText); // 音声認識結果をコールバックに渡す
+          });
+        },
+      );
+    } else {
+      print("失敗");
+      widget.onTextPicked("音声認識の初期化に失敗しました");
+    }
+  }
+  //音声認識停止
+  void _stopListening() {
+    _speech.stop();
+    setState(() {
+      _isListening = false;
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (_isListening) {
+          _stopListening(); // すでに認識中なら停止
+          print("停止");
+        } else {
+          _startListening(); // 音声認識を開始
+          print("開始");
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.background, // 影の色
+              blurRadius: 6, // ぼかしの強さ
+              offset: Offset(2, 2), // 影の位置
+            ),
+          ],
+        ),
+        child: Icon(
+          _isListening ? Icons.stop : Icons.mic, // 音声認識中は停止ボタン、認識していないときはマイクボタン
+          size: 64,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+}
+
 // 空の文字列を返すボタン
 class EmptyTextButton extends StatelessWidget {
   final Function(String) onTextPicked;
@@ -386,7 +470,13 @@ class SendDialog extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // マイクボタン
-                      _sendOption(ImageReferenceButton(onImagePicked: (String text) {},), "画像を選択"),
+                      _sendOption(AudioButton(onTextPicked: (String text) {
+                        print("音声認識: $text"); //デバック
+                        if (text.isNotEmpty) {
+                          Navigator.pop(context);
+                          showEditDialog(context, text);
+                        }
+                      },), "音声入力"),
                       _sendOption(CameraButton(onImagePicked: (String text) {
                         if (text.isNotEmpty) {
                           Navigator.pop(context);
