@@ -43,6 +43,13 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // フィードバックのテキストを取得
+    _getFeedbackData = _fetchFeedback();
+  }
+
   //APIからデータ取得
   Future<List<String>> _fetchData(List<String> labels) async {
     try {
@@ -54,6 +61,16 @@ class _ResultPageState extends State<ResultPage> {
       throw Exception("データ取得時にエラー: $e");
     }
   }
+
+  Future<String> _fetchFeedback() async {
+    try {
+      // ModalRoute を使って渡された引数を取得
+      return ModalRoute.of(context)?.settings.arguments as String? ?? 'フィードバックの受け取りエラー';
+    } catch (e) {
+      throw Exception("データ取得時にエラー: $e");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
