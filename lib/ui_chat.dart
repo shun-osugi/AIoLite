@@ -1,41 +1,60 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
-import 'ui_result.dart';
-import 'colors.dart';
-
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+// Google Generative AI (Gemini) を使うためのライブラリ
 import 'package:google_generative_ai/google_generative_ai.dart';
-const apiKey = 'AIzaSyBKSKfHy_6DjTpx-3Zep78Vf-FXZWP1Tsw';
 
-class chat{
-  int p; //0:自分 1:相手
-  String str; //会話内容
-  chat(this.p,this.str);
+/// 本来は安全に管理すべきAPIキーを、サンプル上では直書きしています。
+const String apiKey = 'AIzaSy***************';
+
+/// 1つのチャットメッセージを表すクラス
+/// [isUser] が true ならユーザーの発言、false ならAIの発言
+class ChatMessage {
+  final bool isUser;
+  final String text;
+
+  ChatMessage(this.isUser, this.text);
 }
 
 void main() {
-  runApp(ChatPage());
+  runApp(MyApp());
 }
 
-class ChatPage extends StatefulWidget {
+/// アプリ全体のルートウィジェット
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Gemini Chat App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: ChatPage(),
+    );
+  }
+}
 
+/// メイン画面（チャット画面）を定義する StatefulWidget
+class ChatPage extends StatefulWidget {
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
+/// 状態管理クラス
 class _ChatPageState extends State<ChatPage> {
-  String inputText = "";
+  // チャット履歴
+  final List<ChatMessage> _messages = [];
+  // テキスト入力欄を制御するコントローラ
   final TextEditingController _textController = TextEditingController();
-  List<chat> chats = []; //会話リスト
+
+  // Google Generative AI (Gemini) 関連
   late final GenerativeModel _model;
-  late final ChatSession AI;
+  late final ChatSession _chatSession;
 
   @override
   void initState() {
     super.initState();
-    // dotenv.load(fileName: ".env");
-    // var apiKey = dotenv.get('GEMINI_API_KEY');
+    // Geminiモデルの初期化
     _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
+
     AI = _model.startChat();
     AI.sendMessage(Content.text('これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください'));
     AI.sendMessage(Content.text('口調は友達のような感じで大丈夫だよ！'));
@@ -61,15 +80,50 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 引数を受け取る
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is String) {
-      _textController.text = args;
-      inputText = args;
-    }
+  /// ユーザーが入力したテキストを送信したときに呼ばれるメソッド
+  void _onSendMessage() async {
+    final userText = _textController.text;
+    if (userText.isEmpty) return; // 空文字は無視
+
+    // 1. ユーザーの発言をチャット履歴に追加
+    setState(() {
+      _messages.add(ChatMessage(true, userText));
+      _textController.clear(); // 入力欄をクリア
+    });
+
+    // 2. Gemini への問い合わせ
+    final content = Content.text(userText);
+    final response = await _chatSession.sendMessage(content);
+
+    // 3. AIからの応答テキストを取得してチャット履歴に追加
+    final aiText = response.text ?? 'AIからの返答取得失敗';
+    setState(() {
+      _messages.add(ChatMessage(false, aiText));
+    });
+  }
+
+  /// タイトルをタップした時に、ポップアップを表示するメソッド
+  void _showTitlePopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("より詳しい説明"),
+          content: SingleChildScrollView(
+            child: Text(
+              "ここに、タイトルに関する長めのテキストや説明文を表示できます。\n"
+              "スクロールして読めるようにSingleChildScrollViewを使っています。"
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text("閉じる"),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          ],
+        );
+      }
+    );
   }
 
   @override
