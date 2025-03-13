@@ -97,19 +97,40 @@ class _ChatPageState extends State<ChatPage> {
               itemCount: chats.length,
               itemBuilder: (context, index) {
                 final chat = chats[chats.length - 1 - index];
-                return Align(
-                  alignment: chat.p == 0 ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                    margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: chat.p == 0 ? Colors.deepPurple[300] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      chat.str,
-                      style: TextStyle(fontSize: 16),
-                    ),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    mainAxisAlignment: chat.p == 0
+                        ? MainAxisAlignment.end // ユーザー: 右寄せ
+                        : MainAxisAlignment.start, // AI: 左寄せ
+                    children: [
+                      if (chat.p == 1) // AIのときだけアイコンを表示
+                        CircleAvatar(
+                          backgroundColor: Colors.deepPurple,
+                          child: Icon(Icons.android, color: Colors.white),
+                        ),
+                      SizedBox(width: 8), // アイコンと吹き出しの間隔
+
+                      Flexible(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          margin: EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: chat.p == 0
+                                ? Colors.deepPurple[300] // ユーザーの吹き出し
+                                : Colors.grey[300], // AIの吹き出し
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            chat.str,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+
+                      if (chat.p == 0) // ユーザーのメッセージにはアイコンなし
+                        SizedBox(width: 8),
+                    ],
                   ),
                 );
               },
