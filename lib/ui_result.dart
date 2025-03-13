@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'api_service.dart';     // API呼び出し用
 import 'colors.dart';
+
 
 class ResultPage extends StatefulWidget {
   final String text;
@@ -38,6 +40,7 @@ class _ResultPageState extends State<ResultPage> {
       appBar: AppBar(
         title: const Text('フィードバック'),
         backgroundColor: AppColors.mainColor,
+        automaticallyImplyLeading: false,
       ),
       backgroundColor: AppColors.white,
 
@@ -46,8 +49,28 @@ class _ResultPageState extends State<ResultPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
+
               //アバターを表示させるスペース用の空白
-              const SizedBox(height: 80),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.2,
+                child: Container(
+                  child: ModelViewer(
+                    src: 'assets/avatar0.glb',
+                    alt: 'A 3D model of AI avatar',
+                    cameraOrbit: "0deg 90deg 0deg",
+                    ar: false,
+                    autoRotate: false,
+                    disableZoom: true,
+                    disableTap: true,
+                    cameraControls: false,
+                    interactionPrompt: null,
+                    interactionPromptThreshold: 0,
+                    autoPlay: true,
+                    animationName: 'hello',
+                  ),
+                ),
+              ),
 
               //フィードバックを表示する吹き出し
               FutureBuilder<List<String>>(
@@ -73,10 +96,7 @@ class _ResultPageState extends State<ResultPage> {
                         ? data.first
                         : 'フィードバック内容がありません';
 
-                    feedbackWidget = Text(
-                      feedbackText,
-                      style: const TextStyle(fontSize: 16),
-                    );
+                    feedbackWidget = ChatBubble(text: feedbackText);
                   }
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 16),
@@ -97,7 +117,7 @@ class _ResultPageState extends State<ResultPage> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.background,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: FutureBuilder<List<String>>(
                   future: _suggestedDataFuture,
@@ -146,4 +166,53 @@ class _ResultPageState extends State<ResultPage> {
       ),
     );
   }
+}
+
+class ChatBubble extends StatelessWidget {
+  final String text;
+
+  const ChatBubble({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: BubblePainter(color: AppColors.background),
+      child: Container(
+        margin: const EdgeInsets.only(top: 10), // 三角形の分の余白
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+class BubblePainter extends CustomPainter {
+  final Color color;
+
+  BubblePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = color;
+    final double triangleWidth = 20;
+    final double triangleHeight = 10;
+
+    final Path path = Path()
+      ..moveTo((size.width - triangleWidth) / 2, 0) // 三角形左端
+      ..lineTo(size.width / 2, -triangleHeight) // 三角形の頂点（中央上）
+      ..lineTo((size.width + triangleWidth) / 2, 0) // 三角形右端
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
