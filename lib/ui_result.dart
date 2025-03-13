@@ -56,9 +56,9 @@ class _ResultPageState extends State<ResultPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('フィードバック'),
+        title: const Text('フィードバック', style: TextStyle(color: AppColors.white),),
         backgroundColor: AppColors.mainColor,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
       ),
       backgroundColor: AppColors.white,
 
@@ -69,7 +69,7 @@ class _ResultPageState extends State<ResultPage> {
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
 
-              //アバターを表示させるスペース用の空白
+              //アバターを表示
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.2,
                 child: Container(
