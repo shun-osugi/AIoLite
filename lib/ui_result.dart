@@ -43,13 +43,6 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // フィードバックのテキストを取得
-    _getFeedbackData = _fetchFeedback();
-  }
-
   //APIからデータ取得
   Future<List<String>> _fetchData(List<String> labels) async {
     try {
