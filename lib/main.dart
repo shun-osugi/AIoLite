@@ -186,20 +186,123 @@ class HelpButton extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('ヘルプ'),
-          content: Text('ここにヘルプの内容を記載'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('閉じる'),
-            ),
-          ],
-        );
+        return HelpDialog();
       },
     );
   }
 }
+
+class HelpDialog extends StatefulWidget {
+  @override
+  _HelpDialogState createState() => _HelpDialogState();
+}
+
+class _HelpDialogState extends State<HelpDialog> {
+  PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  // ヘルプ内容
+  final List<String> helpPages = [
+    "まずは、画面下のSTARTボタンを押して、問題の送信方法を選ぼう！\n送信方法は、音声入力、画像入力(画像ファイルからor写真を撮影)、テキスト入力から選べます。\n音声や画像を送信した場合は、自動でテキストに変換されます。",
+    "問題の送信方法を選んだら、問題文の編集をしよう！\nテキスト入力の場合はここで入力、音声や画像で入力した場合は、問題文を修正できます。",
+    "問題文を決定したら、ラベルの編集をしよう！\n自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。",
+    "ラベルを決定したら、AIとのチャットを開始！\nAIの質問に答えながら、問題を解いていこう！\n問題が解けたら、電球マークのボタンでチャットが終了できます。",
+    "チャットを終えると、AIからのフィードバックと類題が表示されるよ！\nフィードバックを参考にして、類題から次の問題を始めてみよう！",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("使い方", style: TextStyle(color: AppColors.black, fontSize: 22, fontWeight: FontWeight.bold)),
+
+            SizedBox(height: 16),
+
+            Container(
+              height: 150,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: helpPages.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return Center(
+                    child: Text(helpPages[index], textAlign: TextAlign.left, style: TextStyle(color: AppColors.black, fontSize: 14)),
+                  );
+                },
+              ),
+            ),
+
+            SizedBox(height: 16),
+
+            // インジケーター（現在のページを示すドット）
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(helpPages.length, (index) {
+                return Container(
+                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentPage == index ? AppColors.subColor : AppColors.black,
+                  ),
+                );
+              }),
+            ),
+
+            SizedBox(height: 16),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: _currentPage > 0
+                      ? () {
+                    _pageController.previousPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                      : null,
+                  child: Text("← 戻る", style: TextStyle(fontSize: 18)),
+                ),
+                TextButton(
+                  onPressed: _currentPage < helpPages.length - 1
+                      ? () {
+                    _pageController.nextPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                      : () {
+                    Navigator.pop(context); // 最後のページならダイアログを閉じる
+                  },
+                  child: Text(_currentPage < helpPages.length - 1 ? "次へ →" : "閉じる", style: TextStyle(fontSize: 18)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+}
+
 
 // カメラを起動するボタン
 class CameraButton extends StatelessWidget {
@@ -482,7 +585,7 @@ class SendDialog extends StatelessWidget {
                           Navigator.pop(context);
                           showEditDialog(context, text);
                         }
-                      },), "写真を撮影"),
+                      },), "画像入力"),
                       _sendOption(EmptyTextButton(onTextPicked: (String text) {
                         Navigator.pop(context);
                         showEditDialog(context, text);
@@ -522,7 +625,23 @@ class SendDialog extends StatelessWidget {
 void showEditDialog(BuildContext context, String text) {
   showDialog(
     context: context,
-    builder: (context) => EditDialog(editedText: text,),
+    barrierColor: Colors.black54,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Stack(
+            children: [
+              Positioned(
+                bottom: MediaQuery.of(context).size.height * 0.2,
+                left: 0,
+                right: 0,
+                child: EditDialog(editedText: text),
+              ),
+            ],
+          );
+        },
+      );
+    },
   );
 }
 class EditDialog extends StatefulWidget {
