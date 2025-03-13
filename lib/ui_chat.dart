@@ -47,9 +47,9 @@ class _ChatPageState extends State<ChatPage> {
 
     setState(() {
       chats.add(chat(0, text)); // ユーザーのメッセージを会話リストに追加
-      _textController.clear(); // 入力欄をクリア
     });
     _getAIResponse(text); // AIからの応答を取得
+    _textController.clear(); // 入力欄をクリア
   }
 
   void _getAIResponse(String userMessage) async {
