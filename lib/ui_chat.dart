@@ -24,7 +24,8 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  String inputText = "";
+  bool isFirstSend = false;
+  List<String> labels = [];
   final TextEditingController _textController = TextEditingController();
   List<chat> chats = []; //会話リスト
   late final GenerativeModel _model;
@@ -66,9 +67,23 @@ class _ChatPageState extends State<ChatPage> {
     super.didChangeDependencies();
     // 引数を受け取る
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is String) {
-      _textController.text = args;
-      inputText = args;
+
+    if (args is Map<String, dynamic>) {
+      // inputTextを取得
+      final receivedText = args['inputText'] as String?;
+      if (receivedText != null && !isFirstSend) {
+        setState(() {
+          chats.add(chat(0, receivedText));
+        });
+        _getAIResponse(receivedText);
+        isFirstSend = true;
+      }
+
+      // labelsを取得
+      final receivedLabels = args['labels'] as List<String>?;
+      if (receivedLabels != null) {
+        labels = receivedLabels;
+      }
     }
   }
 
@@ -85,7 +100,13 @@ class _ChatPageState extends State<ChatPage> {
             onPressed: () async { //フィードバックへ遷移
               final feedback = await AI.sendMessage(Content.text('今回の会話はどうだった？私が苦手なところとか分かったら短く一文で教えてほしいな。またね！'));
               final feedbackMessage = feedback.text ?? 'フィードバックの作成に失敗しました';
-              Navigator.pushNamed(context, '/result', arguments: feedbackMessage);
+              Navigator.pushNamed(
+                context, '/result',
+                arguments: {
+                  'feedbackText': feedbackMessage,
+                  'labels': labels,
+                },
+              );
             },
           ),
         ],
