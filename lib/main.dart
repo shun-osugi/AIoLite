@@ -139,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     offset: Offset(0, 0),
                                   ),
                                 ],
-                                fontSize: 64,
+                                fontSize: MediaQuery.of(context).size.width * 0.15,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -303,7 +303,6 @@ class _HelpDialogState extends State<HelpDialog> {
   }
 }
 
-
 // カメラを起動するボタン
 class CameraButton extends StatelessWidget {
   final Function(String) onImagePicked;
@@ -322,6 +321,7 @@ class CameraButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () async {
         /*Step 1:Pick image*/
@@ -372,10 +372,10 @@ class CameraButton extends StatelessWidget {
         );
       },
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(screenWidth * 0.03),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(screenWidth * 0.05),
           border: Border.all(color: AppColors.black, width: 2,),
           boxShadow: [
             BoxShadow(
@@ -385,7 +385,7 @@ class CameraButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(Icons.camera_alt, size: 64, color: AppColors.black),
+        child: Icon(Icons.camera_alt, size: screenWidth * 0.15, color: AppColors.black),
       ),
     );
   }
@@ -434,6 +434,7 @@ class _AudioButtonState extends State<AudioButton> {
   }
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         if (_isListening) {
@@ -445,11 +446,11 @@ class _AudioButtonState extends State<AudioButton> {
         }
       },
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(screenWidth * 0.03),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black, width: 2),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(screenWidth * 0.05),
+          border: Border.all(color: AppColors.black, width: 2,),
           boxShadow: [
             BoxShadow(
               color: AppColors.background, // 影の色
@@ -475,21 +476,22 @@ class EmptyTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         onTextPicked("");
       },
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(screenWidth * 0.03),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(screenWidth * 0.05),
           border: Border.all(color: AppColors.black, width: 2,),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              blurRadius: 6,
-              offset: Offset(2, 2),
+              color: AppColors.background, // 影の色
+              blurRadius: 6, // ぼかしの強さ
+              offset: Offset(2, 2), // 影の位置
             ),
           ],
         ),
@@ -632,7 +634,7 @@ void showEditDialog(BuildContext context, String text) {
           return Stack(
             children: [
               Positioned(
-                bottom: MediaQuery.of(context).size.height * 0.2,
+                top: MediaQuery.of(context).size.height * 0.1,
                 left: 0,
                 right: 0,
                 child: EditDialog(editedText: text),
@@ -759,7 +761,6 @@ class _EditDialogState extends State<EditDialog> {
     );
   }
 }
-
 
 // ラベルを編集するダイアログ
 void showLabelDialog(BuildContext context, String text) {
