@@ -15,12 +15,20 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
   late Future<List<String>> _suggestedDataFuture;
+  late Future<String> _getFeedbackData;
 
   @override
   void initState() {
     super.initState();
-    // APIからフィードバック用テキスト＆類題ラベルのリスト を取得する想定
+    // 類題ラベルのリスト を取得する
     _suggestedDataFuture = _fetchData(widget.text);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // フィードバックのテキストを取得
+    _getFeedbackData = _fetchFeedback();
   }
 
   //APIからデータ取得
@@ -33,6 +41,16 @@ class _ResultPageState extends State<ResultPage> {
       throw Exception("データ取得時にエラー: $e");
     }
   }
+
+  Future<String> _fetchFeedback() async {
+    try {
+      // ModalRoute を使って渡された引数を取得
+      return ModalRoute.of(context)?.settings.arguments as String? ?? 'フィードバックの受け取りエラー';
+    } catch (e) {
+      throw Exception("データ取得時にエラー: $e");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,8 +91,8 @@ class _ResultPageState extends State<ResultPage> {
               ),
 
               //フィードバックを表示する吹き出し
-              FutureBuilder<List<String>>(
-                future: _suggestedDataFuture,
+              FutureBuilder<String>(
+                future: _getFeedbackData,
                 builder: (context, snapshot) {
                   Widget feedbackWidget;
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -88,15 +106,13 @@ class _ResultPageState extends State<ResultPage> {
                       snapshot.error.toString(),
                       style: const TextStyle(color: Colors.red),
                     );
-                  } else {
+                  } else if (snapshot.hasData) {
                     // 正常にデータ取得できた場合
-                    final data = snapshot.data ?? [];
-                    // 先頭をフィードバック用テキストとみなす
-                    final feedbackText = data.isNotEmpty
-                        ? data.first
-                        : 'フィードバック内容がありません';
+                    final feedbackText = snapshot.data ?? 'フィードバック内容がありません';
 
                     feedbackWidget = ChatBubble(text: feedbackText);
+                  } else {
+                    feedbackWidget = const Text('データがありません');
                   }
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 16),
