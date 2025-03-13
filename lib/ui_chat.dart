@@ -76,11 +76,11 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("AI チャット"),
-        backgroundColor: Colors.deepPurple,
+        title: Text("AI チャット", style: TextStyle(color: AppColors.white),),
+        backgroundColor: AppColors.mainColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.lightbulb_outline, color: Colors.white),
+            icon: Icon(Icons.lightbulb_outline, color: AppColors.white),
             tooltip: "類題の提示",
             onPressed: () {
               Navigator.pushNamed(context, '/result');
@@ -106,8 +106,8 @@ class _ChatPageState extends State<ChatPage> {
                     children: [
                       if (chat.p == 1) // AIのときだけアイコンを表示
                         CircleAvatar(
-                          backgroundColor: Colors.deepPurple,
-                          child: Icon(Icons.android, color: Colors.white),
+                          backgroundColor: AppColors.subColor,
+                          child: Icon(Icons.android, color: AppColors.white),
                         ),
                       SizedBox(width: 8), // アイコンと吹き出しの間隔
 
@@ -117,13 +117,13 @@ class _ChatPageState extends State<ChatPage> {
                           margin: EdgeInsets.symmetric(horizontal: 8),
                           decoration: BoxDecoration(
                             color: chat.p == 0
-                                ? Colors.deepPurple[300] // ユーザーの吹き出し
-                                : Colors.grey[300], // AIの吹き出し
+                                ? AppColors.mainColor // ユーザーの吹き出し
+                                : AppColors.subColor, // AIの吹き出し
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             chat.str,
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(color: AppColors.white,fontSize: 16),
                           ),
                         ),
                       ),
@@ -154,8 +154,8 @@ class _ChatPageState extends State<ChatPage> {
                 SizedBox(width: 8),
                 FloatingActionButton(
                   onPressed: _sendMessage,
-                  child: Icon(Icons.send, color: Colors.white),
-                  backgroundColor: Colors.deepPurple,
+                  child: Icon(Icons.send, color: AppColors.white),
+                  backgroundColor: AppColors.mainColor,
                 ),
               ],
             ),
