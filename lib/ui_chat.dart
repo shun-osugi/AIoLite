@@ -164,7 +164,7 @@ class _ChatPageState extends State<ChatPage> {
                   border: Border.all(color: AppColors.white, width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.subColor.withOpacity(0.7),
+                      color: AppColors.mainColor.withOpacity(0.7),
                       offset: Offset(0, 4),
                       blurRadius: 10,
                     ),
@@ -183,49 +183,33 @@ class _ChatPageState extends State<ChatPage> {
                             width: MediaQuery.of(context).size.width * 0.95,
                             height: MediaQuery.of(context).size.height * 0.6,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [AppColors.subColor, AppColors.white],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                              color: AppColors.subColor,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: AppColors.white, width: 4),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.subColor.withOpacity(0.7),
-                                  offset: Offset(0, 4),
-                                  blurRadius: 10,
-                                ),
-                              ],
                             ),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisSize: MainAxisSize.max,
                               children: [
                                 Align(
                                   alignment: Alignment.topRight,
                                   child: IconButton(
-                                    icon: Icon(Icons.close),
+                                    icon: Icon(Icons.close, color: AppColors.white,),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                     },
                                   ),
                                 ),
-                                SingleChildScrollView(
-                                  child: Text(
-                                    inputText,
-                                    style: TextStyle(
-                                      color: AppColors.white,
-                                      shadows: [
-                                        Shadow(
-                                          blurRadius: 20,
-                                          color: AppColors.black,
-                                          offset: Offset(0, 0),
-                                        ),
-                                      ],
-                                      fontSize: MediaQuery.of(context).size.width * 0.05,
-                                      fontWeight: FontWeight.bold,
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Text(
+                                      inputText,
+                                      style: TextStyle(
+                                        color: AppColors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -255,7 +239,7 @@ class _ChatPageState extends State<ChatPage> {
                           offset: Offset(0, 0),
                         ),
                       ],
-                      fontSize: MediaQuery.of(context).size.width * 0.08,
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -298,7 +282,7 @@ class _ChatPageState extends State<ChatPage> {
                                     ),
                                     child: Text(
                                       chat.str,
-                                      style: TextStyle(color: chat.p == 0 ? AppColors.white : AppColors.black, fontSize: 16),
+                                      style: TextStyle(color: chat.p == 0 ? AppColors.white : AppColors.black, fontSize: 16, fontWeight: FontWeight.bold,),
                                     ),
                                   ),
                                 ),
@@ -420,7 +404,6 @@ class _ChatPageState extends State<ChatPage> {
                           arguments: {
                             'feedbackText': feedbackMessage,
                             'labels': labels,
-                            'similarQuestions':similarQuestions,
                           },
                         );
                       },
