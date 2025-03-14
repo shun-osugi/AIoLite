@@ -48,7 +48,7 @@ class _ResultPageState extends State<ResultPage> {
         // inputTextとlabelsを基に類題を検索
         similarQuestions = [
           {
-            'text': 'サンプル問題:あるクラスでは、校外学習のためにバスを借りることになりました。バスの料金は、1台あたり25,000円です。クラスには42人の生徒がいて、さらに先生が3人同行します。1台のバスには最大で15人が乗ることができます。(1) クラス全員と先生が乗るためには、バスを最低何台借りる必要がありますか？(2) バスの料金は、全員の人数で均等に分けて支払うことになりました。1人あたりの支払額はいくらになりますか？（小数点以下を切り上げて計算してください。）(3) もし、学校がバス料金の半額を負担してくれる場合、1人あたりの支払額はいくらになりますか？',
+            'text': 'あるクラスでは、校外学習のためにバスを借りることになりました。バスの料金は、1台あたり25,000円です。クラスには42人の生徒がいて、さらに先生が3人同行します。1台のバスには最大で15人が乗ることができます。(1) クラス全員と先生が乗るためには、バスを最低何台借りる必要がありますか？(2) バスの料金は、全員の人数で均等に分けて支払うことになりました。1人あたりの支払額はいくらになりますか？（小数点以下を切り上げて計算してください。）(3) もし、学校がバス料金の半額を負担してくれる場合、1人あたりの支払額はいくらになりますか？',
             'labels' : ['数学 - 式と計算'],
           },
         ];
@@ -79,11 +79,6 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('フィードバック', style: TextStyle(color: AppColors.white)),
-        backgroundColor: AppColors.mainColor,
-        automaticallyImplyLeading: false,
-      ),
       backgroundColor: AppColors.background2,
       body: SafeArea(
         child: Screenshot(controller: screenshotController,
@@ -197,6 +192,10 @@ class _ResultPageState extends State<ResultPage> {
                                             // ボタンを押した時に渡すデータ
                                             final inputText = item['text'];
                                             final remainingLabels = itemLabels;
+
+                                            // ダイアログを閉じ、画面を保存
+                                            Navigator.of(context).pop();
+                                            _captureScreenshot();
 
                                             Navigator.pushNamed(
                                               context,
