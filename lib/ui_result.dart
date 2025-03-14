@@ -90,7 +90,7 @@ class _ResultPageState extends State<ResultPage> {
         title: const Text('フィードバック', style: TextStyle(color: AppColors.white)),
         backgroundColor: AppColors.mainColor,
       ),
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background2,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
