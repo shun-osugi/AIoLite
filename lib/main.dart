@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
         '/chat': (context) => ChatPage(),
         '/result': (context) => ResultPage(),
       },
+      debugShowCheckedModeBanner: false,
     );
   }
 }

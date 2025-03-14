@@ -309,6 +309,7 @@ class _ChatPageState extends State<ChatPage> {
                               ConstrainedBox(
                                 constraints: BoxConstraints(
                                   maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                  minWidth: MediaQuery.of(context).size.width * 0.2,
                                 ),
                                 child: IntrinsicWidth(
                                   child: Container(
