@@ -30,6 +30,7 @@ class _ChatPageState extends State<ChatPage> {
   List<chat> chats = []; //会話リスト
   late final GenerativeModel _model;
   late final ChatSession AI;
+  late List<dynamic> similarQuestions = [];
 
   @override
   void initState() {
@@ -84,6 +85,12 @@ class _ChatPageState extends State<ChatPage> {
       if (receivedLabels != null) {
         labels = receivedLabels;
       }
+
+      // similarQuestionsを取得
+      final receivedSimilarQuestions = args['similarQuestions'] as List<dynamic>?;
+      if (receivedSimilarQuestions != null) {
+        similarQuestions = receivedSimilarQuestions;
+      }
     }
   }
 
@@ -105,6 +112,7 @@ class _ChatPageState extends State<ChatPage> {
                 arguments: {
                   'feedbackText': feedbackMessage,
                   'labels': labels,
+                  'similarQuestions':similarQuestions,
                 },
               );
             },
