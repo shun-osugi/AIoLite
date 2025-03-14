@@ -812,6 +812,8 @@ class _LabelDialogState extends State<LabelDialog> {
   List<String> _suggestedLabels = []; // 推奨ラベル
   List<String?> selectedSubjects = List.filled(4, null); // 教科ドロップダウン選択
   List<String?> selectedCategories = List.filled(4, null); // 分類ドロップダウン選択
+  bool _isLoading = false; // ローディング状態を管理する変数
+
 
   @override
   void initState() {
@@ -861,12 +863,36 @@ class _LabelDialogState extends State<LabelDialog> {
   Future<void> _storeText(String inputText, List<String> editedLabels) async {
     if (inputText.isEmpty || editedLabels.isEmpty) return;
 
-    // 保存処理
-    await ApiService.storeText(inputText, editedLabels);
+    setState(() {
+      _isLoading = true; // 非同期処理中はローディング表示
+    });
+    // APIリクエストを送信し、レスポンスを受け取る
+    Map<String, dynamic> response = await ApiService.storeText(inputText, editedLabels);
+
+    // 類題を取得
+    List<dynamic> similarTexts = response["similar_texts"] ?? [];
+
+
 
     // ログ出力
     debugPrint("テキストを保存: $inputText");
     debugPrint("保存したラベル: $editedLabels");
+
+    setState(() {
+      _isLoading = false; // 処理が終わったらローディングを非表示
+    });
+    // 取得した類題とともに画面遷移
+    if (context.mounted) {
+      Navigator.pushNamed(
+        context,
+        '/chat',
+        arguments: {
+          'inputText': inputText,
+          'labels': editedLabels,
+          'similarQuestions': similarTexts, // 類題を渡す
+        },
+      );
+    }
   }
 
   // 教科と分類のドロップダウンペア
@@ -997,16 +1023,7 @@ class _LabelDialogState extends State<LabelDialog> {
                               editedLabels.add("${selectedSubjects[i]} - ${selectedCategories[i]}");
                             }
                           }
-                          _storeText(widget.editedText, editedLabels);
-
-                          Navigator.pushNamed(
-                            context,
-                            '/chat',
-                            arguments: {
-                              'inputText': widget.editedText,
-                              'labels': editedLabels,
-                            },
-                          );
+                          _storeText(widget.editedText, editedLabels);//画面遷移を_storeTextないに移動済み
                         },
                         child: Text("開始 →", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                       ),
@@ -1027,6 +1044,16 @@ class _LabelDialogState extends State<LabelDialog> {
                 },
               ),
             ),
+            // ローディングインジケーター
+            if (_isLoading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.5), // 背景を半透明に
+                  child: Center(
+                    child: CircularProgressIndicator(), // ローディングインジケーター
+                  ),
+                ),
+              ),
           ],
         ),
       ),
