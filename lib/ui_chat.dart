@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'ui_result.dart';
 import 'colors.dart';
+import 'tts_service.dart';
 
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -34,6 +35,7 @@ class _ChatPageState extends State<ChatPage> {
   late final GenerativeModel _model;
   late final ChatSession AI;
   late List<dynamic> similarQuestions = [];
+  final TTSService _ttsService = TTSService(); //音声読み上げサービス
 
   @override
   void initState() {
@@ -75,6 +77,10 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
     });
+
+    //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
+    await _ttsService.stop();
+    await _ttsService.speak(aiMessage);
   }
 
   @override
@@ -115,7 +121,6 @@ class _ChatPageState extends State<ChatPage> {
       backgroundColor: AppColors.background2,
       body: Stack(
         children: [
-
           // アバター表示
           Positioned(
             top: MediaQuery.of(context).size.height * 0.18,
@@ -331,7 +336,7 @@ class _ChatPageState extends State<ChatPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                     SizedBox(width: 8),
@@ -530,4 +535,36 @@ class CircleIconButton extends StatelessWidget {
       ),
     );
   }
+}
+
+class ChatBubbleTriangle extends CustomPainter {
+  final int p;
+
+  ChatBubbleTriangle({required this.p});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = p == 0 ? AppColors.mainColor : AppColors.subColor
+      ..style = PaintingStyle.fill;
+
+    final Path path = Path();
+    if (p == 0) {
+      // 右下に三角形
+      path.moveTo(-44, -8);
+      path.quadraticBezierTo(-32, 8, -8, 16);
+      path.quadraticBezierTo(-18, 8, -24, -8);
+    } else {
+      // 左上に三角形
+      path.moveTo(44, 0);
+      path.quadraticBezierTo(32, -16, 8, -24);
+      path.quadraticBezierTo(18, -16, 24, 0);
+    }
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
