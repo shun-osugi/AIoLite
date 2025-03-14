@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'api_service.dart';
 import 'colors.dart';
-import 'services/tts_service.dart';
+import 'tts_service.dart';
 
 class ResultPage extends StatefulWidget {
   @override

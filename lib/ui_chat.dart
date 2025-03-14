@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'ui_result.dart';
 import 'colors.dart';
-import 'services/tts_service.dart';
+import 'tts_service.dart';
 
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
