@@ -155,6 +155,23 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 const HelpButton(), // ヘルプを表示するボタン
+
+                Align( //ライセンス
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.9, right: 20),
+                    child: IconButton(
+                      icon: Icon(Icons.handshake, size: 50, color: AppColors.white),
+                      onPressed: () {
+                        showLicensePage(
+                          context: context,
+                          applicationName: 'AIoLite',
+                          applicationVersion: '1.0.0',
+                        );
+                      },
+                    ),
+                  ),
+                )
               ]
           )
         )
