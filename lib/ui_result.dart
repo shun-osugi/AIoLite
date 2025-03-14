@@ -14,7 +14,7 @@ class _ResultPageState extends State<ResultPage> {
   String feedbackText = "";
   List<String> labels = [];
   late List<dynamic> similarQuestions = [];
-
+//
   //音声読み上げサービス
   final TTSService _ttsService = TTSService();
   bool _hasReadFeedback = false; //何度も読み上げられることを防止

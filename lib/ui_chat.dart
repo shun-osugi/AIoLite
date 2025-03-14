@@ -144,7 +144,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
-
+//
           // 会話部分
           Column(
             children: [
