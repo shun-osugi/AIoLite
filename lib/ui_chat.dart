@@ -28,6 +28,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   String inputText = "";
   bool isFirstSend = false;
+  bool _isSending = false;
   List<String> labels = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -52,10 +53,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage() {
+    if (_isSending) return;
+
     String text = _textController.text.trim(); // 入力値を取得し、前後の空白を削除
     if (text.isEmpty) return; // 入力が空の場合は送信しない
 
     setState(() {
+      _isSending = true;
       chats.add(chat(0, text)); // ユーザーのメッセージを会話リストに追加
     });
     _getAIResponse(text); // AIからの応答を取得
@@ -77,6 +81,7 @@ class _ChatPageState extends State<ChatPage> {
 
     setState(() {
       chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
+      _isSending = false;
     });
 
     //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
@@ -145,7 +150,35 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
-//
+
+          Positioned(
+              top: MediaQuery.of(context).size.height * 0.2,
+              left: MediaQuery.of(context).size.width * 0.05,
+              child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.subColor, AppColors.white],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.white, width: 2),
+                  ),
+                  child: Text('イオ', style: TextStyle(
+                    color: AppColors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 20,
+                        color: AppColors.black,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,),)
+              )
+          ),
+
           // 会話部分
           Column(
             children: [
@@ -184,7 +217,11 @@ class _ChatPageState extends State<ChatPage> {
                             width: MediaQuery.of(context).size.width * 0.95,
                             height: MediaQuery.of(context).size.height * 0.6,
                             decoration: BoxDecoration(
-                              color: AppColors.subColor,
+                              gradient: LinearGradient(
+                                colors: [AppColors.subColor, AppColors.white],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: AppColors.white, width: 4),
                             ),
@@ -278,7 +315,11 @@ class _ChatPageState extends State<ChatPage> {
                                     padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                     margin: EdgeInsets.only(bottom: 8, left: chat.p == 0 ? 40 : 8, right: chat.p == 0 ? 8 : 40),
                                     decoration: BoxDecoration(
-                                      color: chat.p == 0 ? AppColors.mainColor : AppColors.subColor,
+                                      gradient: LinearGradient(
+                                        colors: [chat.p == 0 ? AppColors.mainColor : AppColors.subColor, chat.p == 0 ? AppColors.mainColor : AppColors.white],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -313,22 +354,27 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     Expanded(
                       child: TextField(
-                        cursorColor: AppColors.mainColor,
+                        cursorColor: _isSending ? AppColors.subColor : AppColors.mainColor,
                         controller: _textController,
+                        enabled: !_isSending,
                         decoration: InputDecoration(
-                          hintText: "メッセージを入力...",
+                          hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
                           hintStyle: TextStyle(color: AppColors.mainColor),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColors.mainColor,
+                              width: 2, // 枠線の太さ
+                            ),
                           ),
                         ),
                       ),
                     ),
                     SizedBox(width: 8),
                     FloatingActionButton(
-                      onPressed: _sendMessage,
+                      onPressed: _isSending ? null : _sendMessage,
                       child: Icon(Icons.send, color: AppColors.white),
-                      backgroundColor: AppColors.mainColor,
+                      backgroundColor: _isSending ? AppColors.background : AppColors.mainColor,
                     ),
                   ],
                 ),
