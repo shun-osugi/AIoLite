@@ -45,9 +45,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String str = ""; //入力する文字列
+  String str = "";
   FilePickerResult? file;
-  String filename = ""; //写真の名前
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 15), () {
+      setState(() {
+        isLoading = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           cameraControls: false,
                           interactionPrompt: null,
                           interactionPromptThreshold: 0,
+                          loading: Loading.eager,
                           autoPlay: true,
                           animationName: 'wait',
                         ),
@@ -172,7 +183,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       },
                     ),
                   ),
-                )
+                ),
+
+                // ローディング画面
+                if (isLoading)
+                  Center(
+                    child: Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      color: AppColors.mainColor,
+                      child: Image.asset('assets/cover.png', width: MediaQuery.of(context).size.width,),
+                    ),
+                  ),
               ]
           )
         )
@@ -876,43 +898,6 @@ class _LabelDialogState extends State<LabelDialog> {
       }
     });
   }
-
-  /*
-  // テキストを保存し、類似検索
-  Future<void> _storeText(String inputText, List<String> editedLabels) async {
-    if (inputText.isEmpty || editedLabels.isEmpty) return;
-
-    setState(() {
-      _isLoading = true; // 非同期処理中はローディング表示
-    });
-    // APIリクエストを送信し、レスポンスを受け取る
-    Map<String, dynamic> response = await ApiService.storeText(inputText, editedLabels);
-
-    // 類題を取得
-    List<dynamic> similarTexts = response["similar_texts"] ?? [];
-
-
-
-    // ログ出力
-    debugPrint("テキストを保存: $inputText");
-    debugPrint("保存したラベル: $editedLabels");
-
-    setState(() {
-      _isLoading = false; // 処理が終わったらローディングを非表示
-    });
-    // 取得した類題とともに画面遷移
-    if (context.mounted) {
-      Navigator.pushNamed(
-        context,
-        '/chat',
-        arguments: {
-          'inputText': inputText,
-          'labels': editedLabels,
-          'similarQuestions': similarTexts, // 類題を渡す
-        },
-      );
-    }
-  }*/
 
   // 教科と分類のドロップダウンペア
   Widget buildDropdownPair(int index) {
