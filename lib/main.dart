@@ -12,6 +12,7 @@ import 'ui_result.dart';
 import 'colors.dart';
 import 'subject_categories.dart';
 import 'api_service.dart';
+import 'terms_content.dart';
 
 
 void main() {
@@ -196,19 +197,33 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 const HelpButton(), // ヘルプを表示するボタン
 
-                Align( //ライセンス
+                // ライセンスアイコンと利用規約ボタン
+                Align(
                   alignment: Alignment.bottomRight,
                   child: Padding(
-                    padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.9, right: 20),
-                    child: IconButton(
-                      icon: Icon(Icons.handshake, size: 50, color: AppColors.white),
-                      onPressed: () {
-                        showLicensePage(
-                          context: context,
-                          applicationName: 'AIoLite',
-                          applicationVersion: '1.0.0',
-                        );
-                      },
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.9,
+                      right: 20,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 利用規約ボタン (iマーク)
+                        const TermsButton(),
+                        SizedBox(width: 16),
+
+                        // ライセンス表示ボタン
+                        IconButton(
+                          icon: Icon(Icons.handshake, size: 50, color: AppColors.white),
+                          onPressed: () {
+                            showLicensePage(
+                              context: context,
+                              applicationName: 'AIoLite',
+                              applicationVersion: '1.0.0',
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -400,6 +415,109 @@ class _HelpDialogState extends State<HelpDialog> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+}
+
+// 利用規約を表示するボタン
+class TermsButton extends StatelessWidget {
+  const TermsButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.info_outline, size: 50, color: AppColors.white),
+      onPressed: () => _showTermsDialog(context),
+    );
+  }
+
+  void _showTermsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return TermsDialog();
+      },
+    );
+  }
+}
+
+// 利用規約ダイアログ
+class TermsDialog extends StatelessWidget {
+  const TermsDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("利用規約",
+                style: TextStyle(
+                    color: AppColors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold)),
+            SizedBox(height: 16),
+
+            // スクロール表示
+            Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: TermsContent.articles.map((article) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 条タイトル（太字）
+                          Text(
+                            article['title'] ?? '',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          // 条文本文
+                          Text(
+                            article['body'] ?? '',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  "閉じる",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: AppColors.subColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
