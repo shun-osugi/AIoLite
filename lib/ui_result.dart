@@ -13,7 +13,6 @@ class _ResultPageState extends State<ResultPage> {
   String feedbackText = "";
   List<String> labels = [];
   late List<dynamic> similarQuestions = [];
-  bool _isLoading = false; // ローディング状態を管理するフラグ
 
   //音声読み上げサービス
   final TTSService _ttsService = TTSService();
@@ -34,8 +33,14 @@ class _ResultPageState extends State<ResultPage> {
         labels = (args['labels'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList() ?? [];
-        similarQuestions = args['similarQuestions'] ?? [];
-        print("[ResultPage] Received similarQuestions: $similarQuestions");
+
+        // labelsを基に類題を検索
+        similarQuestions = [
+          {
+            'text': 'サンプル問題:あるクラスでは、校外学習のためにバスを借りることになりました。バスの料金は、1台あたり25,000円です。クラスには42人の生徒がいて、さらに先生が3人同行します。1台のバスには最大で15人が乗ることができます。(1) クラス全員と先生が乗るためには、バスを最低何台借りる必要がありますか？(2) バスの料金は、全員の人数で均等に分けて支払うことになりました。1人あたりの支払額はいくらになりますか？（小数点以下を切り上げて計算してください。）(3) もし、学校がバス料金の半額を負担してくれる場合、1人あたりの支払額はいくらになりますか？',
+            'labels' : ['数学 - 式と計算'],
+          },
+        ];
       });
 
       if (feedbackText.isNotEmpty && !_hasReadFeedback) {
@@ -50,7 +55,6 @@ class _ResultPageState extends State<ResultPage> {
   Future<void> _onSolveSimilarQuestion(String inputText, List<String> remainingLabels) async {
     if (inputText.isEmpty || remainingLabels.isEmpty) return;
     setState(() {
-      _isLoading = true; // ローディング開始
     });
 
     // APIリクエストを送信し、レスポンスを受け取る
@@ -59,8 +63,6 @@ class _ResultPageState extends State<ResultPage> {
     // 類題を取得
     List<dynamic> similarTexts = response["similar_texts"] ?? [];
 
-
-
     // ログ出力
     debugPrint("テキストを保存: $inputText");
     debugPrint("保存したラベル: $remainingLabels");
@@ -68,7 +70,6 @@ class _ResultPageState extends State<ResultPage> {
     await Future.delayed(Duration(seconds: 2)); // ここでAPIリクエストのシミュレーション
 
     setState(() {
-      _isLoading = false; // ローディング終了
     });
 
     // 画面遷移
@@ -78,7 +79,6 @@ class _ResultPageState extends State<ResultPage> {
       arguments: {
         'inputText': inputText,
         'labels': remainingLabels,
-        'similarQuestions': similarTexts, // 類題を渡す
       },
     );
   }
@@ -118,30 +118,27 @@ class _ResultPageState extends State<ResultPage> {
               ),
 
               //フィードバックを表示する吹き出し
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ChatBubble(
-                  text: feedbackText.isEmpty
+              FeedbackBubble(
+                  feedbackText: feedbackText.isEmpty
                       ? 'フィードバック内容がありません。'
                       : feedbackText,
-                ),
               ),
 
               // 類題の提示
               Container(
+                width: MediaQuery.of(context).size.width * 0.9,
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(top: 8, bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: AppColors.subColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: similarQuestions.isNotEmpty
+                child: Column(
+                  children: [
+                    Center(child: Text('類題も解いてみよう！', style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.bold),),),
+                    SizedBox(height: 16,),
+                    similarQuestions.isNotEmpty
                     ? Column(
                   children: similarQuestions.map((item) {
                     // labelsの部分をList<String>に変換
@@ -149,44 +146,107 @@ class _ResultPageState extends State<ResultPage> {
                         .map((e) => e.toString())
                         .toList();
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item['text']),
-                        SizedBox(height: 8),
-                        Text(
-                          "ラベル: ${itemLabels.join(', ')}",
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                        SizedBox(height: 16),  // ボタンのスペース
-                        _isLoading
-                            ? Center(child: CircularProgressIndicator()) // ローディング中はインジケーターを表示
-                            : ElevatedButton(
-                          onPressed: () {
-                            // ボタンを押した時に渡すデータ
-                            final inputText = item['text'];
-                            final remainingLabels = itemLabels;
+                    return ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                ),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width * 0.95,
+                                  height: MediaQuery.of(context).size.height * 0.6,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.subColor,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.white, width: 4),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.topRight,
+                                          child: IconButton(
+                                            icon: Icon(Icons.close, color: AppColors.white,),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: SingleChildScrollView(
+                                            child: Text(
+                                              item['text'],
+                                              style: TextStyle(
+                                                color: AppColors.black,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            // ボタンを押した時に渡すデータ
+                                            final inputText = item['text'];
+                                            final remainingLabels = itemLabels;
 
-                            // 類題を解く処理
-                            _onSolveSimilarQuestion(inputText, remainingLabels);
-                          },
-                          child: const Text('類題をチャットで解く'),
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/chat',
+                                              arguments: {
+                                                'inputText': inputText,
+                                                'labels': remainingLabels,
+                                              },
+                                            );
+                                          },child: Text('この類題を解く→',
+                                          textAlign: TextAlign.right,
+                                          style: TextStyle(color: AppColors.black, fontSize: 16,),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),),
+                              );
+                            },
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                        SizedBox(height: 16),
-                      ],
+                        child: Padding(padding: EdgeInsets.all(16),
+                          child: Text(
+                          item['text'],
+                          style: TextStyle(
+                            color: AppColors.black,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 5,
+                          ),
+                        ),
                     );
                   }).toList(),
                 )
-                    : const Text('類題のラベルがありません'),
+                    : const Text('類題がありません。', style: TextStyle(color: AppColors.black), textAlign: TextAlign.center,),
+                  ],
+                ),
               ),
 
               //ホーム画面に戻るボタン
               SizedBox(
-                width: double.infinity,
+                width: MediaQuery.of(context).size.width * 0.9,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainColor, // ボタン色
-                    foregroundColor: AppColors.white,     // 文字色
+                    backgroundColor: AppColors.mainColor,
+                    foregroundColor: AppColors.white,
                   ),
                   onPressed: () {
                     // ルート指定でホーム画面へ戻る
@@ -203,52 +263,71 @@ class _ResultPageState extends State<ResultPage> {
   }
 }
 
-class ChatBubble extends StatelessWidget {
-  final String text;
+class FeedbackBubble extends StatelessWidget {
+  final String feedbackText;
 
-  const ChatBubble({super.key, required this.text});
+  FeedbackBubble({required this.feedbackText});
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(double.infinity, 60), // 高さを設定（適切なサイズを指定）
-      painter: BubblePainter(color: AppColors.background),
-      child: Container(
-        margin: const EdgeInsets.only(top: 10), // 三角形の分の余白
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 16),
-        ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 吹き出しの本体
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.subColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              feedbackText.isEmpty ? 'フィードバック内容がありません。' : feedbackText,
+              style: TextStyle(
+                color: AppColors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // 吹き出しの上に表示する三角形
+          Positioned(
+            top: -10,
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: CustomPaint(
+                size: const Size(40, 20),
+                painter: TrianglePainter(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class BubblePainter extends CustomPainter {
-  final Color color;
-
-  BubblePainter({required this.color});
-
+class TrianglePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()..color = color;
-    final double triangleWidth = 20;
-    final double triangleHeight = 10;
+    final Paint paint = Paint()
+      ..color = AppColors.subColor;
 
     final Path path = Path()
-      ..moveTo((size.width - triangleWidth) / 2, size.height) // 三角形左端
-      ..lineTo(size.width / 2, size.height - triangleHeight) // 三角形の頂点（中央下）
-      ..lineTo((size.width + triangleWidth) / 2, size.height) // 三角形右端
+      ..moveTo(size.width / 2, 0) // 三角形の頂点（中央上）
+      ..lineTo(0, size.height) // 左下
+      ..lineTo(size.width, size.height) // 右下
       ..close();
 
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }
