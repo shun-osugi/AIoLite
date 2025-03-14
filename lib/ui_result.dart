@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'api_service.dart';
 import 'colors.dart';
 import 'tts_service.dart';
+import 'package:screenshot/screenshot.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -18,6 +22,9 @@ class _ResultPageState extends State<ResultPage> {
   //音声読み上げサービス
   final TTSService _ttsService = TTSService();
   bool _hasReadFeedback = false; //何度も読み上げられることを防止
+
+  //フィードバック保存
+  ScreenshotController screenshotController = ScreenshotController();
 
   @override
   void didChangeDependencies() {
@@ -55,6 +62,20 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  //フィードバック保存
+  void _captureScreenshot() async {
+    final uint8List = await screenshotController.capture();
+    if (uint8List != null) {
+      final directory = await getApplicationDocumentsDirectory();
+      final imagePath = '${directory.path}/screenshot_${DateTime.now()}.png';
+      final file = File(imagePath);
+      await file.writeAsBytes(uint8List);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('スクリーンショットを保存しました: $imagePath')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +85,8 @@ class _ResultPageState extends State<ResultPage> {
       ),
       backgroundColor: AppColors.background2,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Screenshot(controller: screenshotController,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
@@ -221,6 +243,8 @@ class _ResultPageState extends State<ResultPage> {
                     foregroundColor: AppColors.white,
                   ),
                   onPressed: () {
+                    // 画面を保存
+                    _captureScreenshot();
                     // ルート指定でホーム画面へ戻る
                     Navigator.pushNamed(context, '/home');
                   },
@@ -231,6 +255,7 @@ class _ResultPageState extends State<ResultPage> {
           ),
         ),
       ),
+    ),
     );
   }
 }
