@@ -336,7 +336,7 @@ class _ChatPageState extends State<ChatPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                     SizedBox(width: 8),
@@ -459,38 +459,6 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-}
-
-class ChatBubbleTriangle extends CustomPainter {
-  final int p;
-
-  ChatBubbleTriangle({required this.p});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = p == 0 ? AppColors.mainColor : AppColors.subColor
-      ..style = PaintingStyle.fill;
-
-    final Path path = Path();
-    if (p == 0) {
-      // 右下に三角形
-      path.moveTo(-44, -8);
-      path.quadraticBezierTo(-32, 8, -8, 16);
-      path.quadraticBezierTo(-18, 8, -24, -8);
-    } else {
-      // 左上に三角形
-      path.moveTo(44, 0);
-      path.quadraticBezierTo(32, -16, 8, -24);
-      path.quadraticBezierTo(18, -16, 24, 0);
-    }
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class CircleIconButton extends StatelessWidget {

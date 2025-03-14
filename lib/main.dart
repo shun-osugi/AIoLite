@@ -876,6 +876,7 @@ class _LabelDialogState extends State<LabelDialog> {
     });
   }
 
+  /*
   // テキストを保存し、類似検索
   Future<void> _storeText(String inputText, List<String> editedLabels) async {
     if (inputText.isEmpty || editedLabels.isEmpty) return;
@@ -910,7 +911,7 @@ class _LabelDialogState extends State<LabelDialog> {
         },
       );
     }
-  }
+  }*/
 
   // 教科と分類のドロップダウンペア
   Widget buildDropdownPair(int index) {
@@ -1040,7 +1041,17 @@ class _LabelDialogState extends State<LabelDialog> {
                               editedLabels.add("${selectedSubjects[i]} - ${selectedCategories[i]}");
                             }
                           }
-                          _storeText(widget.editedText, editedLabels);//画面遷移を_storeTextないに移動済み
+                          // 一旦保存せず遷移
+                          // _storeText(widget.editedText, editedLabels);
+
+                          Navigator.pushNamed(
+                            context,
+                            '/chat',
+                            arguments: {
+                              'inputText': widget.editedText,
+                              'labels': editedLabels,
+                            },
+                          );
                         },
                         child: Text("開始 →", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                       ),
