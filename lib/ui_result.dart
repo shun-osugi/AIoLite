@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'api_service.dart';
 import 'colors.dart';
+import 'services/tts_service.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -13,6 +14,10 @@ class _ResultPageState extends State<ResultPage> {
   List<String> labels = [];
   late List<dynamic> similarQuestions = [];
   bool _isLoading = false; // ローディング状態を管理するフラグ
+
+  //音声読み上げサービス
+  final TTSService _ttsService = TTSService();
+  bool _hasReadFeedback = false; //何度も読み上げられることを防止
 
   @override
   void didChangeDependencies() {
@@ -32,6 +37,12 @@ class _ResultPageState extends State<ResultPage> {
         similarQuestions = args['similarQuestions'] ?? [];
         print("[ResultPage] Received similarQuestions: $similarQuestions");
       });
+
+      if (feedbackText.isNotEmpty && !_hasReadFeedback) {
+        _hasReadFeedback = true;  //何回も読み上げることの防止
+        _ttsService.stop();
+        _ttsService.speak(feedbackText); //フィードバックを読み上げ
+      }
     }
   }
 
