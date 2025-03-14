@@ -157,20 +157,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 const HelpButton(), // ヘルプを表示するボタン
 
-                IconButton(
-                  icon: Icon(Icons.ac_unit, size: 80,),
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context, '/result',
-                      arguments: {
-                        'feedbackText': "今回の会話はすごくスムーズだったよ！しいて言うなら、まだ会話が始まったばかりだから、苦手なところは分からなかったかな。これからいろいろな問題を解いていく売りにもっと詳しく分かるようになると思うよ。",
-                        'labels': null,
-                      },
-                    );
-                  },
-
-                ),
-
                 Align( //ライセンス
                   alignment: Alignment.bottomRight,
                   child: Padding(
