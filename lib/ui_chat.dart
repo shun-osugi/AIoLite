@@ -46,7 +46,8 @@ class _ChatPageState extends State<ChatPage> {
     AI = _model.startChat();
     AI.sendMessage(Content.text('これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください'));
     AI.sendMessage(Content.text('こちらが答えるとき，文章で説明し回答しなければならないような質問を，ときどきお願いします'));
-    AI.sendMessage(Content.text('出力は数式表現やコードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします'));
+    AI.sendMessage(Content.text('出力は数式表現や文字効果（**A**などの），コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします'));
+    AI.sendMessage(Content.text('出力文字数は，多くても100文字程度になるようにしてください'));
     AI.sendMessage(Content.text('口調は友達のような感じで大丈夫だよ！'));
   }
 
