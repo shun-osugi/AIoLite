@@ -403,6 +403,7 @@ class _ChatPageState extends State<ChatPage> {
                         Navigator.pushNamed(
                           context, '/result',
                           arguments: {
+                            'inputText':inputText,
                             'feedbackText': feedbackMessage,
                             'labels': labels,
                           },

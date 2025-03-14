@@ -24,22 +24,28 @@ class _ResultPageState extends State<ResultPage> {
     super.didChangeDependencies();
     // 引数を受け取る
     final Object? args = ModalRoute.of(context)?.settings.arguments;
-
+    print("srfognaorifnaewfnmaom");
     if (args is Map<String, dynamic>) {
       setState(() {
-        // feedbackTextを取得
-        feedbackText = args['feedbackText']?.toString() ?? "";
         //inputTextを取得
         inputText = args['inputText']?.toString() ?? "";
+        // feedbackTextを取得
+        feedbackText = args['feedbackText']?.toString() ?? "";
 
+        print(inputText);
+        print(feedbackText);
+
+        print("srfognaorifnaewfnmaom");
         // labelsを取得
         labels = (args['labels'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList() ?? [];
         });
 
+
         // labelsを基に類題を検索
         if (inputText.isNotEmpty && labels.isNotEmpty) {
+          print("srfognaorifnaewfnmaom");
           fetchSimilarQuestions(inputText, labels);
         }
 
@@ -61,6 +67,7 @@ class _ResultPageState extends State<ResultPage> {
       final response = await ApiService.searchText(text, labels);
       setState(() {
         similarQuestions = response["similarQuestions"] ?? []; // APIレスポンスから類題を取得
+        print(similarQuestions);
       });
     } catch (e) {
       debugPrint("類題検索エラー: $e");
@@ -142,6 +149,7 @@ class _ResultPageState extends State<ResultPage> {
                     similarQuestions.isNotEmpty
                     ? Column(
                   children: similarQuestions.map((item) {
+
                     // labelsの部分をList<String>に変換
                     List<String> itemLabels = (item['labels'] as List<dynamic>)
                         .map((e) => e.toString())

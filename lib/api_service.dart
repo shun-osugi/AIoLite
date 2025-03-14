@@ -34,12 +34,13 @@ class ApiService {
 
   // テキストとラベルで類題検索をするAPI
   static Future<Map<String, dynamic>> searchText(String text, List<String> labels) async {
+    try {
     final url = Uri.parse("$API_BASE_URL/search");
 
     print("Sending request to: $url");
     print("Request body: ${jsonEncode({"text": text, "labels": labels})}");
 
-    try {
+    print("jglnaerofjawoefjnnv");
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -55,6 +56,8 @@ class ApiService {
         throw Exception("Failed to search text: ${response.statusCode}");
       }
     } catch (e) {
+
+      print("jglnaerofjawoefjnnv");
       print("Error: $e");
       throw Exception("API request failed: $e"); // エラーを呼び出し元に伝える
     }
