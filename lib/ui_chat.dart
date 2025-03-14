@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'ui_result.dart';
 import 'colors.dart';
+import 'services/tts_service.dart';
 
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -32,6 +33,7 @@ class _ChatPageState extends State<ChatPage> {
   late final GenerativeModel _model;
   late final ChatSession AI;
   late List<dynamic> similarQuestions = [];
+  final TTSService _ttsService = TTSService(); //音声読み上げサービス
 
   @override
   void initState() {
@@ -73,6 +75,10 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
     });
+
+    //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
+    await _ttsService.stop();
+    await _ttsService.speak(aiMessage);
   }
 
   @override
