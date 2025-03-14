@@ -27,6 +27,7 @@ class _ChatPageState extends State<ChatPage> {
   bool isFirstSend = false;
   List<String> labels = [];
   final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   List<chat> chats = []; //会話リスト
   late final GenerativeModel _model;
   late final ChatSession AI;
@@ -54,6 +55,15 @@ class _ChatPageState extends State<ChatPage> {
     });
     _getAIResponse(text); // AIからの応答を取得
     _textController.clear(); // 入力欄をクリア
+
+    // メッセージ送信後にスクロールを最下部に移動
+    Future.delayed(Duration(milliseconds: 100), () {
+      _scrollController.animateTo(
+        0.0, // 一番下に移動
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   void _getAIResponse(String userMessage) async {
@@ -126,7 +136,7 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: ListView.builder(
               reverse: true,
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(16),
               itemCount: chats.length,
               itemBuilder: (context, index) {
                 final chat = chats[chats.length - 1 - index];
@@ -137,32 +147,39 @@ class _ChatPageState extends State<ChatPage> {
                         ? MainAxisAlignment.end // ユーザー: 右寄せ
                         : MainAxisAlignment.start, // AI: 左寄せ
                     children: [
-                      if (chat.p == 1) // AIのときだけアイコンを表示
-                        CircleAvatar(
-                          backgroundColor: AppColors.subColor,
-                          child: Icon(Icons.android, color: AppColors.white),
-                        ),
-                      SizedBox(width: 8), // アイコンと吹き出しの間隔
-
-                      Flexible(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                          margin: EdgeInsets.symmetric(horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: chat.p == 0
-                                ? AppColors.mainColor // ユーザーの吹き出し
-                                : AppColors.subColor, // AIの吹き出し
-                            borderRadius: BorderRadius.circular(12),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.9,
+                            ),
+                            child: IntrinsicWidth(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                margin: EdgeInsets.only(bottom: 8, left: chat.p == 0 ? 40 : 8, right: chat.p == 0 ? 8 : 40),
+                                decoration: BoxDecoration(
+                                  color: chat.p == 0 ? AppColors.mainColor : AppColors.subColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  chat.str,
+                                  style: TextStyle(color: AppColors.white, fontSize: 16),
+                                ),
+                              ),
+                            ),
                           ),
-                          child: Text(
-                            chat.str,
-                            style: TextStyle(color: AppColors.white,fontSize: 16),
+                          Positioned(
+                            bottom: chat.p == 0 ? 0 : null, // ユーザー（右側）の場合はbottomに配置
+                            top: chat.p != 0 ? 0 : null,     // AI（左側）の場合はtopに配置
+                            right: chat.p == 0 ? 8 : null,
+                            left: chat.p == 0 ? null : 8,
+                            child: CustomPaint(
+                              painter: ChatBubbleTriangle(p: chat.p),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-
-                      if (chat.p == 0) // ユーザーのメッセージにはアイコンなし
-                        SizedBox(width: 8),
                     ],
                   ),
                 );
@@ -197,4 +214,36 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+}
+
+class ChatBubbleTriangle extends CustomPainter {
+  final int p;
+
+  ChatBubbleTriangle({required this.p});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = p == 0 ? AppColors.mainColor : AppColors.subColor
+      ..style = PaintingStyle.fill;
+
+    final Path path = Path();
+    if (p == 0) {
+      // 右下に三角形
+      path.moveTo(-44, -8);
+      path.quadraticBezierTo(-32, 8, -8, 16);
+      path.quadraticBezierTo(-18, 8, -24, -8);
+    } else {
+      // 左上に三角形
+      path.moveTo(44, 0);
+      path.quadraticBezierTo(32, -16, 8, -24);
+      path.quadraticBezierTo(18, -16, 24, 0);
+    }
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
