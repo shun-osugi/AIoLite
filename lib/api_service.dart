@@ -32,9 +32,9 @@ class ApiService {
     }
   }
 
-  // テキストとラベルを保存するAPI
-  static Future<Map<String, dynamic>> storeText(String text, List<String> labels) async {
-    final url = Uri.parse("$API_BASE_URL/store");
+  // テキストとラベルで類題検索をするAPI
+  static Future<Map<String, dynamic>> searchText(String text, List<String> labels) async {
+    final url = Uri.parse("$API_BASE_URL/search");
 
     print("Sending request to: $url");
     print("Request body: ${jsonEncode({"text": text, "labels": labels})}");
@@ -52,11 +52,37 @@ class ApiService {
       if (response.statusCode == 200) {
         return jsonDecode(utf8.decode(response.bodyBytes)); // 日本語対応
       } else {
-        throw Exception("Failed to store text: ${response.statusCode}");
+        throw Exception("Failed to search text: ${response.statusCode}");
       }
     } catch (e) {
       print("Error: $e");
       throw Exception("API request failed: $e"); // エラーを呼び出し元に伝える
+    }
+  }
+
+  // テキストとラベルを保存するAPI
+  static Future<void> storeText(String text, List<String> labels) async {
+    final url = Uri.parse("$API_BASE_URL/store");
+
+    print("Sending request to: $url");
+    print("Request body: ${jsonEncode({"text": text, "labels": labels})}");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"text": text, "labels": labels}),
+      );
+
+      print("Response status: \${response.statusCode}");
+      print("Response body: \${response.body}");
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to store text: \${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: \$e");
+      throw Exception("API request failed: \$e");
     }
   }
 }

@@ -10,6 +10,7 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
+  String inputText = "";
   String feedbackText = "";
   List<String> labels = [];
   late List<dynamic> similarQuestions = [];
@@ -28,20 +29,19 @@ class _ResultPageState extends State<ResultPage> {
       setState(() {
         // feedbackTextを取得
         feedbackText = args['feedbackText']?.toString() ?? "";
+        //inputTextを取得
+        inputText = args['inputText']?.toString() ?? "";
 
         // labelsを取得
         labels = (args['labels'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList() ?? [];
+        });
 
         // labelsを基に類題を検索
-        similarQuestions = [
-          {
-            'text': 'サンプル問題:あるクラスでは、校外学習のためにバスを借りることになりました。バスの料金は、1台あたり25,000円です。クラスには42人の生徒がいて、さらに先生が3人同行します。1台のバスには最大で15人が乗ることができます。(1) クラス全員と先生が乗るためには、バスを最低何台借りる必要がありますか？(2) バスの料金は、全員の人数で均等に分けて支払うことになりました。1人あたりの支払額はいくらになりますか？（小数点以下を切り上げて計算してください。）(3) もし、学校がバス料金の半額を負担してくれる場合、1人あたりの支払額はいくらになりますか？',
-            'labels' : ['数学 - 式と計算'],
-          },
-        ];
-      });
+        if (inputText.isNotEmpty && labels.isNotEmpty) {
+          fetchSimilarQuestions(inputText, labels);
+        }
 
       if (feedbackText.isNotEmpty && !_hasReadFeedback) {
         _hasReadFeedback = true;  //何回も読み上げることの防止
@@ -51,26 +51,27 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  // 類題を検索する関数
+  Future<void> fetchSimilarQuestions(String text, List<String> labels) async {
+    setState(() {
+      // 類題を検索中の状態を表示するため、UIを更新する
+      similarQuestions = ["類題を取得中..."];
+    });
+    try {
+      final response = await ApiService.searchText(text, labels);
+      setState(() {
+        similarQuestions = response["similarQuestions"] ?? []; // APIレスポンスから類題を取得
+      });
+    } catch (e) {
+      debugPrint("類題検索エラー: $e");
+      setState(() {
+        similarQuestions = ["エラーが発生しました。再試行してください。"];
+      });
+    }
+  }
+
   // ボタン押下時に非同期処理を行う関数
   Future<void> _onSolveSimilarQuestion(String inputText, List<String> remainingLabels) async {
-    if (inputText.isEmpty || remainingLabels.isEmpty) return;
-    setState(() {
-    });
-
-    // APIリクエストを送信し、レスポンスを受け取る
-    Map<String, dynamic> response = await ApiService.storeText(inputText, remainingLabels);
-
-    // 類題を取得
-    List<dynamic> similarTexts = response["similar_texts"] ?? [];
-
-    // ログ出力
-    debugPrint("テキストを保存: $inputText");
-    debugPrint("保存したラベル: $remainingLabels");
-    // 非同期処理をシミュレート（例えばAPIリクエスト）
-    await Future.delayed(Duration(seconds: 2)); // ここでAPIリクエストのシミュレーション
-
-    setState(() {
-    });
 
     // 画面遷移
     Navigator.pushNamed(

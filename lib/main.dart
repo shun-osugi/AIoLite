@@ -876,21 +876,13 @@ class _LabelDialogState extends State<LabelDialog> {
     });
   }
 
-  /*
-  // テキストを保存し、類似検索
+  // テキストを保存
   Future<void> _storeText(String inputText, List<String> editedLabels) async {
     if (inputText.isEmpty || editedLabels.isEmpty) return;
 
     setState(() {
       _isLoading = true; // 非同期処理中はローディング表示
     });
-    // APIリクエストを送信し、レスポンスを受け取る
-    Map<String, dynamic> response = await ApiService.storeText(inputText, editedLabels);
-
-    // 類題を取得
-    List<dynamic> similarTexts = response["similar_texts"] ?? [];
-
-
 
     // ログ出力
     debugPrint("テキストを保存: $inputText");
@@ -899,19 +891,8 @@ class _LabelDialogState extends State<LabelDialog> {
     setState(() {
       _isLoading = false; // 処理が終わったらローディングを非表示
     });
-    // 取得した類題とともに画面遷移
-    if (context.mounted) {
-      Navigator.pushNamed(
-        context,
-        '/chat',
-        arguments: {
-          'inputText': inputText,
-          'labels': editedLabels,
-          'similarQuestions': similarTexts, // 類題を渡す
-        },
-      );
-    }
-  }*/
+
+  }
 
   // 教科と分類のドロップダウンペア
   Widget buildDropdownPair(int index) {
@@ -1042,7 +1023,7 @@ class _LabelDialogState extends State<LabelDialog> {
                             }
                           }
                           // 一旦保存せず遷移
-                          // _storeText(widget.editedText, editedLabels);
+                          _storeText(widget.editedText, editedLabels);
 
                           Navigator.pushNamed(
                             context,
