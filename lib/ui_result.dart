@@ -10,6 +10,7 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
+  String inputText = "";
   String feedbackText = "";
   List<String> labels = [];
   late List<dynamic> similarQuestions = [];
@@ -26,6 +27,9 @@ class _ResultPageState extends State<ResultPage> {
 
     if (args is Map<String, dynamic>) {
       setState(() {
+        // inputTextを取得
+        inputText = args['inputText']?.toString() ?? "";
+
         // feedbackTextを取得
         feedbackText = args['feedbackText']?.toString() ?? "";
 
@@ -34,7 +38,7 @@ class _ResultPageState extends State<ResultPage> {
             ?.map((e) => e.toString())
             .toList() ?? [];
 
-        // labelsを基に類題を検索
+        // inputTextとlabelsを基に類題を検索
         similarQuestions = [
           {
             'text': 'サンプル問題:あるクラスでは、校外学習のためにバスを借りることになりました。バスの料金は、1台あたり25,000円です。クラスには42人の生徒がいて、さらに先生が3人同行します。1台のバスには最大で15人が乗ることができます。(1) クラス全員と先生が乗るためには、バスを最低何台借りる必要がありますか？(2) バスの料金は、全員の人数で均等に分けて支払うことになりました。1人あたりの支払額はいくらになりますか？（小数点以下を切り上げて計算してください。）(3) もし、学校がバス料金の半額を負担してくれる場合、1人あたりの支払額はいくらになりますか？',
@@ -49,38 +53,6 @@ class _ResultPageState extends State<ResultPage> {
         _ttsService.speak(feedbackText); //フィードバックを読み上げ
       }
     }
-  }
-
-  // ボタン押下時に非同期処理を行う関数
-  Future<void> _onSolveSimilarQuestion(String inputText, List<String> remainingLabels) async {
-    if (inputText.isEmpty || remainingLabels.isEmpty) return;
-    setState(() {
-    });
-
-    // APIリクエストを送信し、レスポンスを受け取る
-    Map<String, dynamic> response = await ApiService.storeText(inputText, remainingLabels);
-
-    // 類題を取得
-    List<dynamic> similarTexts = response["similar_texts"] ?? [];
-
-    // ログ出力
-    debugPrint("テキストを保存: $inputText");
-    debugPrint("保存したラベル: $remainingLabels");
-    // 非同期処理をシミュレート（例えばAPIリクエスト）
-    await Future.delayed(Duration(seconds: 2)); // ここでAPIリクエストのシミュレーション
-
-    setState(() {
-    });
-
-    // 画面遷移
-    Navigator.pushNamed(
-      context,
-      '/chat',
-      arguments: {
-        'inputText': inputText,
-        'labels': remainingLabels,
-      },
-    );
   }
 
   @override
