@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 15), () {
+    Future.delayed(Duration(seconds: 10), () {
       setState(() {
         isLoading = false;
       });
@@ -94,6 +94,34 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                   ),
+                ),
+
+                Positioned(
+                  top: MediaQuery.of(context).size.height * 0.55,
+                    right: MediaQuery.of(context).size.width * 0.25,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.subColor, AppColors.white],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.white, width: 2),
+                    ),
+                  child: Text('イオ', style: TextStyle(
+                    color: AppColors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 20,
+                        color: AppColors.black,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,),)
+                  )
                 ),
 
                 // メインUI

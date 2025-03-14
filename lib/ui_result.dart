@@ -61,6 +61,7 @@ class _ResultPageState extends State<ResultPage> {
       appBar: AppBar(
         title: const Text('フィードバック', style: TextStyle(color: AppColors.white)),
         backgroundColor: AppColors.mainColor,
+        automaticallyImplyLeading: false,
       ),
       backgroundColor: AppColors.background2,
       body: SafeArea(
@@ -103,7 +104,11 @@ class _ResultPageState extends State<ResultPage> {
                 margin: const EdgeInsets.only(top: 8, bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.subColor,
+                  gradient: LinearGradient(
+                    colors: [AppColors.subColor, AppColors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -131,7 +136,11 @@ class _ResultPageState extends State<ResultPage> {
                                   width: MediaQuery.of(context).size.width * 0.95,
                                   height: MediaQuery.of(context).size.height * 0.6,
                                   decoration: BoxDecoration(
-                                    color: AppColors.subColor,
+                                    gradient: LinearGradient(
+                                      colors: [AppColors.subColor, AppColors.white],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: AppColors.white, width: 4),
                                   ),
@@ -177,7 +186,7 @@ class _ResultPageState extends State<ResultPage> {
                                             );
                                           },child: Text('この類題を解く→',
                                           textAlign: TextAlign.right,
-                                          style: TextStyle(color: AppColors.black, fontSize: 16,),
+                                          style: TextStyle(color: AppColors.mainColor, fontSize: 16,),
                                           ),
                                         ),
                                       ],
@@ -252,7 +261,11 @@ class FeedbackBubble extends StatelessWidget {
             width: MediaQuery.of(context).size.width * 0.9,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.subColor,
+              gradient: LinearGradient(
+                colors: [AppColors.subColor, AppColors.white],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
