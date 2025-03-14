@@ -25,7 +25,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print("APIから取得した類題ラベル: ${data['suggested_labels']}");
+      print("APIから取得した推奨ラベル: ${data['suggested_labels']}");
       return List<String>.from(data["suggested_labels"]); // 推奨ラベルを返す
     } else {
       throw Exception("Failed to classify text");
@@ -33,7 +33,7 @@ class ApiService {
   }
 
   // テキストとラベルを保存するAPI
-  static Future<void> storeText(String text, List<String> labels) async {
+  static Future<Map<String, dynamic>> storeText(String text, List<String> labels) async {
     final url = Uri.parse("$API_BASE_URL/store");
 
     print("Sending request to: $url");
@@ -49,11 +49,14 @@ class ApiService {
       print("Response status: ${response.statusCode}");
       print("Response body: ${response.body}");
 
-      if (response.statusCode != 200) {
-        throw Exception("Failed to store text");
+      if (response.statusCode == 200) {
+        return jsonDecode(utf8.decode(response.bodyBytes)); // 日本語対応
+      } else {
+        throw Exception("Failed to store text: ${response.statusCode}");
       }
     } catch (e) {
       print("Error: $e");
+      throw Exception("API request failed: $e"); // エラーを呼び出し元に伝える
     }
   }
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-import 'api_service.dart';     // API呼び出し用
+import 'api_service.dart';
 import 'colors.dart';
 
-
 class ResultPage extends StatefulWidget {
-
   @override
   _ResultPageState createState() => _ResultPageState();
 }
@@ -13,16 +11,8 @@ class ResultPage extends StatefulWidget {
 class _ResultPageState extends State<ResultPage> {
   String feedbackText = "";
   List<String> labels = [];
-
-  late Future<List<String>> _suggestedDataFuture;
-  late Future<String> _getFeedbackData;
-
-  @override
-  void initState() {
-    super.initState();
-    // 類題ラベルのリスト を取得する
-    _suggestedDataFuture = _fetchData(labels);
-  }
+  late List<dynamic> similarQuestions = [];
+  bool _isLoading = false; // ローディング状態を管理するフラグ
 
   @override
   void didChangeDependencies() {
@@ -32,92 +22,106 @@ class _ResultPageState extends State<ResultPage> {
 
     if (args is Map<String, dynamic>) {
       setState(() {
-      // feedbackTextを取得
-      feedbackText = args['feedbackText']?.toString() ?? "";
+        // feedbackTextを取得
+        feedbackText = args['feedbackText']?.toString() ?? "";
 
-      // labelsを取得
-      labels = (args['labels'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ?? [];
+        // labelsを取得
+        labels = (args['labels'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ?? [];
+        similarQuestions = args['similarQuestions'] ?? [];
+        print("[ResultPage] Received similarQuestions: $similarQuestions");
       });
     }
   }
 
-  //APIからデータ取得
-  Future<List<String>> _fetchData(List<String> labels) async {
-    try {
-      // labelsを基にした類題取得処理,0番目に問題文,1~4番目にラベルが入ることを想定
-      List<String> SAMPLE = ["1+1=", "数学 - 式と計算"];
-      return SAMPLE;
-    } catch (e) {
-      // エラーの場合は投げ直す（FutureBuilder 側で捕捉し表示）
-      throw Exception("データ取得時にエラー: $e");
-    }
-  }
+  // ボタン押下時に非同期処理を行う関数
+  Future<void> _onSolveSimilarQuestion(String inputText, List<String> remainingLabels) async {
+    if (inputText.isEmpty || remainingLabels.isEmpty) return;
+    setState(() {
+      _isLoading = true; // ローディング開始
+    });
 
-  Future<String> _fetchFeedback() async {
-    try {
-      // ModalRoute を使って渡された引数を取得
-      return ModalRoute.of(context)?.settings.arguments as String? ?? 'フィードバックの受け取りエラー';
-    } catch (e) {
-      throw Exception("データ取得時にエラー: $e");
-    }
-  }
+    // APIリクエストを送信し、レスポンスを受け取る
+    Map<String, dynamic> response = await ApiService.storeText(inputText, remainingLabels);
 
+    // 類題を取得
+    List<dynamic> similarTexts = response["similar_texts"] ?? [];
+
+
+
+    // ログ出力
+    debugPrint("テキストを保存: $inputText");
+    debugPrint("保存したラベル: $remainingLabels");
+    // 非同期処理をシミュレート（例えばAPIリクエスト）
+    await Future.delayed(Duration(seconds: 2)); // ここでAPIリクエストのシミュレーション
+
+    setState(() {
+      _isLoading = false; // ローディング終了
+    });
+
+    // 画面遷移
+    Navigator.pushNamed(
+      context,
+      '/chat',
+      arguments: {
+        'inputText': inputText,
+        'labels': remainingLabels,
+        'similarQuestions': similarTexts, // 類題を渡す
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('フィードバック', style: TextStyle(color: AppColors.white),),
+        title: const Text('フィードバック', style: TextStyle(color: AppColors.white)),
         backgroundColor: AppColors.mainColor,
-        // automaticallyImplyLeading: false,
       ),
       backgroundColor: AppColors.white,
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
               //アバターを表示
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.2,
-                child: Container(
-                  child: ModelViewer(
-                    src: 'assets/avatar0.glb',
-                    alt: 'A 3D model of AI avatar',
-                    cameraOrbit: "0deg 90deg 0deg",
-                    ar: false,
-                    autoRotate: false,
-                    disableZoom: true,
-                    disableTap: true,
-                    cameraControls: false,
-                    interactionPrompt: null,
-                    interactionPromptThreshold: 0,
-                    autoPlay: true,
-                    animationName: 'hello',
-                  ),
+                child: ModelViewer(
+                  src: 'assets/avatar0.glb',
+                  alt: 'A 3D model of AI avatar',
+                  cameraOrbit: "0deg 90deg 0deg",
+                  ar: false,
+                  autoRotate: false,
+                  disableZoom: true,
+                  disableTap: true,
+                  cameraControls: false,
+                  interactionPrompt: null,
+                  interactionPromptThreshold: 0,
+                  autoPlay: true,
+                  animationName: 'hello',
                 ),
               ),
 
               //フィードバックを表示する吹き出し
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: ChatBubble(
-                        text: feedbackText.isEmpty
-                            ? feedbackText = 'フィードバック内容がありません。'
-                            : feedbackText),
-                  ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ChatBubble(
+                  text: feedbackText.isEmpty
+                      ? 'フィードバック内容がありません。'
+                      : feedbackText,
+                ),
+              ),
 
-              //類題の提示
+              // 類題の提示
               Container(
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(top: 8, bottom: 16),
@@ -126,58 +130,43 @@ class _ResultPageState extends State<ResultPage> {
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: FutureBuilder<List<String>>(
-                  future: _suggestedDataFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Text(
-                        snapshot.error.toString(),
-                        style: const TextStyle(color: Colors.red),
-                      );
-                    } else {
-                      final data = snapshot.data ?? [];
-                      // 2番目以降を類題リストとみなす
-                      final labels = data.length > 1
-                          ? data.sublist(1)
-                          : <String>[];
+                child: similarQuestions.isNotEmpty
+                    ? Column(
+                  children: similarQuestions.map((item) {
+                    // labelsの部分をList<String>に変換
+                    List<String> itemLabels = (item['labels'] as List<dynamic>)
+                        .map((e) => e.toString())
+                        .toList();
 
-                      if (labels.isEmpty) {
-                        return const Text('類題のラベルがありません');
-                      }
-                      return Center(
-                        child: Column(
-                          children: [
-                            Text(data.first + ''),
-                            SizedBox(height: 16),  // ボタンのスペース
-                            ElevatedButton(
-                              onPressed: () {
-                                // ボタンを押した時に渡すデータ
-                                if (labels.isNotEmpty) {
-                                  final inputText = data[0];  // 1番目のラベルをinputTextに
-                                  final remainingLabels = labels.length > 1 ? labels.sublist(1) : []; // labelsが1つ以上あれば、1番目から残りを渡す
-                                  List<String> typedLabels = List<String>.from(remainingLabels);
-
-                                  // '/chat' 画面に遷移し、必要なデータを渡す
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/chat',
-                                    arguments: {
-                                      'inputText': inputText,
-                                      'labels': typedLabels,
-                                    },
-                                  );
-                                }
-                              },
-                              child: const Text('類題をチャットで解く'),
-                            ),
-                          ],
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item['text']),
+                        SizedBox(height: 8),
+                        Text(
+                          "ラベル: ${itemLabels.join(', ')}",
+                          style: TextStyle(fontStyle: FontStyle.italic),
                         ),
-                      );
-                    }
-                  },
-                ),
+                        SizedBox(height: 16),  // ボタンのスペース
+                        _isLoading
+                            ? Center(child: CircularProgressIndicator()) // ローディング中はインジケーターを表示
+                            : ElevatedButton(
+                          onPressed: () {
+                            // ボタンを押した時に渡すデータ
+                            final inputText = item['text'];
+                            final remainingLabels = itemLabels;
+
+                            // 類題を解く処理
+                            _onSolveSimilarQuestion(inputText, remainingLabels);
+                          },
+                          child: const Text('類題をチャットで解く'),
+                        ),
+                        SizedBox(height: 16),
+                      ],
+                    );
+                  }).toList(),
+                )
+                    : const Text('類題のラベルがありません'),
               ),
 
               //ホーム画面に戻るボタン
