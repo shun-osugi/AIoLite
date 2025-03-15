@@ -848,6 +848,7 @@ void showEditDialog(BuildContext context, String text) {
   showDialog(
     context: context,
     barrierColor: Colors.black54,
+    // barrierDismissible: false,//barrierDismissibleをfalseにすると、戻るボタン以外をクリックしても反応しません
     builder: (BuildContext context) {
       return StatefulBuilder(
         builder: (context, setState) {
@@ -901,10 +902,16 @@ class _EditDialogState extends State<EditDialog> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         child: GestureDetector(
+          onLongPressStart: (details){
+            _focusNode.unfocus();
+          },
           onTap: () {
-            // コンテナ内をタップしたときにもフォーカスをテキストフィールドの最後尾に移動
             FocusScope.of(context).requestFocus(_focusNode);
             _textController.selection = TextSelection.collapsed(offset: _textController.text.length);
+            // FocusScope.of(context).unfocus();
+            // primaryFocus?.unfocus();
+            // コンテナ内をタップしたときにもフォーカスをテキストフィールドの最後尾に移動
+            setState((){});
           },
           child: Stack(
             children: [
@@ -974,6 +981,20 @@ class _EditDialogState extends State<EditDialog> {
                   },
                 ),
               ),
+
+              _focusNode.hasFocus ?
+              Positioned(
+                top: 24,
+                right: 10,
+                child: TextButton(
+                  onPressed: () {
+                    _focusNode.unfocus();
+                    setState((){});
+                  },
+                  child: Text("閉じる", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ) :
+              Container(),
             ],
           ),
         ),
