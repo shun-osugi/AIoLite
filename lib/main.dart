@@ -1168,7 +1168,7 @@ class _LabelDialogState extends State<LabelDialog> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           List<String> editedLabels = [];
                           for (int i = 0; i < 4; i++) {
                             if (selectedSubjects[i] != null && selectedCategories[i] != null) {
@@ -1177,7 +1177,16 @@ class _LabelDialogState extends State<LabelDialog> {
                           }
 
                           // ここでラベルを保存
-                          //
+                          if (widget.editedText.isNotEmpty && editedLabels.isNotEmpty) {
+                            try {
+                              await ApiService.storeText(widget.editedText, editedLabels);
+                              print("テキストとラベルを保存しました");
+                            } catch (e) {
+                              print("エラー: $e");
+                            }
+                          } else {
+                            print("テキストまたはラベルが空です");
+                          }
 
                           Navigator.pushNamed(
                             context,

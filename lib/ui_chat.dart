@@ -114,10 +114,10 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       // similarQuestionsを取得
-      final receivedSimilarQuestions = args['similarQuestions'] as List<dynamic>?;
+      /*final receivedSimilarQuestions = args['similarQuestions'] as List<dynamic>?;
       if (receivedSimilarQuestions != null) {
         similarQuestions = receivedSimilarQuestions;
-      }
+      }*/
     }
   }
 
