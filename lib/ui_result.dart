@@ -148,11 +148,7 @@ class _ResultPageState extends State<ResultPage> {
                 margin: const EdgeInsets.only(top: 8, bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.subColor, AppColors.white],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.subColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -310,11 +306,7 @@ class FeedbackBubble extends StatelessWidget {
             width: MediaQuery.of(context).size.width * 0.9,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.subColor, AppColors.white],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.subColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(

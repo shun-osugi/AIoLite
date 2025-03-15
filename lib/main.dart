@@ -837,7 +837,7 @@ class SendDialog extends StatelessWidget {
       children: [
         sendButton,
         SizedBox(height: 8),
-        Text(label, style: TextStyle(fontSize: 20, color: AppColors.black, fontWeight: FontWeight.bold),),
+        Text(label, style: TextStyle(fontSize: 16, color: AppColors.black, fontWeight: FontWeight.bold),),
       ],
     );
   }
