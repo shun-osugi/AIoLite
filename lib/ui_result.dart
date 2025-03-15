@@ -46,12 +46,15 @@ class _ResultPageState extends State<ResultPage> {
             .toList() ?? [];
 
         // inputTextとlabelsを基に類題を検索
-        similarQuestions = [
+        /*similarQuestions = [
           {
             'text': 'あるクラスでは、校外学習のためにバスを借りることになりました。バスの料金は、1台あたり25,000円です。クラスには42人の生徒がいて、さらに先生が3人同行します。1台のバスには最大で15人が乗ることができます。(1) クラス全員と先生が乗るためには、バスを最低何台借りる必要がありますか？(2) バスの料金は、全員の人数で均等に分けて支払うことになりました。1人あたりの支払額はいくらになりますか？（小数点以下を切り上げて計算してください。）(3) もし、学校がバス料金の半額を負担してくれる場合、1人あたりの支払額はいくらになりますか？',
             'labels' : ['数学 - 式と計算'],
-          },
-        ];
+          },];*/
+        if (inputText.isNotEmpty && labels.isNotEmpty) {
+          fetchSimilarQuestions(inputText, labels);
+        }
+        print(similarQuestions);
       });
 
       if (feedbackText.isNotEmpty && !_hasReadFeedback) {
@@ -59,6 +62,30 @@ class _ResultPageState extends State<ResultPage> {
         _ttsService.stop();
         _ttsService.speak(feedbackText); //フィードバックを読み上げ
       }
+    }
+  }
+
+  // 類題を検索する関数
+  Future<void> fetchSimilarQuestions(String text, List<String> labels) async {
+    try {
+      final response = await ApiService.searchText(text, labels);
+      print(response);
+
+      setState(() {
+        var uniqueQuestions = <String, dynamic>{};
+
+        // 重複を削除しながらリストを作成
+        response["similar_texts"]?.forEach((item) {
+          uniqueQuestions[item['text']] = item; // textをキーにして保存
+        });
+
+        similarQuestions = uniqueQuestions.values.toList();
+      });
+    } catch (e) {
+      debugPrint("類題検索エラー: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('類題検索に失敗しました: $e')),
+      );
     }
   }
 
