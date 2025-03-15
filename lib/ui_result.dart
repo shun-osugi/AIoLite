@@ -193,8 +193,6 @@ class _ResultPageState extends State<ResultPage> {
                                             final inputText = item['text'];
                                             final remainingLabels = itemLabels;
 
-                                            // ダイアログを閉じ、画面を保存
-                                            Navigator.of(context).pop();
                                             _captureScreenshot();
 
                                             Navigator.pushNamed(
