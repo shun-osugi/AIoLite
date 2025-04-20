@@ -7,7 +7,7 @@ import 'tts_service.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-const apiKey = 'AIzaSyBKSKfHy_6DjTpx-3Zep78Vf-FXZWP1Tsw';
+const apiKey = 'AIzaSyAYHREhSflQFLkhUV4oGrLEIUI-M0m2i34';
 
 class chat{
   int p; //0:自分 1:相手
