@@ -16,28 +16,37 @@ class chat{
 }
 
 void main() {
-  runApp(ChatPage());
+  runApp(ChatBasicPage());
 }
 
-class ChatPage extends StatefulWidget {
+class ChatBasicPage extends StatefulWidget {
 
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
-  String inputText = "";
-  bool isFirstSend = false;
-  bool _isSending = false;
-  List<String> labels = [];
+class _ChatPageState extends State<ChatBasicPage> {
+
+  String inputText = ""; // 入力文章用文字列
+
+  bool isFirstSend = false; // はじめの問題文の送信をしたか
+  bool _isSending = false; // 二度目以降、問題文の送信中を判断
+
+  List<String> labels = []; // ラベルの格納用リスト
+
+  // テキストのコントローラー
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
   List<chat> chats = []; //会話リスト
+
+  // AIモデル
   late final GenerativeModel _model;
   late final ChatSession AI;
-  late List<dynamic> similarQuestions = [];
+
   final TTSService _ttsService = TTSService(); //音声読み上げサービス
 
+  // はじめにAIに送る指示
   @override
   void initState() {
     super.initState();
@@ -52,6 +61,7 @@ class _ChatPageState extends State<ChatPage> {
     AI.sendMessage(Content.text('口調は友達のような感じで大丈夫だよ！'));
   }
 
+  // AIへメッセージを送信
   void _sendMessage() {
     if (_isSending) return;
 
@@ -75,11 +85,12 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  // AIからのメッセージを取得
   void _getAIResponse(String userMessage) async {
     try {
       final response = await AI.sendMessage(
           Content.text(userMessage)); // AIにメッセージを送信
-      String aiMessage = response.text ?? 'AIの返答に失敗しました'; // AIの返答を取得
+      String aiMessage = response.text ?? 'イオからのメッセージが取得できませんでした'; // AIの返答を取得
 
       setState(() {
         chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
@@ -92,12 +103,13 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       // エラー時の処理
       setState(() {
-        chats.add(chat(1, 'AIと通信できませんでした: $e')); // エラー内容を表示
+        chats.add(chat(1, 'イオからのメッセージが取得できませんでした'));
         _isSending = false;
       });
     }
   }
 
+  // 前画面から引数を受け取る
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -121,19 +133,13 @@ class _ChatPageState extends State<ChatPage> {
       if (receivedLabels != null) {
         labels = receivedLabels;
       }
-
-      // similarQuestionsを取得
-      /*final receivedSimilarQuestions = args['similarQuestions'] as List<dynamic>?;
-      if (receivedSimilarQuestions != null) {
-        similarQuestions = receivedSimilarQuestions;
-      }*/
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background2,
+      backgroundColor: AppColors.background_b,
       body: Stack(
         children: [
           // アバター表示
@@ -160,6 +166,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
 
+          // アバター名表示
           Positioned(
               top: MediaQuery.of(context).size.height * 0.2,
               left: MediaQuery.of(context).size.width * 0.05,
@@ -234,35 +241,35 @@ class _ChatPageState extends State<ChatPage> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: AppColors.white, width: 4),
                             ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Align(
-                                  alignment: Alignment.topRight,
-                                  child: IconButton(
-                                    icon: Icon(Icons.close, color: AppColors.white,),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.topRight,
+                                    child: IconButton(
+                                      icon: Icon(Icons.close, color: AppColors.white,),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    child: Text(
-                                      inputText,
-                                      style: TextStyle(
-                                        color: AppColors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      child: Text(
+                                        inputText,
+                                        style: TextStyle(
+                                          color: AppColors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),),
+                                ],
+                              ),
+                            ),),
                         );
                       },
                     );
@@ -400,113 +407,113 @@ class _ChatPageState extends State<ChatPage> {
             left: MediaQuery.of(context).size.width * 0.5,
             child: Container(
                 width: MediaQuery.of(context).size.width * 0.4,
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // ホームボタン
-                      CircleIconButton(
-                        icon: Icons.home,
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/home');
-                        },
-                      ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // ホームボタン
+                        CircleIconButton(
+                          icon: Icons.home,
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/home');
+                          },
+                        ),
 
-                      SizedBox(height: MediaQuery.of(context).size.width * 0.1),
+                        SizedBox(height: MediaQuery.of(context).size.width * 0.1),
 
-                      // やり直しボタン
-                      CircleIconButton(
-                        icon: Icons.change_circle_outlined,
-                        onPressed: () {
-                          setState(() {
-                            chats.clear();
-                            chats.add(chat(0, inputText));
-                          });
-                          AI.sendMessage(Content.text('もう一度始めから教えて！'));
-                          _getAIResponse(inputText);
-                        },
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-
-                  // チャット終了ボタン
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    height: MediaQuery.of(context).size.height * 0.06,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.accentColor, AppColors.white],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: AppColors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.accentColor.withOpacity(0.7),
-                          offset: Offset(0, 4),
-                          blurRadius: 10,
+                        // やり直しボタン
+                        CircleIconButton(
+                          icon: Icons.change_circle_outlined,
+                          onPressed: () {
+                            setState(() {
+                              chats.clear();
+                              chats.add(chat(0, inputText));
+                            });
+                            AI.sendMessage(Content.text('もう一度始めから教えて！'));
+                            _getAIResponse(inputText);
+                          },
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () async { //フィードバックへ遷移
-                        try {
-                          final feedback = await AI.sendMessage(Content.text(
-                              '今回の会話はどうだった？私が苦手なところとか分かったら短く一文で教えてほしいな。またね！'));
-                          final feedbackMessage = feedback.text ??
-                              'フィードバックの作成に失敗しました';
-                          Navigator.pushNamed(
-                            context, '/result',
-                            arguments: {
-                              'inputText': inputText,
-                              'feedbackText': feedbackMessage,
-                              'labels': labels,
-                            },
-                          );
-                        } catch (e) {
-                          Navigator.pushNamed(
-                            context, '/result',
-                            arguments: {
-                              'inputText': inputText,
-                              'feedbackText': 'フィードバックの作成に失敗しました',
-                              'labels': labels,
-                            },
-                          );
-                        }
 
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                    // チャット終了ボタン
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppColors.accentColor, AppColors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(40),
+                        border: Border.all(color: AppColors.white, width: 4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accentColor.withOpacity(0.7),
+                            offset: Offset(0, 4),
+                            blurRadius: 10,
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        '解けた！',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 20,
-                              color: AppColors.black,
-                              offset: Offset(0, 0),
-                            ),
-                          ],
-                          fontSize: MediaQuery.of(context).size.width * 0.05,
-                          fontWeight: FontWeight.bold,
+                      child: ElevatedButton(
+                        onPressed: () async { //フィードバックへ遷移
+                          try {
+                            final feedback = await AI.sendMessage(Content.text(
+                                '今回の会話はどうだった？私が苦手なところとか分かったら短く一文で教えてほしいな。またね！'));
+                            final feedbackMessage = feedback.text ??
+                                'フィードバックの作成に失敗しました';
+                            Navigator.pushNamed(
+                              context, '/result',
+                              arguments: {
+                                'inputText': inputText,
+                                'feedbackText': feedbackMessage,
+                                'labels': labels,
+                              },
+                            );
+                          } catch (e) {
+                            Navigator.pushNamed(
+                              context, '/result',
+                              arguments: {
+                                'inputText': inputText,
+                                'feedbackText': 'フィードバックの作成に失敗しました',
+                                'labels': labels,
+                              },
+                            );
+                          }
+
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                        child: Text(
+                          '解けた！',
+                          style: TextStyle(
+                            color: AppColors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 20,
+                                color: AppColors.black,
+                                offset: Offset(0, 0),
+                              ),
+                            ],
+                            fontSize: MediaQuery.of(context).size.width * 0.05,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
+                  ],
+                )
             ),
           ),
 
