@@ -15,9 +15,12 @@ import 'subject_categories.dart';
 import 'api_service.dart';
 import 'terms_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
-void main() {
+
+Future<void> main() async{
+  await dotenv.load(); // 環境変数の読み込み
   runApp(const MyApp());
 }
 
