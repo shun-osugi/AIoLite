@@ -1,15 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 // APIサーバーのIPを定数で管理（変更しやすい）
 const String API_BASE_URL = "http://10.0.2.2:8000";
+final String API_KEY = dotenv.env['API_KEY'] ?? '';
 
 
 class ApiService {
   // 推奨ラベルを返すAPIを呼び出す
   static Future<List<String>> classifyText(String text) async {
     final url = Uri.parse("$API_BASE_URL/classify"); // APIのエンドポイント
-    final headers = {"Content-Type": "application/json"};
+    final headers = {
+      "Content-Type": "application/json"
+      //"x-api-key": API_KEY  // APIキーをヘッダーに追加
+    };
     final body = jsonEncode({"text": text});
 
     print("Sending request to: $url");
@@ -42,7 +48,10 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json"
+          //"x-api-key": API_KEY  // APIキーをヘッダーに追加
+        },
         body: jsonEncode({"text": text, "labels": labels}),
       );
 
@@ -70,7 +79,10 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json"
+          //"x-api-key": API_KEY  // APIキーをヘッダーに追加
+       },
         body: jsonEncode({"text": text, "labels": labels}),
       );
 
