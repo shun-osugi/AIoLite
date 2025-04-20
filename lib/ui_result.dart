@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
 import 'api_service.dart';
 import 'colors.dart';
 import 'tts_service.dart';
-import 'package:screenshot/screenshot.dart';
+import 'widget_fbsheet.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -18,13 +19,16 @@ class _ResultPageState extends State<ResultPage> {
   String feedbackText = "";
   List<String> labels = [];
   late List<dynamic> similarQuestions = [];
-//
+
+  //  フィードバックシートの可視状態
+  bool _isFbsheetVisible = false;
+
   //音声読み上げサービス
   final TTSService _ttsService = TTSService();
   bool _hasReadFeedback = false; //何度も読み上げられることを防止
 
   //フィードバック保存
-  ScreenshotController screenshotController = ScreenshotController();
+  ScreenshotController ssController = ScreenshotController();
 
   @override
   void didChangeDependencies() {
@@ -85,15 +89,15 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   //フィードバック保存
-  void _captureScreenshot() async {
-    final uint8List = await screenshotController.capture();
+  void _saveFbSheet() async {
+    final uint8List = await ssController.capture();
     if (uint8List != null) {
       final directory = await getApplicationDocumentsDirectory();
-      final imagePath = '${directory.path}/screenshot_${DateTime.now()}.png';
+      final imagePath = '${directory.path}/AIoLite_${DateTime.now()}.png';
       final file = File(imagePath);
       await file.writeAsBytes(uint8List);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('スクリーンショットを保存しました: $imagePath')),
+        SnackBar(content: Text('保存しました!: $imagePath')),
       );
     }
   }
@@ -103,8 +107,7 @@ class _ResultPageState extends State<ResultPage> {
     return Scaffold(
       backgroundColor: AppColors.background_a,
       body: SafeArea(
-        child: Screenshot(controller: screenshotController,
-          child: SingleChildScrollView(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
@@ -131,10 +134,43 @@ class _ResultPageState extends State<ResultPage> {
 
               //フィードバックを表示する吹き出し
               FeedbackBubble(
-                  feedbackText: feedbackText.isEmpty
-                      ? 'フィードバック内容がありません。'
-                      : feedbackText,
+                feedbackText:
+                    feedbackText.isEmpty ? 'フィードバック内容がありません。' : feedbackText,
               ),
+
+              // ▼ ---------- フィードバックシート ---------- ▼ //
+              // フィードバックシートを表示するボタン
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.mainColor,
+                    foregroundColor: AppColors.white,
+                  ),
+                  onPressed: () {
+                    // 画面を保存
+                    _saveFbSheet();
+                    // visible の状態を 反転して UI を再描画
+                    setState(() {
+                      _isFbsheetVisible = !_isFbsheetVisible;
+                    });
+                  },
+                  child: const Text('詳細表示'),
+                ),
+              ),
+
+              // フィードバックシート(widget_fbsheet.dart)
+              Visibility(
+                visible: _isFbsheetVisible, //ボタンが押されるたびに可視/不可視を切り替え
+                child: Screenshot(
+                  controller: ssController,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 16),
+                    child: Stack(clipBehavior: Clip.none, children: [FbSheet()]),
+                  ),
+                ),
+              ),
+              // ▲ ---------- フィードバックシート ---------- ▲ //
 
               // 類題の提示
               Container(
@@ -211,8 +247,6 @@ class _ResultPageState extends State<ResultPage> {
                                             final inputText = item['text'];
                                             final remainingLabels = itemLabels;
 
-                                            _captureScreenshot();
-
                                             Navigator.pushNamed(
                                               context,
                                               '/chat',
@@ -267,8 +301,6 @@ class _ResultPageState extends State<ResultPage> {
                     foregroundColor: AppColors.white,
                   ),
                   onPressed: () {
-                    // 画面を保存
-                    _captureScreenshot();
                     // ルート指定でホーム画面へ戻る
                     Navigator.pushNamed(context, '/home');
                   },
@@ -279,7 +311,7 @@ class _ResultPageState extends State<ResultPage> {
           ),
         ),
       ),
-    ),
+      // ),
     );
   }
 }
@@ -335,8 +367,7 @@ class FeedbackBubble extends StatelessWidget {
 class TrianglePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = AppColors.subColor;
+    final Paint paint = Paint()..color = AppColors.subColor;
 
     final Path path = Path()
       ..moveTo(size.width / 2, 0) // 三角形の頂点（中央上）
