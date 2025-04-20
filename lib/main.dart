@@ -8,11 +8,13 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'ui_chat.dart';
+import 'ui_chat_basic.dart';
 import 'ui_result.dart';
 import 'colors.dart';
 import 'subject_categories.dart';
 import 'api_service.dart';
 import 'terms_content.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 void main() {
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => MyHomePage(),
         '/chat': (context) => ChatPage(),
+        '/chat_basic': (context) => ChatBasicPage(),
         '/result': (context) => ResultPage(),
       },
       debugShowCheckedModeBanner: false,
@@ -50,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String str = "";
   FilePickerResult? file;
   bool isLoading = true;
+  bool _isBasicMode = true;
 
   @override
   void initState() {
@@ -59,13 +63,32 @@ class _MyHomePageState extends State<MyHomePage> {
         isLoading = false;
       });
     });
+    _loadMode(); // モード読込
+  }
+
+  // モード読込
+  Future<void> _loadMode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isBasicMode = prefs.getBool('basicMode') ?? true;
+    });
+  }
+
+  // モード切替
+  Future<void> _onModeChanged(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('basicMode', value);
+    setState(() {
+      _isBasicMode = value;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     file = null;
+    Color backgroundColor = _isBasicMode ? AppColors.subColor : AppColors.mainColor;
     return Scaffold(
-      backgroundColor: AppColors.mainColor,
+      backgroundColor: backgroundColor,
         body: SingleChildScrollView(
           child: Stack(
               children: [
@@ -188,14 +211,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
                         SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
-                        //DifficultyDropdown(), // 難易度選択
-
                         SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                       ],
                     ),
                   ),
                 ),
 
+                ModeToggleButton(
+                  isBasicMode: _isBasicMode,
+                  onChanged: _onModeChanged,
+                ), // モード切替ボタン（テスト用）
                 const HelpButton(), // ヘルプを表示するボタン
 
                 // ライセンスアイコンと利用規約ボタン
@@ -242,6 +267,47 @@ class _MyHomePageState extends State<MyHomePage> {
               ]
           )
         )
+    );
+  }
+}
+
+// モード変更用トグルボタン（テスト用）
+class ModeToggleButton extends StatelessWidget {
+  final bool isBasicMode;
+  final ValueChanged<bool> onChanged;
+
+  const ModeToggleButton({
+    Key? key,
+    required this.isBasicMode,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 50, right: 100),
+        child: Switch(
+          value: isBasicMode,
+          onChanged: (value) async {
+            // 保存処理
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('isBasicMode', value);
+
+            // コールバックで状態更新
+            onChanged(value);
+
+            // モード切り替え通知を表示
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(value ? 'Basicモードに切り替えました' : 'Advancedモードに切り替えました'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -1022,6 +1088,7 @@ class _LabelDialogState extends State<LabelDialog> {
   List<String?> selectedSubjects = List.filled(4, null); // 教科ドロップダウン選択
   List<String?> selectedCategories = List.filled(4, null); // 分類ドロップダウン選択
   bool _isLoading = false; // ローディング状態を管理する変数
+  bool _isBasicMode = false;
 
 
   @override
@@ -1029,6 +1096,15 @@ class _LabelDialogState extends State<LabelDialog> {
     super.initState();
     // 初期化時にテキストを元にラベルを取得
     _getSuggestedLabels(widget.editedText);
+    // モード読込
+    _loadMode();
+  }
+
+  void _loadMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isBasicMode = prefs.getBool('isBasicMode') ?? true;
+    });
   }
 
   // 推奨ラベルを取得
@@ -1211,7 +1287,7 @@ class _LabelDialogState extends State<LabelDialog> {
 
                           Navigator.pushNamed(
                             context,
-                            '/chat',
+                            _isBasicMode ? '/chat_basic' : '/chat',
                             arguments: {
                               'inputText': widget.editedText,
                               'labels': editedLabels,

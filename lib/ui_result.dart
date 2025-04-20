@@ -46,11 +46,6 @@ class _ResultPageState extends State<ResultPage> {
             .toList() ?? [];
 
         // inputTextとlabelsを基に類題を検索
-        /*similarQuestions = [
-          {
-            'text': 'あるクラスでは、校外学習のためにバスを借りることになりました。バスの料金は、1台あたり25,000円です。クラスには42人の生徒がいて、さらに先生が3人同行します。1台のバスには最大で15人が乗ることができます。(1) クラス全員と先生が乗るためには、バスを最低何台借りる必要がありますか？(2) バスの料金は、全員の人数で均等に分けて支払うことになりました。1人あたりの支払額はいくらになりますか？（小数点以下を切り上げて計算してください。）(3) もし、学校がバス料金の半額を負担してくれる場合、1人あたりの支払額はいくらになりますか？',
-            'labels' : ['数学 - 式と計算'],
-          },];*/
         if (inputText.isNotEmpty && labels.isNotEmpty) {
           fetchSimilarQuestions(inputText, labels);
         }
@@ -106,7 +101,7 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background2,
+      backgroundColor: AppColors.background_a,
       body: SafeArea(
         child: Screenshot(controller: screenshotController,
           child: SingleChildScrollView(
