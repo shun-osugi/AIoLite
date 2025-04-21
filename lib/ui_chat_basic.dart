@@ -7,7 +7,7 @@ import 'tts_service.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-const apiKey = 'AIzaSyAYHREhSflQFLkhUV4oGrLEIUI-M0m2i34';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class chat{
   int p; //0:自分 1:相手
@@ -50,8 +50,7 @@ class _ChatPageState extends State<ChatBasicPage> {
   @override
   void initState(){
     super.initState();
-    // dotenv.load(fileName: ".env");
-    // var apiKey = dotenv.get('GEMINI_API_KEY');
+    var apiKey = dotenv.get('GEMINI_API_KEY');
     _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
     AI = _model.startChat();
     _initAsync();
@@ -63,7 +62,7 @@ class _ChatPageState extends State<ChatBasicPage> {
     出力は数式表現や文字効果（**A**などの），コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします
     こちら側は小学生を想定しているので漢字などを使う場合は難しい表現はあまりしないでください
     もし，問題を解き終えたら，問題で使った知識が普段どういう風に使われているか教えてください
-    また全ての出力において，理解しやすいように多くても出力文字数は100文字以内になるようにしてください
+    また全ての出力において，理解しやすいように多くても出力文字数は80文字以内になるようにしてください
     口調は友達（小学生）のような感じで大丈夫だよ！
     '''));
   }
