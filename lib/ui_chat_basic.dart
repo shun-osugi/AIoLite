@@ -48,17 +48,24 @@ class _ChatPageState extends State<ChatBasicPage> {
 
   // はじめにAIに送る指示
   @override
-  void initState() {
+  void initState(){
     super.initState();
     // dotenv.load(fileName: ".env");
     // var apiKey = dotenv.get('GEMINI_API_KEY');
     _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
     AI = _model.startChat();
-    AI.sendMessage(Content.text('これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください'));
-    AI.sendMessage(Content.text('こちらが答えるとき，文章で説明し回答しなければならないような質問を，ときどきお願いします'));
-    AI.sendMessage(Content.text('出力は数式表現や文字効果（**A**などの），コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします'));
-    AI.sendMessage(Content.text('出力文字数は，多くても100文字程度になるようにしてください'));
-    AI.sendMessage(Content.text('口調は友達のような感じで大丈夫だよ！'));
+    _initAsync();
+  }
+
+  Future<void> _initAsync() async {
+    await AI.sendMessage(Content.text('''
+    これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください
+    出力は数式表現や文字効果（**A**などの），コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします
+    こちら側は小学生を想定しているので漢字などを使う場合は難しい表現はあまりしないでください
+    もし，問題を解き終えたら，問題で使った知識が普段どういう風に使われているか教えてください
+    また全ての出力において，理解しやすいように多くても出力文字数は100文字以内になるようにしてください
+    口調は友達（小学生）のような感じで大丈夫だよ！
+    '''));
   }
 
   // AIへメッセージを送信
