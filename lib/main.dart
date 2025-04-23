@@ -55,17 +55,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String str = "";
   FilePickerResult? file;
-  bool isLoading = true;
-  bool _isBasicMode = true;
+  bool _isBasicMode = false;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 10), () {
-      setState(() {
-        isLoading = false;
-      });
-    });
     _loadMode(); // モード読込
   }
 
@@ -256,17 +250,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-
-                // ローディング画面
-                if (isLoading)
-                  Center(
-                    child: Container(
-                      height: MediaQuery.of(context).size.height,
-                      width: MediaQuery.of(context).size.width,
-                      color: AppColors.mainColor,
-                      child: Image.asset('assets/cover.png', width: MediaQuery.of(context).size.width,),
-                    ),
-                  ),
               ]
           )
         )
