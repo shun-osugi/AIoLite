@@ -26,7 +26,6 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-
   String inputText = ""; // 入力文章用文字列
 
   bool isFirstSend = false; // はじめの問題文の送信をしたか
@@ -58,10 +57,11 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _initAsync() async {
     await AI.sendMessage(Content.text('''
-    これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください
-    こちらが答えるとき，文章で説明し回答しなければならないような質問を，ときどきお願いします
-    出力は数式表現や文字効果（**A**などの），コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします
-    出力文字数は，多くても100文字程度になるようにしてください
+    これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください.
+    こちらが答えるとき，文章で説明し回答しなければならないような質問を，ときどきお願いします.
+    出力は数式表現や文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
+    出力文字数は,多くても100文字程度になるようにしてください.
+    中高生（受験生）を対象とするので，必ず最初に「どこまで自力で解けるか解いてみて」などと聞いて，それに伴って会話を進めてください.
     口調は友達のような感じで大丈夫だよ！
     '''));
   }
@@ -131,6 +131,7 @@ class _ChatPageState extends State<ChatPage> {
         _getAIResponse(receivedText);
         isFirstSend = true;
         inputText = receivedText;
+        _isSending = true;
       }
 
       // labelsを取得
@@ -467,16 +468,43 @@ class _ChatPageState extends State<ChatPage> {
                     child: ElevatedButton(
                       onPressed: () async { //フィードバックへ遷移
                         try {
-                          final feedback = await AI.sendMessage(Content.text(
-                              '今回の会話はどうだった？私が苦手なところとか分かったら短く一文で教えてほしいな。またね！'));
+                          final feedback = await AI.sendMessage(Content.text(//簡単なフィードバック
+                              '今回の会話はどうだった？私が苦手なところとか分かったら短く(50文字程度)一文で教えてほしいな．'));
                           final feedbackMessage = feedback.text ??
                               'フィードバックの作成に失敗しました';
+                          
+                          //詳細のフィードバックを作成
+                          final info = await AI.sendMessage(Content.text('''
+                          今回の会話について，
+                          1,どういう解き方を最初したのか
+                          2,ユーザーが間違えてた部分
+                          3,間違えた部分の正しい解き方
+                          4,問題自体の正しい解き方
+                          を，必ず以下のフォーマットで送ってください
+                          &&内容1&&内容2&&内容3&&内容4
+                          '''));
+                          String infotext = info.text ?? '作成失敗';
+                          final B = infotext.substring(infotext.indexOf('&&')).split('&&');
+                          String firstans = B[1];     //どういう解き方を最初したのか
+                          String wrong = B[2];        //間違えてた部分
+                          String wrongpartans = B[3]; //間違えてた部分の正しい解き方
+                          String correctans = B[4];   //それの正しい解き方
+                          // print("sdoifsdjffd");
+                          // print(firstans);
+                          // print(wrong);
+                          // print(wrongpartans);
+                          // print(correctans);
+
                           Navigator.pushNamed(
                             context, '/result',
                             arguments: {
                               'inputText': inputText,
                               'feedbackText': feedbackMessage,
                               'labels': labels,
+                              'firstans': firstans,
+                              'wrong': wrong,
+                              'wrongpartans': wrongpartans,
+                              'correctans': correctans,
                             },
                           );
                         } catch (e) {
