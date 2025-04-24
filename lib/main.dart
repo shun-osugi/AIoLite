@@ -218,7 +218,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   isBasicMode: _isBasicMode,
                   onChanged: _onModeChanged,
                 ), // モード切替ボタン（テスト用）
-                const HelpButton(), // ヘルプを表示するボタン
+                HelpButton(mode: _isBasicMode ? 'basic' : 'advanced'), // ヘルプを表示するボタン
+
 
                 // ライセンスアイコンと利用規約ボタン
                 Align(
@@ -257,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// モード変更用トグルボタン（テスト用）
+// モード選択ボタン（ダイアログを表示）
 class ModeToggleButton extends StatelessWidget {
   final bool isBasicMode;
   final ValueChanged<bool> onChanged;
@@ -268,39 +269,121 @@ class ModeToggleButton extends StatelessWidget {
     required this.onChanged,
   }) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topRight,
       child: Padding(
         padding: const EdgeInsets.only(top: 50, right: 100),
-        child: Switch(
-          value: isBasicMode,
-          onChanged: (value) async {
-            // 保存処理
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setBool('isBasicMode', value);
+        child: IconButton(
+          icon: Icon(Icons.tune, color: Colors.white, size: 36),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => ModeSelectionDialog(
+                isBasicMode: isBasicMode,
+                onChanged: (value) async {
+                // 保存処理
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('isBasicMode', value);
 
-            // コールバックで状態更新
-            onChanged(value);
+                // コールバックで状態更新
+                onChanged(value);
 
-            // モード切り替え通知を表示
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(value ? 'Basicモードに切り替えました' : 'Advancedモードに切り替えました'),
-                duration: Duration(seconds: 2),
+                  // モード切り替え通知を表示
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(value ? 'Basicモードに切り替えました' : 'Advancedモードに切り替えました'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                },
               ),
             );
           },
-        ),
-      ),
+        )
+      )
     );
   }
 }
 
+class ModeSelectionDialog extends StatelessWidget {
+  final bool isBasicMode;
+  final ValueChanged<bool> onChanged;
+
+  const ModeSelectionDialog({
+    Key? key,
+    required this.isBasicMode,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(isBasicMode ? 'モードをえらんでね' : 'モードの選択'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildOption(
+            context,
+            mode: true,
+            title: 'ベーシックモード',
+            description: 'しょうがくせい向けのモード',
+          ),
+          const SizedBox(height: 12),
+          _buildOption(
+            context,
+            mode: false,
+            title: 'アドバンスモード',
+            description: '中学生から高校生向けのモード',
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          child: const Text('キャンセル'),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOption(BuildContext context,
+      {required bool mode, required String title, required String description}) {
+    return ListTile(
+      leading: Icon(
+        (isBasicMode == mode)
+            ? Icons.radio_button_checked
+            : Icons.radio_button_unchecked,
+        color: Theme.of(context).primaryColor,
+      ),
+      title: Text(title),
+      subtitle: Text(description),
+      onTap: () async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('basicMode', mode);
+        onChanged(mode);
+        Navigator.pop(context);
+
+        // モード切り替え通知
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(mode ? 'ベーシックモードにかわった！' : 'Advancedモードに切り替えました'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
 // ヘルプを表示するボタン
 class HelpButton extends StatelessWidget {
-  const HelpButton({Key? key}) : super(key: key);
+  final String mode; // モード: 'basic' or 'advanced'
+
+  const HelpButton({Key? key, required this.mode}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -322,12 +405,16 @@ class HelpButton extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        return HelpDialog();
+        return HelpDialog(mode: mode);
       },
     );
   }
 }
 class HelpDialog extends StatefulWidget {
+  final String mode;
+
+  const HelpDialog({Key? key, required this.mode}) : super(key: key);
+
   @override
   _HelpDialogState createState() => _HelpDialogState();
 }
@@ -336,14 +423,33 @@ class _HelpDialogState extends State<HelpDialog> {
   int _currentPage = 0;
 
   // ヘルプ内容
-  final List<Map<String, String>> helpPages = [
-    {"image": "assets/help0.png", "head": "まずは、STARTボタンを押して問題を送信しよう！", "text": "ここでは、このアプリの使用方法を確認することができます。\n右下のボタンからは、利用規約、ライセンス表示を確認することができます。"},
-    {"image": "assets/help1.png", "head": "問題の送信方法を選んで、問題を送信しよう！", "text": "送信方法は、音声入力、画像入力(画像ファイルからor写真を撮影)、テキスト入力から選べます。\n音声や画像を送信した場合は、自動でテキストに変換されます。"},
-    {"image": "assets/help2.png", "head": "問題文の編集をしよう！", "text": "テキスト入力の場合はここで入力、音声や画像で入力した場合は、問題文を修正できます。"},
-    {"image": "assets/help3.png", "head": "問題のラベル(教科・単元)の編集をしよう！", "text": "\n送信された問題文を元に、自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。"},
-    {"image": "assets/help4.png", "head": "AIとのチャットを開始！\nAIの質問に答えながら、問題を解いていこう！", "text": "下のテキストボックスからAIへメッセージを送信すると、AIから返事が返ってきます。\n問題が解けたら、「解けた！」ボタンでチャットが終了できます。\nまた、右上のボタンからは、ホーム画面に戻ることや、今の問題をもう一度初めからやり直すことができます。"},
-    {"image": "assets/help5.png", "head": "チャットを終えると、AIからのフィードバックと類題が表示されるよ！\nフィードバックを参考にして、類題から次の問題を始めてみよう！", "text": "類題を選択することで、新たにAIとのチャットを開始できます。"},
-  ];
+  late final List<Map<String, String>> helpPages;
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.mode == 'basic') {
+      helpPages = [
+        // ベーシック用
+        {"image": "assets/help0.png", "head": "はじめに", "text": "『START』ボタンをおして、もんだいをはじめよう！\nこのアプリのつかいかたがわからなくなったら、いつでもこのヘルプをみてね！"},
+        {"image": "assets/help1.png", "head": "もんだいの いれかた", "text": "もんだいを いれるほうほうは、こえ・しゃしん・てがき の３つ！\nさっそくいれてみようか！"},
+        {"image": "assets/help2.png", "head": "もんだいを なおそう！", "text": "こえ・しゃしんでいれたもんだいが まちがっていたら、なおすことができるよ。"},
+        {"image": "assets/help3.png", "head": "もんだいの ぶんるい", "text": "\nもんだいにあう『かもく』を えらんでね！\nまちがっていても だいじょうぶ。\nえらびなおすことができるよ。"},
+        {"image": "assets/help4.png", "head": "AIと おしゃべりしながら といてみよう！", "text": "もんだいが できたら、AIが おてつだいしてくれるよ。\nこたえがわかったら『とけた！』ボタンを おしてね。\nみぎうえにあるおうちのボタンからいちばんさいしょのページにもどることができるよ。\nそれと、やじるしのマークをおすともういちどさいしょからAIがおてつだいしてくれるよ。"},
+        {"image": "assets/help5.png", "head": "どんなことにつかうのか　つぎのもんだい", "text": "とけたら、これからこのちしきをどうやってつかうのかをAIがおしえてくれるよ！\nにている もんだいにも チャレンジしてみてね！"},
+      ];
+    } else {
+      helpPages = [
+        // アドバンス用
+        {"image": "assets/help0.png", "head": "まずは、STARTボタンを押して問題を送信しよう！", "text": "ここでは、このアプリの使用方法を確認することができます。\n右下のボタンからは、利用規約、ライセンス表示を確認することができます。"},
+        {"image": "assets/help1.png", "head": "問題の送信方法を選んで、問題を送信しよう！", "text": "送信方法は、音声入力、画像入力(画像ファイルからor写真を撮影)、テキスト入力から選べます。\n音声や画像を送信した場合は、自動でテキストに変換されます。"},
+        {"image": "assets/help2.png", "head": "問題文の編集をしよう！", "text": "テキスト入力の場合はここで入力、音声や画像で入力した場合は、問題文を修正できます。"},
+        {"image": "assets/help3.png", "head": "問題のラベル(教科・単元)の編集をしよう！", "text": "\n送信された問題文を元に、自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。"},
+        {"image": "assets/help4.png", "head": "AIとのチャットを開始！\nAIの質問に答えながら、問題を解いていこう！", "text": "下のテキストボックスからAIへメッセージを送信すると、AIから返事が返ってきます。\n問題が解けたら、「解けた！」ボタンでチャットが終了できます。\nまた、右上のボタンからは、ホーム画面に戻ることや、今の問題をもう一度初めからやり直すことができます。"},
+        {"image": "assets/help5.png", "head": "チャットを終えると、AIからのフィードバックと類題が表示されるよ！\nフィードバックを参考にして、類題から次の問題を始めてみよう！", "text": "類題を選択することで、新たにAIとのチャットを開始できます。"},
+      ];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -354,7 +460,7 @@ class _HelpDialogState extends State<HelpDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("使い方", style: TextStyle(color: AppColors.black, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(widget.mode == 'basic' ? "つかいかた" : "使い方", style: TextStyle(color: AppColors.black, fontSize: 22, fontWeight: FontWeight.bold)),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
@@ -442,7 +548,7 @@ class _HelpDialogState extends State<HelpDialog> {
                     );
                   }
                       : null,
-                  child: Text("← 戻る", style: TextStyle(fontSize: 18)),
+                  child: Text(widget.mode == 'basic' ? "←もどる" : "←戻る", style: TextStyle(fontSize: 18)),
                 ),
                 TextButton(
                   onPressed: _currentPage < helpPages.length - 1
@@ -455,7 +561,7 @@ class _HelpDialogState extends State<HelpDialog> {
                       : () {
                     Navigator.pop(context); // 最後のページならダイアログを閉じる
                   },
-                  child: Text(_currentPage < helpPages.length - 1 ? "次へ →" : "閉じる", style: TextStyle(fontSize: 18)),
+                  child: Text(_currentPage < helpPages.length - 1 ? widget.mode == 'basic' ? "→つぎ" : "→次へ": widget.mode == 'basic' ? "とじる" : "閉じる", style: TextStyle(fontSize: 18)),
                 ),
               ],
             ),
