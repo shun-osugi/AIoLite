@@ -71,15 +71,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // モード切替
-  Future<void> _onModeChanged(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('basicMode', value);
-    setState(() {
-      _isBasicMode = value;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     file = null;
@@ -93,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Center(
                   child: Column(
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.4,),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.38,),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.2,
                       child: Container(
@@ -119,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
 
                 Positioned(
-                  top: MediaQuery.of(context).size.height * 0.55,
+                  top: MediaQuery.of(context).size.height * 0.53,
                     right: MediaQuery.of(context).size.width * 0.25,
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -155,9 +146,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
 
-                        Image.asset('assets/logo.png', height: MediaQuery.of(context).size.height * 0.4), // ロゴ画像
+                        Image.asset('assets/logo.png', height: MediaQuery.of(context).size.height * 0.38), // ロゴ画像
 
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.19),
 
                         // STARTボタン
                         Container(
@@ -206,18 +197,80 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ),),
 
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.035),
 
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                        // モード切替＋全体統計＋フィードバックボタン（横並び）
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // モード切替ボタン
+                            ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => ModeSelectionDialog(
+                                    isBasicMode: _isBasicMode,
+                                    onChanged: (newMode) {
+                                      setState(() {
+                                        _isBasicMode = newMode;
+                                      });
+                                    },
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey.shade300,
+                                foregroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                              ),
+                              child: const Text('モード切替' ,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 20),
+
+                            //フィードバックのボタン（アドバンス時のみ）
+                            if (!_isBasicMode)
+                              CircleAvatar(
+                                radius: 26,
+                                backgroundColor: Colors.grey.shade300,
+                                child: IconButton(
+                                  icon: const Icon(Icons.auto_stories),
+                                  onPressed: () {
+                                    // フィードバックの処理の記述
+                                  },
+                                ),
+                              ),
+
+                            const SizedBox(width: 15),
+
+                            // 全体統計のボタン
+                            CircleAvatar(
+                              radius: 26,
+                              backgroundColor: Colors.grey.shade300,
+                              child: IconButton(
+                                icon: const Icon(Icons.bar_chart),
+                                onPressed: () {
+                                  // 全体統計の処理を記述
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                       ],
                     ),
                   ),
                 ),
 
-                ModeToggleButton(
-                  isBasicMode: _isBasicMode,
-                  onChanged: _onModeChanged,
-                ), // モード切替ボタン（テスト用）
                 HelpButton(mode: _isBasicMode ? 'basic' : 'advanced'), // ヘルプを表示するボタン
 
 
@@ -226,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   alignment: Alignment.bottomRight,
                   child: Padding(
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * 0.9,
+                      top: MediaQuery.of(context).size.height * 0.91,
                       right: 20,
                     ),
                     child: Row(
@@ -234,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         // 利用規約ボタン (iマーク)
                         const TermsButton(),
-                        SizedBox(width: 16),
+                        SizedBox(width: 15),
 
                         // ライセンス表示ボタン
                         IconButton(
@@ -283,22 +336,7 @@ class ModeToggleButton extends StatelessWidget {
               context: context,
               builder: (context) => ModeSelectionDialog(
                 isBasicMode: isBasicMode,
-                onChanged: (value) async {
-                // 保存処理
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('isBasicMode', value);
-
-                // コールバックで状態更新
-                onChanged(value);
-
-                  // モード切り替え通知を表示
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(value ? 'Basicモードに切り替えました' : 'Advancedモードに切り替えました'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                },
+                onChanged: onChanged, // コールバックで状態更新
               ),
             );
           },
@@ -361,8 +399,10 @@ class ModeSelectionDialog extends StatelessWidget {
       title: Text(title),
       subtitle: Text(description),
       onTap: () async {
+        // 保存して状態反映
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('basicMode', mode);
+        await prefs.setBool('isBasicMode', mode);
+
         onChanged(mode);
         Navigator.pop(context);
 
@@ -390,9 +430,18 @@ class HelpButton extends StatelessWidget {
     return Align(
       alignment: Alignment.topRight,
       child: Padding(
-        padding: const EdgeInsets.only(top: 40, right: 20),
-        child: IconButton(
-          icon: Icon(Icons.help_outline, size: 50, color: AppColors.white),
+        padding: const EdgeInsets.only(top: 60, right: 25),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.grey.shade300,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+          ),
+          label: const Text("  使い方  "),
           onPressed: () {
             _showHelpDialog(context);
           },
@@ -410,6 +459,7 @@ class HelpButton extends StatelessWidget {
     );
   }
 }
+
 class HelpDialog extends StatefulWidget {
   final String mode;
 
