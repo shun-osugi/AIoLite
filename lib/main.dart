@@ -226,8 +226,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                               ),
-                              child: const Text('モード切替' ,
-                                style: TextStyle(
+                              child: Text(
+                                _isBasicMode ? 'モードきりかえ' : 'モード切替',
+                                style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -427,6 +428,7 @@ class HelpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isBasic = mode == 'basic';
     return Align(
       alignment: Alignment.topRight,
       child: Padding(
@@ -441,7 +443,7 @@ class HelpButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(25),
             ),
           ),
-          label: const Text("  使い方  "),
+          label: Text(isBasic ? 'つかいかた' : '  使い方  '),
           onPressed: () {
             _showHelpDialog(context);
           },
