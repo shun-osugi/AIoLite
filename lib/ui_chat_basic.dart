@@ -186,7 +186,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(40),
-                    border: Border.all(color: AppColors.background, width: 3),
+                    border: Border.all(color: AppColors.background_b, width: 4),
                   ),
                   child: Text('イオ', style: TextStyle(
                     color: AppColors.black,
@@ -229,7 +229,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(40),
-                  border: Border.all(color: AppColors.background, width: 3),
+                  border: Border.all(color: AppColors.black, width: 3),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.mainColor.withOpacity(0.7),
@@ -251,13 +251,9 @@ class _ChatPageState extends State<ChatBasicPage> {
                             width: MediaQuery.of(context).size.width * 0.95,
                             height: MediaQuery.of(context).size.height * 0.6,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [AppColors.subColor, AppColors.white],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                              color: AppColors.white,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.background, width: 4),
+                              border: Border.all(color: AppColors.black, width: 4),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(8),
@@ -267,20 +263,23 @@ class _ChatPageState extends State<ChatBasicPage> {
                                   Align(
                                     alignment: Alignment.topRight,
                                     child: IconButton(
-                                      icon: Icon(Icons.close, color: AppColors.white,),
+                                      icon: Icon(Icons.close, color: AppColors.black, size: MediaQuery.of(context).size.width * 0.1,),
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
                                     ),
                                   ),
                                   Expanded(
-                                    child: SingleChildScrollView(
-                                      child: Text(
-                                        inputText,
-                                        style: TextStyle(
-                                          color: AppColors.black,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                    child: Scrollbar(
+                                      thumbVisibility: true,
+                                      child: SingleChildScrollView(
+                                        child: Text(
+                                          inputText,
+                                          style: TextStyle(
+                                            color: AppColors.black,
+                                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -317,65 +316,68 @@ class _ChatPageState extends State<ChatBasicPage> {
 
               // チャット部分
               if (!openMenu)
-              Expanded(
-                child: ListView.builder(
-                  reverse: true,
-                  padding: EdgeInsets.all(16),
-                  itemCount: chats.length,
-                  itemBuilder: (context, index) {
-                    final chat = chats[chats.length - 1 - index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        mainAxisAlignment: chat.p == 0
-                            ? MainAxisAlignment.end // ユーザー: 右寄せ
-                            : MainAxisAlignment.start, // AI: 左寄せ
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
+                Expanded(
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    child: ListView.builder(
+                      reverse: true,
+                      padding: EdgeInsets.all(16),
+                      itemCount: chats.length,
+                      itemBuilder: (context, index) {
+                        final chat = chats[chats.length - 1 - index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: chat.p == 0
+                                ? MainAxisAlignment.end // ユーザー: 右寄せ
+                                : MainAxisAlignment.start, // AI: 左寄せ
                             children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth: MediaQuery.of(context).size.width * 0.9,
-                                  minWidth: MediaQuery.of(context).size.width * 0.2,
-                                ),
-                                child: IntrinsicWidth(
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-                                    margin: EdgeInsets.only(bottom: 8, left: chat.p == 0 ? 40 : 8, right: chat.p == 0 ? 8 : 40),
-                                    constraints: BoxConstraints(minWidth: 80),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [chat.p == 0 ? AppColors.mainColor : AppColors.subColor, chat.p == 0 ? AppColors.mainColor : AppColors.white],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(24),
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                      minWidth: MediaQuery.of(context).size.width * 0.2,
                                     ),
-                                    child: Text(
-                                      chat.str,
-                                      style: TextStyle(color: chat.p == 0 ? AppColors.white : AppColors.black, fontSize: 16, fontWeight: FontWeight.bold,),
+                                    child: IntrinsicWidth(
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                                        margin: EdgeInsets.only(bottom: 8, left: chat.p == 0 ? 40 : 8, right: chat.p == 0 ? 8 : 40),
+                                        constraints: BoxConstraints(minWidth: 80),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [chat.p == 0 ? AppColors.mainColor : AppColors.subColor, chat.p == 0 ? AppColors.mainColor : AppColors.white],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(24),
+                                        ),
+                                        child: Text(
+                                          chat.str,
+                                          style: TextStyle(color: chat.p == 0 ? AppColors.white : AppColors.black, fontSize: 16, fontWeight: FontWeight.bold,),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: chat.p == 0 ? 0 : null, // ユーザー（右側）の場合はbottomに配置
-                                top: chat.p != 0 ? 0 : null,     // AI（左側）の場合はtopに配置
-                                right: chat.p == 0 ? 8 : null,
-                                left: chat.p == 0 ? null : 8,
-                                child: CustomPaint(
-                                  painter: ChatBubbleTriangle(p: chat.p),
-                                ),
+                                  Positioned(
+                                    bottom: chat.p == 0 ? 0 : null, // ユーザー（右側）の場合はbottomに配置
+                                    top: chat.p != 0 ? 0 : null,     // AI（左側）の場合はtopに配置
+                                    right: chat.p == 0 ? 8 : null,
+                                    left: chat.p == 0 ? null : 8,
+                                    child: CustomPaint(
+                                      painter: ChatBubbleTriangle(p: chat.p),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
 
               // メニュー部分
               if (openMenu)
@@ -391,7 +393,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                           decoration: BoxDecoration(
                             color: AppColors.mainColor,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.background, width: 3),
+                            border: Border.all(color: AppColors.white, width: 3),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.mainColor.withOpacity(0.7),
@@ -433,7 +435,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.background, width: 3),
+                            border: Border.all(color: AppColors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.mainColor.withOpacity(0.7),
@@ -475,7 +477,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.background, width: 3),
+                            border: Border.all(color: AppColors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.mainColor.withOpacity(0.7),
@@ -503,7 +505,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               ),
                             ),
                             child: Text(
-                              '始めからやり直す',
+                              'いまのもんだいをやりなおす',
                               style: TextStyle(
                                 color: AppColors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -533,14 +535,14 @@ class _ChatPageState extends State<ChatBasicPage> {
                           enabledBorder: OutlineInputBorder( // 未フォーカス時
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: _isSending ? AppColors.background : AppColors.mainColor,
+                              color: _isSending ? AppColors.white : AppColors.mainColor,
                               width: 3,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder( // フォーカス時
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: _isSending ? AppColors.background : AppColors.mainColor,
+                              color: _isSending ? AppColors.white : AppColors.mainColor,
                               width: 4,
                             ),
                           ),
@@ -550,8 +552,8 @@ class _ChatPageState extends State<ChatBasicPage> {
                     SizedBox(width: 8),
                     FloatingActionButton(
                       onPressed: _isSending ? null : _sendMessage,
-                      child: Icon(Icons.send, color: _isSending ? AppColors.black : AppColors.background),
-                      backgroundColor: _isSending ? AppColors.background : AppColors.mainColor,
+                      child: Icon(Icons.send, color: _isSending ? AppColors.black : AppColors.white),
+                      backgroundColor: _isSending ? AppColors.white : AppColors.mainColor,
                     ),
                   ],
                 ),
@@ -576,7 +578,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(40),
-                border: Border.all(color: AppColors.background, width: 3),
+                border: Border.all(color: AppColors.black, width: 3),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.accentColor.withOpacity(0.7),
