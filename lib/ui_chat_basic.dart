@@ -134,12 +134,6 @@ class _ChatPageState extends State<ChatBasicPage> {
         isFirstSend = true;
         inputText = receivedText;
       }
-
-      // labelsを取得
-      final receivedLabels = args['labels'] as List<String>?;
-      if (receivedLabels != null) {
-        labels = receivedLabels;
-      }
     }
   }
 
@@ -256,7 +250,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               border: Border.all(color: B_Colors.black, width: 4),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(24),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
@@ -412,7 +406,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               ),
                             ),
                             child: Text(
-                              'チャット画面の使い方',
+                              'おしゃべりのしかた',
                               style: TextStyle(
                                 color: B_Colors.white,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -454,7 +448,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               ),
                             ),
                             child: Text(
-                              'ホームに戻る',
+                              'ホームにもどる',
                               style: TextStyle(
                                 color: B_Colors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,

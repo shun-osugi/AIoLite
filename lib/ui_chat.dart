@@ -256,7 +256,7 @@ class _ChatPageState extends State<ChatPage> {
                               border: Border.all(color: A_Colors.black, width: 4),
                             ),
                           child: Padding(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(24),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               children: [
