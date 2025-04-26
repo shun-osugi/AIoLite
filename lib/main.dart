@@ -1150,7 +1150,7 @@ class _EditDialogState extends State<EditDialog> {
                         child: TextField(
                           controller: _textController,
                           focusNode: _focusNode, // FocusNodeを設定
-                          style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black,),
+                          style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                           minLines: null,
                           maxLines: null,
                           decoration: InputDecoration(

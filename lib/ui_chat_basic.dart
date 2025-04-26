@@ -41,6 +41,7 @@ class _ChatPageState extends State<ChatBasicPage> {
   final ScrollController _scrollController = ScrollController();
 
   List<chat> chats = []; //会話リスト
+  int chatIndex = 0; // チャット表示のインデックス
 
   // AIモデル
   late final GenerativeModel _model;
@@ -79,6 +80,7 @@ class _ChatPageState extends State<ChatBasicPage> {
     setState(() {
       _isSending = true;
       chats.add(chat(0, text)); // ユーザーのメッセージを会話リストに追加
+      chatIndex = chats.length - 2; // Indexを更新
     });
     _getAIResponse(text); // AIからの応答を取得
     _textController.clear(); // 入力欄をクリア
@@ -101,6 +103,7 @@ class _ChatPageState extends State<ChatBasicPage> {
       String aiMessage = (response.text ?? 'イオからのメッセージが取得できませんでした').trim(); // AIの返答を取得
       setState(() {
         chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
+        chatIndex = chats.length - 2; // Indexを更新
         _isSending = false;
       });
 
@@ -128,7 +131,9 @@ class _ChatPageState extends State<ChatBasicPage> {
       final receivedText = args['inputText'] as String?;
       if (receivedText != null && !isFirstSend) {
         setState(() {
+          _isSending = true;
           chats.add(chat(0, receivedText));
+          chatIndex = chats.length - 2; // Indexを更新
         });
         _getAIResponse(receivedText);
         isFirstSend = true;
@@ -158,6 +163,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                 autoRotate: false,
                 disableZoom: true,
                 disableTap: true,
+                disablePan: true,
                 cameraControls: false,
                 interactionPrompt: null,
                 interactionPromptThreshold: 0,
@@ -184,14 +190,14 @@ class _ChatPageState extends State<ChatBasicPage> {
                   ),
                   child: Text('イオ', style: TextStyle(
                     color: B_Colors.black,
-                    fontSize: 20,
+                    fontSize: MediaQuery.of(context).size.width * 0.06,
                     fontWeight: FontWeight.bold,),)
               )
           ),
 
           // メニュー⇆チャット切替ボタン
           Positioned(
-              top: MediaQuery.of(context).size.height * 0.15,
+              top: MediaQuery.of(context).size.height * 0.17,
               right: MediaQuery.of(context).size.width * 0.15,
               child:
               MenuButton(
@@ -215,7 +221,7 @@ class _ChatPageState extends State<ChatBasicPage> {
               // 問題文を表示するボタン
               Container(
                 width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.1,
+                height: MediaQuery.of(context).size.height * 0.12,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [B_Colors.subColor, B_Colors.white],
@@ -271,7 +277,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                           inputText,
                                           style: TextStyle(
                                             color: B_Colors.black,
-                                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                                            fontSize: MediaQuery.of(context).size.width * 0.05,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -297,7 +303,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                     inputText,
                     style: TextStyle(
                       color: B_Colors.black,
-                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      fontSize: MediaQuery.of(context).size.width * 0.06,
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -306,72 +312,86 @@ class _ChatPageState extends State<ChatBasicPage> {
                 ),
               ),
 
-              SizedBox(height: MediaQuery.of(context).size.height * 0.22),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.25),
 
               // チャット部分
               if (!openMenu)
                 Expanded(
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    child: ListView.builder(
-                      reverse: true,
-                      padding: EdgeInsets.all(16),
-                      itemCount: chats.length,
-                      itemBuilder: (context, index) {
-                        final chat = chats[chats.length - 1 - index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            mainAxisAlignment: chat.p == 0
-                                ? MainAxisAlignment.end // ユーザー: 右寄せ
-                                : MainAxisAlignment.start, // AI: 左寄せ
-                            children: [
-                              Stack(
-                                clipBehavior: Clip.none,
+                  child: Stack(
+                    children: [
+                      for (int i = (chatIndex > -1 ? 0 : 1); i < 2; i++)
+                        Positioned(
+                          top: chats[chatIndex + i].p != 0 ? 0 : null,
+                          bottom: chats[chatIndex + i].p == 0 ? 0 : null,
+                          left: 0,
+                          right: 0,
+                          child: Opacity(
+                            opacity: i == 0 ? 0.6 : 1.0,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24),
+                              child: Row(
+                                mainAxisAlignment: chats[chatIndex + i].p == 0
+                                    ? MainAxisAlignment.end
+                                    : MainAxisAlignment.start,
                                 children: [
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth: MediaQuery.of(context).size.width * 0.9,
-                                      minWidth: MediaQuery.of(context).size.width * 0.2,
-                                    ),
-                                    child: IntrinsicWidth(
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-                                        margin: EdgeInsets.only(bottom: 8, left: chat.p == 0 ? 40 : 8, right: chat.p == 0 ? 8 : 40),
-                                        constraints: BoxConstraints(minWidth: 80),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [chat.p == 0 ? B_Colors.mainColor : B_Colors.subColor, chat.p == 0 ? B_Colors.mainColor : B_Colors.white],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                          borderRadius: BorderRadius.circular(24),
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                          minWidth: MediaQuery.of(context).size.width * 0.2,
+                                          maxHeight: MediaQuery.of(context).size.height * 0.3,
                                         ),
-                                        child: Text(
-                                          chat.str,
-                                          style: TextStyle(color: chat.p == 0 ? B_Colors.white : B_Colors.black, fontSize: 16, fontWeight: FontWeight.bold,),
+                                        child: IntrinsicWidth(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                                            margin: EdgeInsets.only(bottom: 8, left: chats[chatIndex + i].p == 0 ? 40 : 8, right: chats[chatIndex + i].p == 0 ? 8 : 40),
+                                            constraints: BoxConstraints(minWidth: 80),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.subColor,
+                                                  chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.white
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius: BorderRadius.circular(24),
+                                            ),
+                                            child: SingleChildScrollView(
+                                              child:Text(
+                                                chats[chatIndex + i].str,
+                                                style: TextStyle(
+                                                  color: chats[chatIndex + i].p == 0 ? B_Colors.white : B_Colors.black,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: chat.p == 0 ? 0 : null, // ユーザー（右側）の場合はbottomに配置
-                                    top: chat.p != 0 ? 0 : null,     // AI（左側）の場合はtopに配置
-                                    right: chat.p == 0 ? 8 : null,
-                                    left: chat.p == 0 ? null : 8,
-                                    child: CustomPaint(
-                                      painter: ChatBubbleTriangle(p: chat.p),
-                                    ),
+                                      Positioned(
+                                        bottom: chats[chatIndex + i].p == 0 ? 0 : null,
+                                        top: chats[chatIndex + i].p != 0 ? 0 : null,
+                                        right: chats[chatIndex + i].p == 0 ? 8 : null,
+                                        left: chats[chatIndex + i].p == 0 ? null : 8,
+                                        child: CustomPaint(
+                                          painter: ChatBubbleTriangle(p: chats[chatIndex + i].p),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                    ],
                   ),
                 ),
+
 
               // メニュー部分
               if (openMenu)
@@ -383,7 +403,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                         // ヘルプボタン
                         Container(
                           width: MediaQuery.of(context).size.width * 0.8,
-                          height: MediaQuery.of(context).size.height * 0.05,
+                          height: MediaQuery.of(context).size.height * 0.06,
                           decoration: BoxDecoration(
                             color: B_Colors.mainColor,
                             borderRadius: BorderRadius.circular(24),
@@ -392,7 +412,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               BoxShadow(
                                 color: B_Colors.mainColor.withOpacity(0.7),
                                 offset: Offset(0, 4),
-                                blurRadius: 10,
+                                blurRadius: 16,
                               ),
                             ],
                           ),
@@ -409,7 +429,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               'おしゃべりのしかた',
                               style: TextStyle(
                                 color: B_Colors.white,
-                                fontSize: MediaQuery.of(context).size.width * 0.05,
+                                fontSize: MediaQuery.of(context).size.width * 0.06,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -421,7 +441,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                         // ホームに戻るボタン
                         Container(
                           width: MediaQuery.of(context).size.width * 0.8,
-                          height: MediaQuery.of(context).size.height * 0.05,
+                          height: MediaQuery.of(context).size.height * 0.06,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [B_Colors.subColor, B_Colors.white],
@@ -432,9 +452,9 @@ class _ChatPageState extends State<ChatBasicPage> {
                             border: Border.all(color: B_Colors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
-                                color: B_Colors.mainColor.withOpacity(0.7),
+                                color: B_Colors.black.withOpacity(0.7),
                                 offset: Offset(0, 4),
-                                blurRadius: 10,
+                                blurRadius: 16,
                               ),
                             ],
                           ),
@@ -451,7 +471,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               'ホームにもどる',
                               style: TextStyle(
                                 color: B_Colors.black,
-                                fontSize: MediaQuery.of(context).size.width * 0.05,
+                                fontSize: MediaQuery.of(context).size.width * 0.06,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -463,7 +483,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                         // 今の問題をやり直すボタン
                         Container(
                           width: MediaQuery.of(context).size.width * 0.8,
-                          height: MediaQuery.of(context).size.height * 0.05,
+                          height: MediaQuery.of(context).size.height * 0.06,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [B_Colors.subColor, B_Colors.white],
@@ -474,9 +494,9 @@ class _ChatPageState extends State<ChatBasicPage> {
                             border: Border.all(color: B_Colors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
-                                color: B_Colors.mainColor.withOpacity(0.7),
+                                color: B_Colors.black.withOpacity(0.7),
                                 offset: Offset(0, 4),
-                                blurRadius: 10,
+                                blurRadius: 16,
                               ),
                             ],
                           ),
@@ -485,6 +505,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               setState(() {
                                 chats.clear();
                                 chats.add(chat(0, inputText));
+                                chatIndex = chats.length - 2; // Indexを更新
                                 openMenu = false;
                               });
                               AI.sendMessage(Content.text('もう一度始めから教えて！'));
@@ -499,10 +520,10 @@ class _ChatPageState extends State<ChatBasicPage> {
                               ),
                             ),
                             child: Text(
-                              'いまのもんだいをやりなおす',
+                              'もんだいをやりなおす',
                               style: TextStyle(
                                 color: B_Colors.black,
-                                fontSize: MediaQuery.of(context).size.width * 0.05,
+                                fontSize: MediaQuery.of(context).size.width * 0.06,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -514,44 +535,162 @@ class _ChatPageState extends State<ChatBasicPage> {
 
               // 入力部分
               if (!openMenu)
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
+                Column(
                   children: [
-                    Expanded(
-                      child: TextField(
-                        cursorColor: _isSending ? B_Colors.subColor : B_Colors.mainColor,
-                        controller: _textController,
-                        enabled: !_isSending,
-                        decoration: InputDecoration(
-                          hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
-                          hintStyle: TextStyle(color: B_Colors.mainColor),
-                          enabledBorder: OutlineInputBorder( // 未フォーカス時
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: _isSending ? B_Colors.white : B_Colors.mainColor,
-                              width: 3,
+                    // 矢印ボタンと？ボタン
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // 一つ前のチャットへ
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.20,
+                          height: MediaQuery.of(context).size.width * 0.16,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [chatIndex > -1 ? B_Colors.accentColor : B_Colors.white, B_Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(color: B_Colors.black, width: 3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: chatIndex > -1 ? B_Colors.accentColor.withOpacity(0.7) : Colors.transparent,
+                                offset: Offset(0, 4),
+                                blurRadius: 10,
+                              ),
+                            ],
                           ),
-                          focusedBorder: OutlineInputBorder( // フォーカス時
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: _isSending ? B_Colors.white : B_Colors.mainColor,
-                              width: 4,
-                            ),
+                          child: IconButton(
+                            icon: Icon(Icons.arrow_back),
+                            iconSize: MediaQuery.of(context).size.width * 0.1,
+                            color: B_Colors.black,
+                            onPressed: () {
+                              setState(() {
+                                if (chatIndex > -1) {
+                                  chatIndex -= 1;
+                                }
+                              });
+                            },
                           ),
                         ),
-                      ),
+
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+
+                        // ？ボタン
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.44,
+                          height: MediaQuery.of(context).size.width * 0.16,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [B_Colors.accentColor, B_Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(color: B_Colors.black, width: 3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: B_Colors.accentColor.withOpacity(0.7),
+                                offset: Offset(0, 4),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.question_mark),
+                            iconSize: MediaQuery.of(context).size.width * 0.1,
+                            color: B_Colors.black,
+                            onPressed: () {
+                              setState(() {
+                                _isSending = true;
+                                chats.add(chat(0, '？')); // ユーザーのメッセージを会話リストに追加
+                                chatIndex = chats.length - 2; // Indexを更新
+                              });
+                              AI.sendMessage(Content.text('今のところがわからなかったから、もう一度分かりやすく教えて！'));
+                              _getAIResponse(inputText);
+                            },
+                          ),
+                        ),
+
+                        SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+
+                        // 一つ後のチャットへ
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.20,
+                          height: MediaQuery.of(context).size.width * 0.16,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [chatIndex < chats.length - 2 ? B_Colors.accentColor : B_Colors.white, B_Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(color: B_Colors.black, width: 3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: chatIndex < chats.length - 2 ? B_Colors.accentColor.withOpacity(0.7) : Colors.transparent,
+                                offset: Offset(0, 4),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.arrow_forward),
+                            iconSize: MediaQuery.of(context).size.width * 0.1,
+                            color: B_Colors.black,
+                            onPressed: () {
+                              setState(() {
+                                if (chatIndex < chats.length - 2) {
+                                  chatIndex += 1;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 8),
-                    FloatingActionButton(
-                      onPressed: _isSending ? null : _sendMessage,
-                      child: Icon(Icons.send, color: _isSending ? B_Colors.black : B_Colors.white),
-                      backgroundColor: _isSending ? B_Colors.white : B_Colors.mainColor,
+
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              cursorColor: _isSending ? B_Colors.subColor : B_Colors.mainColor,
+                              controller: _textController,
+                              enabled: !_isSending,
+                              decoration: InputDecoration(
+                                hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
+                                hintStyle: TextStyle(color: B_Colors.mainColor),
+                                enabledBorder: OutlineInputBorder( // 未フォーカス時
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: _isSending ? B_Colors.white : B_Colors.mainColor,
+                                    width: 3,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder( // フォーカス時
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: _isSending ? B_Colors.white : B_Colors.mainColor,
+                                    width: 4,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          FloatingActionButton(
+                            onPressed: _isSending ? null : _sendMessage,
+                            child: Icon(Icons.send, color: _isSending ? B_Colors.black : B_Colors.white),
+                            backgroundColor: _isSending ? B_Colors.white : B_Colors.mainColor,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             ],
@@ -559,12 +698,12 @@ class _ChatPageState extends State<ChatBasicPage> {
 
           // チャット終了ボタン
           Positioned(
-            top: MediaQuery.of(context).size.height * 0.32,
+            top: MediaQuery.of(context).size.height * 0.30,
             left: MediaQuery.of(context).size.width * 0.5,
             child:
             Container(
               width: MediaQuery.of(context).size.width * 0.4,
-              height: MediaQuery.of(context).size.height * 0.06,
+              height: MediaQuery.of(context).size.height * 0.08,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [B_Colors.accentColor, B_Colors.white],
@@ -646,7 +785,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                   'できた！',
                   style: TextStyle(
                     color: B_Colors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
+                    fontSize: MediaQuery.of(context).size.width * 0.06,
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -673,7 +812,7 @@ class MenuButton extends StatelessWidget {
     Key? key,
     required this.icon,
     required this.onPressed,
-    this.size = 60.0,
+    this.size = 80.0,
     this.color = B_Colors.mainColor,
     this.shadowColor = Colors.black,
   }) : super(key: key);
@@ -719,14 +858,14 @@ class ChatBubbleTriangle extends CustomPainter {
     final Path path = Path();
     if (p == 0) {
       // 右下に三角形
-      path.moveTo(-44, -8);
-      path.quadraticBezierTo(-32, 8, -8, 16);
-      path.quadraticBezierTo(-18, 8, -24, -8);
+      path.moveTo(-36, -8);
+      path.quadraticBezierTo(-48, 8, -72, 16);
+      path.quadraticBezierTo(-62, 8, -56, -8);
     } else {
       // 左上に三角形
-      path.moveTo(44, 0);
-      path.quadraticBezierTo(32, -16, 8, -24);
-      path.quadraticBezierTo(18, -16, 24, 0);
+      path.moveTo(36, 0);
+      path.quadraticBezierTo(48, -16, 72, -24);
+      path.quadraticBezierTo(62, -16, 56, 0);
     }
     path.close();
 
