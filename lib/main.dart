@@ -1175,7 +1175,17 @@ class _EditDialogState extends State<EditDialog> {
                           onPressed: () {
                             String editedText = _textController.text;
                             Navigator.pop(context);
-                            showLabelDialog(context, editedText);
+                            if (_isBasicMode) {
+                              Navigator.pushNamed(
+                                context,
+                                '/chat_basic',
+                                arguments: {
+                                  'inputText': editedText,
+                                },
+                              );
+                            }else{
+                              showLabelDialog(context, editedText);
+                            }
                           },
                           child: Text("次へ →", style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
                         ),
@@ -1424,7 +1434,7 @@ class _LabelDialogState extends State<LabelDialog> {
 
                           Navigator.pushNamed(
                             context,
-                            _isBasicMode ? '/chat_basic' : '/chat',
+                            '/chat',
                             arguments: {
                               'inputText': widget.editedText,
                               'labels': editedLabels,
