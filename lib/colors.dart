@@ -15,5 +15,5 @@ class B_Colors {
   static const Color accentColor = Color(0xfffbff82); // ボタン色
   static const Color background = Color(0xfffffde1); // チャット、ダイアログ背景
   static const Color white = Color(0xffeaeff8); // 白色
-  static const Color black = Color(0xff615f62); // 黒色
+  static const Color black = Color(0xff4d4c4e); // 黒色
 }

@@ -164,6 +164,7 @@ class _ChatPageState extends State<ChatPage> {
                 autoRotate: false,
                 disableZoom: true,
                 disableTap: true,
+                disablePan: true,
                 cameraControls: false,
                 interactionPrompt: null,
                 interactionPromptThreshold: 0,
@@ -190,7 +191,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   child: Text('イオ', style: TextStyle(
                     color: A_Colors.black,
-                    fontSize: 20,
+                    fontSize: MediaQuery.of(context).size.width * 0.05,
                     fontWeight: FontWeight.bold,),)
               )
           ),
@@ -356,7 +357,7 @@ class _ChatPageState extends State<ChatPage> {
                                         ),
                                         child: Text(
                                           chat.str,
-                                          style: TextStyle(color: chat.p == 0 ? A_Colors.white : A_Colors.black, fontSize: 16, fontWeight: FontWeight.bold,),
+                                          style: TextStyle(color: chat.p == 0 ? A_Colors.white : A_Colors.black, fontSize: 18, fontWeight: FontWeight.bold,),
                                         ),
                                       ),
                                     ),
@@ -438,7 +439,7 @@ class _ChatPageState extends State<ChatPage> {
                             border: Border.all(color: A_Colors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
-                                color: A_Colors.mainColor.withOpacity(0.7),
+                                color: A_Colors.black.withOpacity(0.7),
                                 offset: Offset(0, 4),
                                 blurRadius: 10,
                               ),
@@ -480,7 +481,7 @@ class _ChatPageState extends State<ChatPage> {
                             border: Border.all(color: A_Colors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
-                                color: A_Colors.mainColor.withOpacity(0.7),
+                                color: A_Colors.black.withOpacity(0.7),
                                 offset: Offset(0, 4),
                                 blurRadius: 10,
                               ),
