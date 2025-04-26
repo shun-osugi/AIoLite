@@ -146,7 +146,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background_a,
+      backgroundColor: A_Colors.background,
       body: Stack(
         children: [
           // アバター表示
@@ -181,15 +181,15 @@ class _ChatPageState extends State<ChatPage> {
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [AppColors.subColor, AppColors.white],
+                      colors: [A_Colors.subColor, A_Colors.white],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(40),
-                    border: Border.all(color: AppColors.background_a, width: 4),
+                    border: Border.all(color: A_Colors.background, width: 4),
                   ),
                   child: Text('イオ', style: TextStyle(
-                    color: AppColors.black,
+                    color: A_Colors.black,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,),)
               )
@@ -224,15 +224,15 @@ class _ChatPageState extends State<ChatPage> {
                 height: MediaQuery.of(context).size.height * 0.1,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.subColor, AppColors.white],
+                    colors: [A_Colors.subColor, A_Colors.white],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(40),
-                  border: Border.all(color: AppColors.black, width: 3),
+                  border: Border.all(color: A_Colors.black, width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.mainColor.withOpacity(0.7),
+                      color: A_Colors.mainColor.withOpacity(0.7),
                       offset: Offset(0, 4),
                       blurRadius: 10,
                     ),
@@ -251,9 +251,9 @@ class _ChatPageState extends State<ChatPage> {
                             width: MediaQuery.of(context).size.width * 0.95,
                             height: MediaQuery.of(context).size.height * 0.6,
                             decoration: BoxDecoration(
-                              color: AppColors.white,
+                              color: A_Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.black, width: 4),
+                              border: Border.all(color: A_Colors.black, width: 4),
                             ),
                           child: Padding(
                             padding: const EdgeInsets.all(8),
@@ -263,7 +263,7 @@ class _ChatPageState extends State<ChatPage> {
                                 Align(
                                   alignment: Alignment.topRight,
                                   child: IconButton(
-                                    icon: Icon(Icons.close, color: AppColors.black, size: MediaQuery.of(context).size.width * 0.1,),
+                                    icon: Icon(Icons.close, color: A_Colors.black, size: MediaQuery.of(context).size.width * 0.1,),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                     },
@@ -276,7 +276,7 @@ class _ChatPageState extends State<ChatPage> {
                                       child: Text(
                                         inputText,
                                         style: TextStyle(
-                                          color: AppColors.black,
+                                          color: A_Colors.black,
                                           fontSize: MediaQuery.of(context).size.width * 0.04,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -302,7 +302,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: Text(
                     inputText,
                     style: TextStyle(
-                      color: AppColors.black,
+                      color: A_Colors.black,
                       fontSize: MediaQuery.of(context).size.width * 0.05,
                       fontWeight: FontWeight.bold,
                     ),
@@ -348,7 +348,7 @@ class _ChatPageState extends State<ChatPage> {
                                         constraints: BoxConstraints(minWidth: 80),
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
-                                            colors: [chat.p == 0 ? AppColors.mainColor : AppColors.subColor, chat.p == 0 ? AppColors.mainColor : AppColors.white],
+                                            colors: [chat.p == 0 ? A_Colors.mainColor : A_Colors.subColor, chat.p == 0 ? A_Colors.mainColor : A_Colors.white],
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                           ),
@@ -356,7 +356,7 @@ class _ChatPageState extends State<ChatPage> {
                                         ),
                                         child: Text(
                                           chat.str,
-                                          style: TextStyle(color: chat.p == 0 ? AppColors.white : AppColors.black, fontSize: 16, fontWeight: FontWeight.bold,),
+                                          style: TextStyle(color: chat.p == 0 ? A_Colors.white : A_Colors.black, fontSize: 16, fontWeight: FontWeight.bold,),
                                         ),
                                       ),
                                     ),
@@ -391,12 +391,12 @@ class _ChatPageState extends State<ChatPage> {
                           width: MediaQuery.of(context).size.width * 0.8,
                           height: MediaQuery.of(context).size.height * 0.05,
                           decoration: BoxDecoration(
-                            color: AppColors.mainColor,
+                            color: A_Colors.mainColor,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.white, width: 3),
+                            border: Border.all(color: A_Colors.white, width: 3),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.mainColor.withOpacity(0.7),
+                                color: A_Colors.mainColor.withOpacity(0.7),
                                 offset: Offset(0, 4),
                                 blurRadius: 10,
                               ),
@@ -414,7 +414,7 @@ class _ChatPageState extends State<ChatPage> {
                             child: Text(
                               'チャット画面の使い方',
                               style: TextStyle(
-                                color: AppColors.white,
+                                color: A_Colors.white,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -430,15 +430,15 @@ class _ChatPageState extends State<ChatPage> {
                           height: MediaQuery.of(context).size.height * 0.05,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [AppColors.subColor, AppColors.white],
+                              colors: [A_Colors.subColor, A_Colors.white],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.black, width: 3),
+                            border: Border.all(color: A_Colors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.mainColor.withOpacity(0.7),
+                                color: A_Colors.mainColor.withOpacity(0.7),
                                 offset: Offset(0, 4),
                                 blurRadius: 10,
                               ),
@@ -456,7 +456,7 @@ class _ChatPageState extends State<ChatPage> {
                             child: Text(
                               'ホームに戻る',
                               style: TextStyle(
-                                color: AppColors.black,
+                                color: A_Colors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -472,15 +472,15 @@ class _ChatPageState extends State<ChatPage> {
                           height: MediaQuery.of(context).size.height * 0.05,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [AppColors.subColor, AppColors.white],
+                              colors: [A_Colors.subColor, A_Colors.white],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.black, width: 3),
+                            border: Border.all(color: A_Colors.black, width: 3),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.mainColor.withOpacity(0.7),
+                                color: A_Colors.mainColor.withOpacity(0.7),
                                 offset: Offset(0, 4),
                                 blurRadius: 10,
                               ),
@@ -507,7 +507,7 @@ class _ChatPageState extends State<ChatPage> {
                             child: Text(
                               '今の問題をやりなおす',
                               style: TextStyle(
-                                color: AppColors.black,
+                                color: A_Colors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -526,23 +526,23 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     Expanded(
                       child: TextField(
-                        cursorColor: _isSending ? AppColors.subColor : AppColors.mainColor,
+                        cursorColor: _isSending ? A_Colors.subColor : A_Colors.mainColor,
                         controller: _textController,
                         enabled: !_isSending,
                         decoration: InputDecoration(
                           hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
-                          hintStyle: TextStyle(color: AppColors.mainColor),
+                          hintStyle: TextStyle(color: A_Colors.mainColor),
                           enabledBorder: OutlineInputBorder( // 未フォーカス時
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: _isSending ? AppColors.white : AppColors.mainColor,
+                              color: _isSending ? A_Colors.white : A_Colors.mainColor,
                               width: 3,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder( // フォーカス時
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: _isSending ? AppColors.white : AppColors.mainColor,
+                              color: _isSending ? A_Colors.white : A_Colors.mainColor,
                               width: 4,
                             ),
                           ),
@@ -552,8 +552,8 @@ class _ChatPageState extends State<ChatPage> {
                     SizedBox(width: 8),
                     FloatingActionButton(
                       onPressed: _isSending ? null : _sendMessage,
-                      child: Icon(Icons.send, color: _isSending ? AppColors.black : AppColors.white),
-                      backgroundColor: _isSending ? AppColors.white : AppColors.mainColor,
+                      child: Icon(Icons.send, color: _isSending ? A_Colors.black : A_Colors.white),
+                      backgroundColor: _isSending ? A_Colors.white : A_Colors.mainColor,
                     ),
                   ],
                 ),
@@ -573,15 +573,15 @@ class _ChatPageState extends State<ChatPage> {
               height: MediaQuery.of(context).size.height * 0.06,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.accentColor, AppColors.white],
+                  colors: [A_Colors.accentColor, A_Colors.white],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(40),
-                border: Border.all(color: AppColors.black, width: 3),
+                border: Border.all(color: A_Colors.black, width: 3),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.accentColor.withOpacity(0.7),
+                    color: A_Colors.accentColor.withOpacity(0.7),
                     offset: Offset(0, 4),
                     blurRadius: 10,
                   ),
@@ -651,7 +651,7 @@ class _ChatPageState extends State<ChatPage> {
                 child: Text(
                   '振り返りへ',
                   style: TextStyle(
-                    color: AppColors.black,
+                    color: A_Colors.black,
                     fontSize: MediaQuery.of(context).size.width * 0.05,
                     fontWeight: FontWeight.bold,
                   ),
@@ -680,7 +680,7 @@ class MenuButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.size = 60.0,
-    this.color = AppColors.mainColor,
+    this.color = A_Colors.mainColor,
     this.shadowColor = Colors.black,
   }) : super(key: key);
 
@@ -719,7 +719,7 @@ class ChatBubbleTriangle extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = p == 0 ? AppColors.mainColor : AppColors.subColor
+      ..color = p == 0 ? A_Colors.mainColor : A_Colors.subColor
       ..style = PaintingStyle.fill;
 
     final Path path = Path();
