@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
-import 'ui_result.dart';
 import 'colors.dart';
 import 'tts_service.dart';
 
@@ -8,6 +6,7 @@ import 'tts_service.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sqflite/sqflite.dart';
 
 class chat{
   int p; //0:自分 1:相手
@@ -45,6 +44,12 @@ class _ChatPageState extends State<ChatPage> {
 
   final TTSService _ttsService = TTSService(); //音声読み上げサービス
 
+  late Database _database;//データベース
+  String firstans = "";     //どういう解き方を最初したのか
+  String wrong = "";        //間違えてた部分
+  String wrongpartans = ""; //間違えてた部分の正しい解き方
+  String correctans = "";
+
   // はじめにAIに送る指示
   @override
   void initState() {
@@ -53,6 +58,7 @@ class _ChatPageState extends State<ChatPage> {
     _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
     AI = _model.startChat();
     _initAsync();
+    _initDatabase();
   }
 
   Future<void> _initAsync() async {
@@ -139,6 +145,69 @@ class _ChatPageState extends State<ChatPage> {
       if (receivedLabels != null) {
         labels = receivedLabels;
       }
+    }
+  }
+
+  //データベース初期化
+  Future<void> _initDatabase() async {
+    // データベースをオープン（存在しない場合は作成）
+    try{
+      _database = await openDatabase(
+        'database.db',
+        version: 1,
+        onCreate: (Database db, int version) async {
+          //テーブルがないなら作成
+          //フィードバックテーブルを作成
+          //fieldはリスト（flutter側に持ってくるときに変換予定）
+          return db.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS feedback(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              subject TEXT,
+              field TEXT,
+              problem TEXT,
+              firstans TEXT,
+              wrong TEXT,
+              wrongpartans TEXT,
+              correctans TEXT
+            )
+            ''',
+          );
+        },
+      );
+    }catch(e){
+      print("データベース保存エラー");
+      print(e);
+    }
+  }
+
+  Future<void> inputDatabase() async {
+    String subject = "なし"; //教科
+    String field = "なし";   //ラベル（sqliteでは文字列の状態で保存）
+    if(labels.isNotEmpty){
+      List<String> s=labels[0].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
+      subject = s[0]; //教科は一つ目の項目で優先
+      field = s[1];
+      for(int i=1;i<labels.length;i++){//二つ目以降のラベルも保存
+        field += '&&'; //ラベル1&&ラベル2&&...のフォーマットで保存
+        field += labels[i].replaceAll(RegExp(r'\s'), '').split('-')[1];
+      }
+    }
+    try{
+      // var all = await _database.query('feedback');
+      //recordId 主キー
+      int recordId = await _database.insert('feedback', {
+        'subject': subject,
+        'field': field,
+        'problem': inputText,
+        'firstans': firstans,
+        'wrong': wrong,
+        'wrongpartans': wrongpartans,
+        'correctans': correctans
+      });
+    }catch(e){
+      print("データベース保存エラー");
+      print(e);
     }
   }
 
@@ -483,17 +552,19 @@ class _ChatPageState extends State<ChatPage> {
                           を，必ず以下のフォーマットで送ってください
                           &&内容1&&内容2&&内容3&&内容4
                           '''));
-                          String infotext = info.text ?? '作成失敗';
+                          String infotext = info.text ?? '&&なし&&なし&&なし&&なし';
                           final B = infotext.substring(infotext.indexOf('&&')).split('&&');
-                          String firstans = B[1];     //どういう解き方を最初したのか
-                          String wrong = B[2];        //間違えてた部分
-                          String wrongpartans = B[3]; //間違えてた部分の正しい解き方
-                          String correctans = B[4];   //それの正しい解き方
+                          firstans = B[1];     //どういう解き方を最初したのか
+                          wrong = B[2];        //間違えてた部分
+                          wrongpartans = B[3]; //間違えてた部分の正しい解き方
+                          correctans = B[4];   //それの正しい解き方
                           // print("sdoifsdjffd");
                           // print(firstans);
                           // print(wrong);
                           // print(wrongpartans);
                           // print(correctans);
+
+                          inputDatabase();//データベースに追加
 
                           Navigator.pushNamed(
                             context, '/result',
