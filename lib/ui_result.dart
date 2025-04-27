@@ -105,7 +105,7 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background_a,
+      backgroundColor: A_Colors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -144,8 +144,8 @@ class _ResultPageState extends State<ResultPage> {
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainColor,
-                    foregroundColor: AppColors.white,
+                    backgroundColor: A_Colors.mainColor,
+                    foregroundColor: A_Colors.white,
                   ),
                   onPressed: () {
                     // 画面を保存
@@ -179,12 +179,12 @@ class _ResultPageState extends State<ResultPage> {
                 margin: const EdgeInsets.only(top: 8, bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.subColor,
+                  color: A_Colors.subColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
-                    Center(child: Text('類題も解いてみよう！', style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.bold),),),
+                    Center(child: Text('類題も解いてみよう！', style: TextStyle(color: A_Colors.black, fontSize: 16, fontWeight: FontWeight.bold),),),
                     SizedBox(height: 16,),
                     similarQuestions.isNotEmpty
                     ? Column(
@@ -208,12 +208,12 @@ class _ResultPageState extends State<ResultPage> {
                                   height: MediaQuery.of(context).size.height * 0.6,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [AppColors.subColor, AppColors.white],
+                                      colors: [A_Colors.subColor, A_Colors.white],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.white, width: 4),
+                                    border: Border.all(color: A_Colors.white, width: 4),
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(20),
@@ -223,7 +223,7 @@ class _ResultPageState extends State<ResultPage> {
                                         Align(
                                           alignment: Alignment.topRight,
                                           child: IconButton(
-                                            icon: Icon(Icons.close, color: AppColors.white,),
+                                            icon: Icon(Icons.close, color: A_Colors.white,),
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
@@ -234,7 +234,7 @@ class _ResultPageState extends State<ResultPage> {
                                             child: Text(
                                               item['text'],
                                               style: TextStyle(
-                                                color: AppColors.black,
+                                                color: A_Colors.black,
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                             ),
@@ -257,7 +257,7 @@ class _ResultPageState extends State<ResultPage> {
                                             );
                                           },child: Text('この類題を解く→',
                                           textAlign: TextAlign.right,
-                                          style: TextStyle(color: AppColors.mainColor, fontSize: 16,),
+                                          style: TextStyle(color: A_Colors.mainColor, fontSize: 16,),
                                           ),
                                         ),
                                       ],
@@ -268,7 +268,7 @@ class _ResultPageState extends State<ResultPage> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.white,
+                          backgroundColor: A_Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -277,7 +277,7 @@ class _ResultPageState extends State<ResultPage> {
                           child: Text(
                           item['text'],
                           style: TextStyle(
-                            color: AppColors.black,
+                            color: A_Colors.black,
                             fontSize: 16,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -287,7 +287,7 @@ class _ResultPageState extends State<ResultPage> {
                     );
                   }).toList(),
                 )
-                    : const Text('類題がありません。', style: TextStyle(color: AppColors.black), textAlign: TextAlign.center,),
+                    : const Text('類題がありません。', style: TextStyle(color: A_Colors.black), textAlign: TextAlign.center,),
                   ],
                 ),
               ),
@@ -297,8 +297,8 @@ class _ResultPageState extends State<ResultPage> {
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainColor,
-                    foregroundColor: AppColors.white,
+                    backgroundColor: A_Colors.mainColor,
+                    foregroundColor: A_Colors.white,
                   ),
                   onPressed: () {
                     // ルート指定でホーム画面へ戻る
@@ -333,13 +333,13 @@ class FeedbackBubble extends StatelessWidget {
             width: MediaQuery.of(context).size.width * 0.9,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.subColor,
+              color: A_Colors.subColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
               feedbackText.isEmpty ? 'フィードバック内容がありません。' : feedbackText,
               style: TextStyle(
-                color: AppColors.black,
+                color: A_Colors.black,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -367,7 +367,7 @@ class FeedbackBubble extends StatelessWidget {
 class TrianglePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()..color = AppColors.subColor;
+    final Paint paint = Paint()..color = A_Colors.subColor;
 
     final Path path = Path()
       ..moveTo(size.width / 2, 0) // 三角形の頂点（中央上）

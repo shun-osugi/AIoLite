@@ -35,7 +35,7 @@ class _FbSheetState extends State<FbSheet> {
             margin: const EdgeInsets.only(top: 8, bottom: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.subColor,
+              color: A_Colors.subColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -45,7 +45,7 @@ class _FbSheetState extends State<FbSheet> {
                   child: Text(
                     fbTitle1,
                     style: TextStyle(
-                        color: AppColors.black,
+                        color: A_Colors.black,
                         fontSize: 16,
                         fontWeight: FontWeight.bold),
                   ),
@@ -58,14 +58,14 @@ class _FbSheetState extends State<FbSheet> {
                   margin: const EdgeInsets.only(top: 8, bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: A_Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   // テキスト文章
                   child: Text(
                     fbText1,
                     style: TextStyle(
-                      color: AppColors.black,
+                      color: A_Colors.black,
                       fontSize: 16,
                     ),
                   ),
@@ -82,7 +82,7 @@ class _FbSheetState extends State<FbSheet> {
             margin: const EdgeInsets.only(top: 8, bottom: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.subColor,
+              color: A_Colors.subColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -92,7 +92,7 @@ class _FbSheetState extends State<FbSheet> {
                   child: Text(
                     fbTitle2,
                     style: TextStyle(
-                        color: AppColors.black,
+                        color: A_Colors.black,
                         fontSize: 16,
                         fontWeight: FontWeight.bold),
                   ),
@@ -105,14 +105,14 @@ class _FbSheetState extends State<FbSheet> {
                   margin: const EdgeInsets.only(top: 8, bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: A_Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   // テキスト文章
                   child: Text(
                     fbText2,
                     style: TextStyle(
-                      color: AppColors.black,
+                      color: A_Colors.black,
                       fontSize: 16,
                     ),
                   ),
@@ -129,7 +129,7 @@ class _FbSheetState extends State<FbSheet> {
             margin: const EdgeInsets.only(top: 8, bottom: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.subColor,
+              color: A_Colors.subColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -139,7 +139,7 @@ class _FbSheetState extends State<FbSheet> {
                   child: Text(
                     fbTitle3,
                     style: TextStyle(
-                        color: AppColors.black,
+                        color: A_Colors.black,
                         fontSize: 16,
                         fontWeight: FontWeight.bold),
                   ),
@@ -152,14 +152,14 @@ class _FbSheetState extends State<FbSheet> {
                   margin: const EdgeInsets.only(top: 8, bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: A_Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   // テキスト文章
                   child: Text(
                     fbText3,
                     style: TextStyle(
-                      color: AppColors.black,
+                      color: A_Colors.black,
                       fontSize: 16,
                     ),
                   ),
