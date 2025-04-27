@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
-import 'ui_result.dart';
 import 'colors.dart';
 import 'tts_service.dart';
 
