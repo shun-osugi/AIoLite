@@ -25,6 +25,11 @@ class _FbSheetState extends State<FbSheet> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: A_Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         children: [
 
