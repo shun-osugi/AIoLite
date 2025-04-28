@@ -695,11 +695,14 @@ class _ChatPageState extends State<ChatPage> {
                       arguments: {
                         'inputText': inputText,
                         'feedbackText': feedbackMessage,
+                        'dateId': 0,
                         'labels': labels,
+                        /*
                         'firstans': firstans,
                         'wrong': wrong,
                         'wrongpartans': wrongpartans,
                         'correctans': correctans,
+                        */
                       },
                     );
                   } catch (e) {
@@ -708,11 +711,14 @@ class _ChatPageState extends State<ChatPage> {
                       arguments: {
                         'inputText': inputText,
                         'feedbackText': 'フィードバックの作成に失敗しました',
+                        'feedbackId': 0,
                         'labels': labels,
+                        /*
                         'firstans': firstans,
                         'wrong': wrong,
                         'wrongpartans': wrongpartans,
                         'correctans': correctans,
+                        */
                       },
                     );
                   }

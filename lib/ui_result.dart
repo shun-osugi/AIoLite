@@ -17,6 +17,7 @@ class ResultPage extends StatefulWidget {
 class _ResultPageState extends State<ResultPage> {
   String inputText = "";
   String feedbackText = "";
+  int feedbackId = 0;
   List<String> labels = [];
   late List<dynamic> similarQuestions = [];
 
@@ -44,10 +45,14 @@ class _ResultPageState extends State<ResultPage> {
         // feedbackTextを取得
         feedbackText = args['feedbackText']?.toString() ?? "";
 
+        // feedbackDateIdを取得
+        feedbackId = args['feedbackId']?.toInt() ?? 0;
+
         // labelsを取得
         labels = (args['labels'] as List<dynamic>?)
-            ?.map((e) => e.toString())
-            .toList() ?? [];
+                ?.map((e) => e.toString())
+                .toList() ??
+            [];
 
         // inputTextとlabelsを基に類題を検索
         if (inputText.isNotEmpty && labels.isNotEmpty) {
@@ -57,7 +62,7 @@ class _ResultPageState extends State<ResultPage> {
       });
 
       if (feedbackText.isNotEmpty && !_hasReadFeedback) {
-        _hasReadFeedback = true;  //何回も読み上げることの防止
+        _hasReadFeedback = true; //何回も読み上げることの防止
         _ttsService.stop();
         _ttsService.speak(feedbackText); //フィードバックを読み上げ
       }
@@ -166,7 +171,8 @@ class _ResultPageState extends State<ResultPage> {
                   controller: ssController,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 16),
-                    child: Stack(clipBehavior: Clip.none, children: [FbSheet()]),
+                    child:
+                        Stack(clipBehavior: Clip.none, children: [FbSheet()]),
                   ),
                 ),
               ),
@@ -184,110 +190,153 @@ class _ResultPageState extends State<ResultPage> {
                 ),
                 child: Column(
                   children: [
-                    Center(child: Text('類題も解いてみよう！', style: TextStyle(color: A_Colors.black, fontSize: 16, fontWeight: FontWeight.bold),),),
-                    SizedBox(height: 16,),
+                    Center(
+                      child: Text(
+                        '類題も解いてみよう！',
+                        style: TextStyle(
+                            color: A_Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
                     similarQuestions.isNotEmpty
-                    ? Column(
-                  children: similarQuestions.map((item) {
-                    // labelsの部分をList<String>に変換
-                    List<String> itemLabels = (item['labels'] as List<dynamic>)
-                        .map((e) => e.toString())
-                        .toList();
+                        ? Column(
+                            children: similarQuestions.map((item) {
+                              // labelsの部分をList<String>に変換
+                              List<String> itemLabels =
+                                  (item['labels'] as List<dynamic>)
+                                      .map((e) => e.toString())
+                                      .toList();
 
-                    return ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Dialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                                ),
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.95,
-                                  height: MediaQuery.of(context).size.height * 0.6,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [A_Colors.subColor, A_Colors.white],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: A_Colors.white, width: 4),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Align(
-                                          alignment: Alignment.topRight,
-                                          child: IconButton(
-                                            icon: Icon(Icons.close, color: A_Colors.white,),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
+                              return ElevatedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Dialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(12)),
                                         ),
-                                        Expanded(
-                                          child: SingleChildScrollView(
-                                            child: Text(
-                                              item['text'],
-                                              style: TextStyle(
-                                                color: A_Colors.black,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.95,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.6,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                A_Colors.subColor,
+                                                A_Colors.white
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                                color: A_Colors.white,
+                                                width: 4),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(20),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Align(
+                                                  alignment: Alignment.topRight,
+                                                  child: IconButton(
+                                                    icon: Icon(
+                                                      Icons.close,
+                                                      color: A_Colors.white,
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: SingleChildScrollView(
+                                                    child: Text(
+                                                      item['text'],
+                                                      style: TextStyle(
+                                                        color: A_Colors.black,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    // ボタンを押した時に渡すデータ
+                                                    final inputText =
+                                                        item['text'];
+                                                    final remainingLabels =
+                                                        itemLabels;
+
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      '/chat',
+                                                      arguments: {
+                                                        'inputText': inputText,
+                                                        'labels':
+                                                            remainingLabels,
+                                                      },
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    'この類題を解く→',
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                      color: A_Colors.mainColor,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            // ボタンを押した時に渡すデータ
-                                            final inputText = item['text'];
-                                            final remainingLabels = itemLabels;
-
-                                            Navigator.pushNamed(
-                                              context,
-                                              '/chat',
-                                              arguments: {
-                                                'inputText': inputText,
-                                                'labels': remainingLabels,
-                                              },
-                                            );
-                                          },child: Text('この類題を解く→',
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(color: A_Colors.mainColor, fontSize: 16,),
-                                          ),
-                                        ),
-                                      ],
+                                      );
+                                    },
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: A_Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Text(
+                                    item['text'],
+                                    style: TextStyle(
+                                      color: A_Colors.black,
+                                      fontSize: 16,
                                     ),
-                                  ),),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 5,
+                                  ),
+                                ),
                               );
-                            },
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: A_Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            }).toList(),
+                          )
+                        : const Text(
+                            '類題がありません。',
+                            style: TextStyle(color: A_Colors.black),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        child: Padding(padding: EdgeInsets.all(16),
-                          child: Text(
-                          item['text'],
-                          style: TextStyle(
-                            color: A_Colors.black,
-                            fontSize: 16,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 5,
-                          ),
-                        ),
-                    );
-                  }).toList(),
-                )
-                    : const Text('類題がありません。', style: TextStyle(color: A_Colors.black), textAlign: TextAlign.center,),
                   ],
                 ),
               ),

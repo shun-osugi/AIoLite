@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 
+class feedback {//フィードバック一つのデータ
+  int id;              //id
+  String subject;      //教科
+  List<String> field;  //分野
+  String problem;      //問題文
+  String wrong;        //間違えてた部分
+  String wrongpartans; //間違えてた部分の正しい解き方
+  String correctans;   //それの正しい解き方
+  feedback(this.id, this.subject, this.field, this.problem, this.wrong, this.wrongpartans, this.correctans);
+}
+
 class FbSheet extends StatefulWidget {
-  const FbSheet({super.key});
+  final int dateId; // SQLのid
+  const FbSheet({super.key, this.dateId = 1});
 
   @override
   State<FbSheet> createState() => _FbSheetState();
@@ -24,157 +36,155 @@ class _FbSheetState extends State<FbSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: A_Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-
-          // ▼ ---------- フィードバック1 ---------- ▼ //
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(top: 8, bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: A_Colors.subColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                // タイトル
-                Center(
-                  child: Text(
-                    fbTitle1,
-                    style: TextStyle(
-                        color: A_Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-
-                // テキスト枠
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  alignment: Alignment.centerLeft,
-                  margin: const EdgeInsets.only(top: 8, bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: A_Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  // テキスト文章
-                  child: Text(
-                    fbText1,
-                    style: TextStyle(
-                      color: A_Colors.black,
-                      fontSize: 16,
+        margin: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: A_Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            // ▼ ---------- フィードバック1 ---------- ▼ //
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(top: 8, bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: A_Colors.subColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  // タイトル
+                  Center(
+                    child: Text(
+                      fbTitle1,
+                      style: TextStyle(
+                          color: A_Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          // ▲ ---------- フィードバック1 ---------- ▲ //
 
-          // ▼ ---------- フィードバック2 ---------- ▼ //
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(top: 8, bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: A_Colors.subColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                // タイトル
-                Center(
-                  child: Text(
-                    fbTitle2,
-                    style: TextStyle(
+                  // テキスト枠
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(top: 8, bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: A_Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    // テキスト文章
+                    child: Text(
+                      fbText1,
+                      style: TextStyle(
                         color: A_Colors.black,
                         fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-
-                // テキスト枠
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  alignment: Alignment.centerLeft,
-                  margin: const EdgeInsets.only(top: 8, bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: A_Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  // テキスト文章
-                  child: Text(
-                    fbText2,
-                    style: TextStyle(
-                      color: A_Colors.black,
-                      fontSize: 16,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // ▲ ---------- フィードバック2 ---------- ▲ //
+            // ▲ ---------- フィードバック1 ---------- ▲ //
 
-          // ▼ ---------- フィードバック3 ---------- ▼ //
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(top: 8, bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: A_Colors.subColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                // タイトル
-                Center(
-                  child: Text(
-                    fbTitle3,
-                    style: TextStyle(
+            // ▼ ---------- フィードバック2 ---------- ▼ //
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(top: 8, bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: A_Colors.subColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  // タイトル
+                  Center(
+                    child: Text(
+                      fbTitle2,
+                      style: TextStyle(
+                          color: A_Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  // テキスト枠
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(top: 8, bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: A_Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    // テキスト文章
+                    child: Text(
+                      fbText2,
+                      style: TextStyle(
                         color: A_Colors.black,
                         fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-
-                // テキスト枠
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  alignment: Alignment.centerLeft,
-                  margin: const EdgeInsets.only(top: 8, bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: A_Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  // テキスト文章
-                  child: Text(
-                    fbText3,
-                    style: TextStyle(
-                      color: A_Colors.black,
-                      fontSize: 16,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // ▲ ---------- フィードバック3 ---------- ▲ //
-        ],
-      )
-    );
+            // ▲ ---------- フィードバック2 ---------- ▲ //
+
+            // ▼ ---------- フィードバック3 ---------- ▼ //
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(top: 8, bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: A_Colors.subColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  // タイトル
+                  Center(
+                    child: Text(
+                      fbTitle3,
+                      style: TextStyle(
+                          color: A_Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  // テキスト枠
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(top: 8, bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: A_Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    // テキスト文章
+                    child: Text(
+                      fbText3,
+                      style: TextStyle(
+                        color: A_Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // ▲ ---------- フィードバック3 ---------- ▲ //
+          ],
+        ));
   }
 }
