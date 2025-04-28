@@ -6,10 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:ps_hacku_osaka/ui_fblist.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'ui_chat.dart';
 import 'ui_chat_basic.dart';
 import 'ui_result.dart';
+import 'ui_fblist.dart';
 import 'colors.dart';
 import 'subject_categories.dart';
 import 'api_service.dart';
@@ -41,6 +43,7 @@ class MyApp extends StatelessWidget {
         '/chat': (context) => ChatPage(),
         '/chat_basic': (context) => ChatBasicPage(),
         '/result': (context) => ResultPage(),
+        '/fblist': (context) => FblistPage(),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -193,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                         SizedBox(height: MediaQuery.of(context).size.height * 0.035),
 
-                        // モード切替＋全体統計＋フィードバックボタン（横並び）
+                        // モード切替＋全体統計＋フィードバック一覧ボタン（横並び）
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -252,7 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                             SizedBox(width: MediaQuery.of(context).size.width * 0.02),
 
-                            //フィードバックのボタン（アドバンス時のみ）
+                            //フィードバック一覧のボタン（アドバンス時のみ）
                             if (!_isBasicMode)
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.16,
@@ -277,8 +280,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                   icon: Icon(Icons.auto_stories),
                                   iconSize: MediaQuery.of(context).size.width * 0.08,
                                   color: _isBasicMode ? B_Colors.black : A_Colors.black,
-                                  onPressed: () {
-                                    // フィードバックの処理を記述
+                                  onPressed: () {                                    
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/fblist',
+                                    );
                                   },
                                 ),
                               ),
