@@ -13,6 +13,7 @@ import 'ui_chat_basic.dart';
 import 'ui_result.dart';
 import 'ui_fblist.dart';
 import 'colors.dart';
+import 'ui_statistics.dart';
 import 'subject_categories.dart';
 import 'api_service.dart';
 import 'terms_content.dart';
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/chat_basic': (context) => ChatBasicPage(),
         '/result': (context) => ResultPage(),
         '/fblist': (context) => FblistPage(),
+        '/stats': (context) =>  StatsPage(),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -316,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 iconSize: MediaQuery.of(context).size.width * 0.1,
                                 color: _isBasicMode ? B_Colors.black : A_Colors.black,
                                 onPressed: () {
-                                  // 全体統計の処理を記述
+                                  Navigator.pushNamed(context, '/stats');
                                 },
                               ),
                             ),
