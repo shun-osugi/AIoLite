@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 import 'package:ps_hacku_osaka/widget_fbsheet.dart';
 import 'subject_categories.dart';
+
 class feedback {
   //フィードバック一つのデータ
   int id; //id
@@ -22,20 +23,29 @@ class FblistPage extends StatefulWidget {
 }
 
 class _FblistPageState extends State<FblistPage> {
-  List<feedback> fblist = []; //フィードバック一覧リスト
+  List<feedback> fblist = [
+    feedback(1, "数学", ["代数", "方程式"], "x + 2 = 5", "左辺から2を引いた", "右辺から2を引くのを忘れた",
+        "右辺からも2を引く", "x = 3"),
+    feedback(2, "英語", ["文法", "現在形"], "I (go) to school.", "go", "三単現のsをつけた",
+        "主語がIなのでそのまま", "go"),
+    feedback(3, "数学", ["幾何", "図形"], "三角形の内角の和は？", "360度", "内角と外角を混同した",
+        "内角のみを足す", "180度"),
+    feedback(4, "理科", ["物理", "運動"], "自由落下する物体の加速度は？", "0", "速度が一定だと思った",
+        "重力が働く", "約9.8 m/s²"),
+  ];
   int listNum = 0; //フィードバック一覧リストの選択(0で仮置き)
   List<String> _filteredLabels = []; // 絞り込み後のラベル
   List<String> _filteredSubjects = []; // 絞り込み後の科目リスト
   List<String> _filteredFields = []; // 絞り込み後の分野リスト
   List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
 
-    @override
+  @override
   void initState() {
     super.initState();
     _filteredFbList = List.from(fblist); // 初期表示は全件
   }
 
-    // ダイアログからラベルを受け取るコールバック関数
+  // ダイアログからラベルを受け取るコールバック関数
   void _updateFilteredLabels(List<String> labels) {
     setState(() {
       _filteredLabels = labels;
@@ -58,7 +68,8 @@ class _FblistPageState extends State<FblistPage> {
     });
   }
 
-   void _filterFeedbackList() {
+  void _filterFeedbackList() {
+    /*
     _filteredFbList.clear();
     if (_filteredLabels.isEmpty) {
       _filteredFbList.addAll(fblist); // ラベルが選択されていなければ全件表示
@@ -70,6 +81,9 @@ class _FblistPageState extends State<FblistPage> {
         }
       }
     }
+    */
+    _filteredFbList.addAll(fblist); //絞り込みなし
+    listNum = 0; //絞り込み後はリセット
   }
 
   @override
@@ -82,26 +96,57 @@ class _FblistPageState extends State<FblistPage> {
           child: Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              // ▼ ---------- ラベルボタン ---------- ▼ //
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.mainColor,
-                    foregroundColor: A_Colors.white,
-                  ),
-                  onPressed: () {
-                    showLabelDialog(context, _updateFilteredLabels);
-                  },
-                  child: const Text('絞り込み'),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                // ▼ ---------- 左ボタン ---------- ▼ //
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: A_Colors.black),
+                  onPressed: listNum > 0
+                      ? () {
+                          setState(() {
+                            if (listNum > 0) {
+                              listNum--;
+                            }
+                          });
+                        }
+                      : null,
+                  color: A_Colors.black.withOpacity(listNum > 0 ? 1.0 : 0.3),
                 ),
-              ),
+                // ▼ ---------- ラベルボタン ---------- ▼ //
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: A_Colors.mainColor,
+                      foregroundColor: A_Colors.white,
+                    ),
+                    onPressed: () {
+                      showLabelDialog(context, _updateFilteredLabels);
+                    },
+                    child: const Text('絞り込み'),
+                  ),
+                ),
+                // ▼ ---------- 右ボタン ---------- ▼ //
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios,
+                      color: A_Colors.black),
+                  onPressed: listNum > 0
+                      ? () {
+                          setState(() {
+                            if (listNum < _filteredFbList.length - 1) {
+                              listNum++;
+                            }
+                          });
+                        }
+                      : null,
+                  color: A_Colors.black.withOpacity(listNum < _filteredFbList.length - 1 ? 1.0 : 0.3),
+                ),
+              ]),
 
               // ▼ ---------- フィードバックシート ---------- ▼ //
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 16),
                 child: Stack(clipBehavior: Clip.none, children: [
-                  if (_filteredFbList.isNotEmpty)
+                  if (fblist.isNotEmpty)
                     FbSheet(
                       labels: _filteredFbList[listNum].field,
                       problem: _filteredFbList[listNum].problem,
@@ -148,7 +193,8 @@ void showLabelDialog(
 }
 
 class LabelDialog extends StatefulWidget {
-  const LabelDialog({Key? key, required this.onLabelsSelected}) : super(key: key);
+  const LabelDialog({Key? key, required this.onLabelsSelected})
+      : super(key: key);
   final Function(List<String>) onLabelsSelected;
 
   @override
@@ -342,7 +388,7 @@ class _LabelDialogState extends State<LabelDialog> {
                           }
                           */
 
-                            // ---------------------------------- ラベル選択実行　-------------------------------------------//
+                          // ---------------------------------- ラベル選択実行　-------------------------------------------//
 
                           Navigator.pop(
                             context,
