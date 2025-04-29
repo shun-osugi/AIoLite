@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 
-class FbSheet extends StatefulWidget {
-  const FbSheet({super.key});
+class FbSheet extends StatefulWidget {  
+  final List<String> labels; //ラベル
+  final String problem;      //問題文
+  final String wrong;        //間違えてた部分
+  final String wrongpartans; //間違えてた部分の正しい解き方
+  final String correctans;   //それの正しい解き方
+
+  const FbSheet({
+    super.key,
+    this.labels = const [],
+    this.problem = "none",
+    this.wrong = "none",
+    this.wrongpartans = "none",
+    this.correctans = "none",
+    });
 
   @override
   State<FbSheet> createState() => _FbSheetState();
@@ -11,7 +24,7 @@ class FbSheet extends StatefulWidget {
 class _FbSheetState extends State<FbSheet> {
   // フィードバック1
   String fbTitle1 = "aaa"; // 問題文(ラベル)
-  String fbText1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  String fbText1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   // フィードバック2
   String fbTitle2 = "bbb"; // 間違えてた部分
   String fbText2 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
@@ -20,6 +33,14 @@ class _FbSheetState extends State<FbSheet> {
   String fbText3 = "cccccccccccccccccccccccccccccccc";
   // 内容が空だった場合のテキスト
   String fbErrorText = "。。。";
+
+  @override
+  void initState() {
+    super.initState();
+    fbText1 = widget.wrong; //仮設定
+    fbText2 = widget.wrongpartans;
+    fbText3 = widget.correctans;
+  }
 
   @override
   Widget build(BuildContext context) {

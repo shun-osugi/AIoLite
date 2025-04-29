@@ -703,18 +703,8 @@ class _ChatPageState extends State<ChatPage> {
                       },
                     );
                   } catch (e) {
-                    Navigator.pushNamed(
-                      context, '/result',
-                      arguments: {
-                        'inputText': inputText,
-                        'feedbackText': 'フィードバックの作成に失敗しました',
-                        'labels': labels,
-                        'firstans': firstans,
-                        'wrong': wrong,
-                        'wrongpartans': wrongpartans,
-                        'correctans': correctans,
-                      },
-                    );
+                    print("フィードバック保存エラー");
+                    print(e);
                   }
                 },
                 style: ElevatedButton.styleFrom(
