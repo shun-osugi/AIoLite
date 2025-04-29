@@ -18,6 +18,9 @@ class _ResultPageState extends State<ResultPage> {
   String inputText = "";
   String feedbackText = "";
   List<String> labels = [];
+  String wrong = "";
+  String wrongpartans = "";
+  String correctans = "";
   late List<dynamic> similarQuestions = [];
 
   //  フィードバックシートの可視状態
@@ -54,6 +57,14 @@ class _ResultPageState extends State<ResultPage> {
           fetchSimilarQuestions(inputText, labels);
         }
         print(similarQuestions);
+
+        // wrongを取得
+        wrong = args['wrong']?.toString() ?? "";
+        // wrongpartansを取得
+        wrongpartans = args['wrongpartans']?.toString() ?? "";
+        // correctansを取得
+        correctans = args['correctans']?.toString() ?? "";
+        
       });
 
       if (feedbackText.isNotEmpty && !_hasReadFeedback) {
@@ -149,7 +160,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                   onPressed: () {
                     // 画面を保存
-                    _saveFbSheet();
+                    // _saveFbSheet();
                     // visible の状態を 反転して UI を再描画
                     setState(() {
                       _isFbsheetVisible = !_isFbsheetVisible;
@@ -166,7 +177,14 @@ class _ResultPageState extends State<ResultPage> {
                   controller: ssController,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 16),
-                    child: Stack(clipBehavior: Clip.none, children: [FbSheet()]),
+                    child: Stack(clipBehavior: Clip.none,children: [
+                      FbSheet(
+                        labels: labels,
+                        problem: inputText,
+                        wrong: wrong,
+                        wrongpartans: wrongpartans,
+                        correctans: correctans,
+                        )]),
                   ),
                 ),
               ),
