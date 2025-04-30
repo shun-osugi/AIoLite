@@ -1,0 +1,107 @@
+import 'package:flutter/material.dart';
+import 'package:ps_hacku_osaka/colors.dart';
+import 'package:ps_hacku_osaka/widget_fbsheet.dart';
+import 'subject_categories.dart';
+
+class feedback {
+  //フィードバック一つのデータ
+  int id; //id
+  String subject; //教科
+  List<String> field; //分野
+  String problem; //問題文
+  String firstans; //どういう解き方を最初したのか
+  String wrong; //間違えてた部分
+  String wrongpartans; //間違えてた部分の正しい解き方
+  String correctans; //それの正しい解き方
+  feedback(this.id, this.subject, this.field, this.problem, this.firstans,
+      this.wrong, this.wrongpartans, this.correctans);
+}
+
+class FblistPage extends StatefulWidget {
+  @override
+  _FblistPageState createState() => _FblistPageState();
+}
+
+class _FblistPageState extends State<FblistPage> {
+  List<feedback> fblist = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: A_Colors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                // ▼ ---------- 左ボタン ---------- ▼ //
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: A_Colors.black),
+                  onPressed: listNum > 0
+                      ? () {
+                          setState(() {
+                            if (listNum > 0) {
+                              listNum--;
+                            }
+                          });
+                        }
+                      : null,
+                  color: A_Colors.black.withOpacity(listNum > 0 ? 1.0 : 0.3),
+                ),
+                // ▼ ---------- 右ボタン ---------- ▼ //
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios,
+                      color: A_Colors.black),
+                  onPressed: listNum > 0
+                      ? () {
+                          setState(() {
+                            if (listNum < _filteredFbList.length - 1) {
+                              listNum++;
+                            }
+                          });
+                        }
+                      : null,
+                  color: A_Colors.black.withOpacity(listNum < _filteredFbList.length - 1 ? 1.0 : 0.3),
+                ),
+              ]),
+
+              // ▼ ---------- フィードバックシート ---------- ▼ //
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                child: Stack(clipBehavior: Clip.none, children: [
+                  if (fblist.isNotEmpty)
+                    FbSheet(
+                      labels: _filteredFbList[listNum].field,
+                      problem: _filteredFbList[listNum].problem,
+                      wrong: _filteredFbList[listNum].wrong,
+                      wrongpartans: _filteredFbList[listNum].wrongpartans,
+                      correctans: _filteredFbList[listNum].correctans,
+                    )
+                  else
+                    const Text("該当なし", style: TextStyle(fontSize: 18)),
+                ]),
+              ),
+
+              // ▼ ---------- ホームボタン ---------- ▼ //
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: A_Colors.mainColor,
+                    foregroundColor: A_Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/home');
+                  },
+                  child: const Text('ホーム画面へ戻る'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
