@@ -23,28 +23,21 @@ class FblistPage extends StatefulWidget {
 }
 
 class _FblistPageState extends State<FblistPage> {
-  List<feedback> fblist = [
-    feedback(1, "数学", ["代数", "方程式"], "x + 2 = 5", "左辺から2を引いた", "右辺から2を引くのを忘れた",
-        "右辺からも2を引く", "x = 3"),
-    feedback(2, "英語", ["文法", "現在形"], "I (go) to school.", "go", "三単現のsをつけた",
-        "主語がIなのでそのまま", "go"),
-    feedback(3, "数学", ["幾何", "図形"], "三角形の内角の和は？", "360度", "内角と外角を混同した",
-        "内角のみを足す", "180度"),
-    feedback(4, "理科", ["物理", "運動"], "自由落下する物体の加速度は？", "0", "速度が一定だと思った",
-        "重力が働く", "約9.8 m/s²"),
-  ];
+  List<feedback> fblist = [];
   int listNum = 0; //フィードバック一覧リストの選択(0で仮置き)
-  List<String> _filteredLabels = []; // 絞り込み後のラベル
-  List<String> _filteredSubjects = []; // 絞り込み後の科目リスト
-  List<String> _filteredFields = []; // 絞り込み後の分野リスト
+  // List<String> _filteredLabels = []; // 絞り込み後のラベル
+  // list<String> _filteredSubjects = []; // 絞り込み後の科目リスト
+  // List<String> _filteredFields = []; // 絞り込み後の分野リスト
   List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
 
+/*
   @override
   void initState() {
     super.initState();
     _filteredFbList = List.from(fblist); // 初期表示は全件
   }
-
+*/
+  /*
   // ダイアログからラベルを受け取るコールバック関数
   void _updateFilteredLabels(List<String> labels) {
     setState(() {
@@ -67,23 +60,10 @@ class _FblistPageState extends State<FblistPage> {
       _filterFeedbackList();
     });
   }
+  */
 
+  // 絞り込み処理
   void _filterFeedbackList() {
-    /*
-    _filteredFbList.clear();
-    if (_filteredLabels.isEmpty) {
-      _filteredFbList.addAll(fblist); // ラベルが選択されていなければ全件表示
-    } else {
-      for (final fb in fblist) {
-        if (_filteredSubjects.any((subject) => fb.subject == subject) &&
-            _filteredFields.any((field) => fb.field.contains(field))) {
-          _filteredFbList.add(fb);
-        }
-      }
-    }
-    */
-    _filteredFbList.addAll(fblist); //絞り込みなし
-    listNum = 0; //絞り込み後はリセット
   }
 
   @override
@@ -112,6 +92,7 @@ class _FblistPageState extends State<FblistPage> {
                   color: A_Colors.black.withOpacity(listNum > 0 ? 1.0 : 0.3),
                 ),
                 // ▼ ---------- ラベルボタン ---------- ▼ //
+                /*
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: ElevatedButton(
@@ -125,6 +106,7 @@ class _FblistPageState extends State<FblistPage> {
                     child: const Text('絞り込み'),
                   ),
                 ),
+                */
                 // ▼ ---------- 右ボタン ---------- ▼ //
                 IconButton(
                   icon: const Icon(Icons.arrow_forward_ios,
