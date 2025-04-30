@@ -2,7 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 import 'package:ps_hacku_osaka/widget_fbsheet.dart';
 import 'subject_categories.dart';
-import 'api_service.dart';
+
+class feedback {
+  //フィードバック一つのデータ
+  int id; //id
+  String subject; //教科
+  List<String> field; //分野
+  String problem; //問題文
+  String firstans; //どういう解き方を最初したのか
+  String wrong; //間違えてた部分
+  String wrongpartans; //間違えてた部分の正しい解き方
+  String correctans; //それの正しい解き方
+  feedback(this.id, this.subject, this.field, this.problem, this.firstans,
+      this.wrong, this.wrongpartans, this.correctans);
+}
 
 class FblistPage extends StatefulWidget {
   @override
@@ -10,6 +23,48 @@ class FblistPage extends StatefulWidget {
 }
 
 class _FblistPageState extends State<FblistPage> {
+  List<feedback> fblist = [];
+  int listNum = 0; //フィードバック一覧リストの選択(0で仮置き)
+  // List<String> _filteredLabels = []; // 絞り込み後のラベル
+  // list<String> _filteredSubjects = []; // 絞り込み後の科目リスト
+  // List<String> _filteredFields = []; // 絞り込み後の分野リスト
+  List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
+
+/*
+  @override
+  void initState() {
+    super.initState();
+    _filteredFbList = List.from(fblist); // 初期表示は全件
+  }
+*/
+  /*
+  // ダイアログからラベルを受け取るコールバック関数
+  void _updateFilteredLabels(List<String> labels) {
+    setState(() {
+      _filteredLabels = labels;
+      _filteredSubjects.clear();
+      _filteredFields.clear();
+
+      for (final label in _filteredLabels) {
+        final parts = label.split(' - ');
+        if (parts.length == 2) {
+          _filteredSubjects.add(parts[0]);
+          _filteredFields.add(parts[1]);
+        }
+      }
+      // print("選択されたラベル: $_filteredLabels");
+      // print("絞り込み科目: $_filteredSubjects");
+      // print("絞り込み分野: $_filteredFields");
+
+      // 絞り込み処理を実行
+      _filterFeedbackList();
+    });
+  }
+  */
+
+  // 絞り込み処理
+  void _filterFeedbackList() {
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,26 +75,70 @@ class _FblistPageState extends State<FblistPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),              
-              // ▼ ---------- ラベルボタン ---------- ▼ //
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.mainColor,
-                    foregroundColor: A_Colors.white,
-                  ),
-                  onPressed: () {
-                    showLabelDialog(context);
-                  },
-                  child: const Text('絞り込み'),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                // ▼ ---------- 左ボタン ---------- ▼ //
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: A_Colors.black),
+                  onPressed: listNum > 0
+                      ? () {
+                          setState(() {
+                            if (listNum > 0) {
+                              listNum--;
+                            }
+                          });
+                        }
+                      : null,
+                  color: A_Colors.black.withOpacity(listNum > 0 ? 1.0 : 0.3),
                 ),
-              ),
+                // ▼ ---------- ラベルボタン ---------- ▼ //
+                /*
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: A_Colors.mainColor,
+                      foregroundColor: A_Colors.white,
+                    ),
+                    onPressed: () {
+                      showLabelDialog(context, _updateFilteredLabels);
+                    },
+                    child: const Text('絞り込み'),
+                  ),
+                ),
+                */
+                // ▼ ---------- 右ボタン ---------- ▼ //
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios,
+                      color: A_Colors.black),
+                  onPressed: listNum > 0
+                      ? () {
+                          setState(() {
+                            if (listNum < _filteredFbList.length - 1) {
+                              listNum++;
+                            }
+                          });
+                        }
+                      : null,
+                  color: A_Colors.black.withOpacity(listNum < _filteredFbList.length - 1 ? 1.0 : 0.3),
+                ),
+              ]),
 
               // ▼ ---------- フィードバックシート ---------- ▼ //
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 16),
-                child: Stack(clipBehavior: Clip.none, children: [FbSheet()]),
+                child: Stack(clipBehavior: Clip.none, children: [
+                  if (fblist.isNotEmpty)
+                    FbSheet(
+                      labels: _filteredFbList[listNum].field,
+                      problem: _filteredFbList[listNum].problem,
+                      wrong: _filteredFbList[listNum].wrong,
+                      wrongpartans: _filteredFbList[listNum].wrongpartans,
+                      correctans: _filteredFbList[listNum].correctans,
+                    )
+                  else
+                    const Text("該当なし", style: TextStyle(fontSize: 18)),
+                ]),
               ),
 
               // ▼ ---------- ホームボタン ---------- ▼ //
@@ -56,7 +155,6 @@ class _FblistPageState extends State<FblistPage> {
                   child: const Text('ホーム画面へ戻る'),
                 ),
               ),
-
             ],
           ),
         ),
@@ -68,60 +166,27 @@ class _FblistPageState extends State<FblistPage> {
 // ▼ ---------- ラベル表示 ---------- ▼ //
 
 // ラベルを編集するダイアログ
-void showLabelDialog(BuildContext context) {
+void showLabelDialog(
+    BuildContext context, Function(List<String>) updateFilteredLabels) {
   showDialog(
     context: context,
-    builder: (context) => LabelDialog(),
+    builder: (context) => LabelDialog(onLabelsSelected: updateFilteredLabels),
   );
 }
+
 class LabelDialog extends StatefulWidget {
-  const LabelDialog({Key? key}) : super(key: key);
+  const LabelDialog({Key? key, required this.onLabelsSelected})
+      : super(key: key);
+  final Function(List<String>) onLabelsSelected;
 
   @override
   _LabelDialogState createState() => _LabelDialogState();
 }
+
 class _LabelDialogState extends State<LabelDialog> {
-  List<String> _suggestedLabels = []; // 推奨ラベル
   List<String?> selectedSubjects = List.filled(4, null); // 教科ドロップダウン選択
   List<String?> selectedCategories = List.filled(4, null); // 分類ドロップダウン選択
   bool _isLoading = false;
-
-  // 推奨ラベルを取得
-  Future<void> _getSuggestedLabels(String inputText) async {
-    if (inputText.isEmpty) return;
-
-    try {
-      List<String> labels = await ApiService.classifyText(inputText);
-      setState(() {
-        _suggestedLabels = labels;
-      });
-
-      // ラベルを順番に設定
-      _setDropdownValues();
-
-      // ログ出力
-      debugPrint("推奨ラベル: $labels");
-    } catch (e) {
-      debugPrint("エラー: $e");
-    }
-  }
-
-  // 推奨ラベルを元にドロップダウンに順番に値をセット
-  void _setDropdownValues() {
-    if (_suggestedLabels.isEmpty) return;
-
-    setState(() {
-      for (int i = 0; i < _suggestedLabels.length && i < 4; i++) {
-        String label = _suggestedLabels[i];
-
-        List<String> parts = label.split(" - ");
-        if (parts.length == 2) {
-          selectedSubjects[i] = parts[0];  // 教科
-          selectedCategories[i] = parts[1]; // 分類
-        }
-      }
-    });
-  }
 
   // 教科と分類のドロップダウンペア
   Widget buildDropdownPair(int index) {
@@ -137,7 +202,10 @@ class _LabelDialogState extends State<LabelDialog> {
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               isExpanded: true,
-              hint: Text("未選択", style: TextStyle(color: A_Colors.black),),
+              hint: Text(
+                "未選択",
+                style: TextStyle(color: A_Colors.black),
+              ),
               value: selectedSubjects[index],
               iconEnabledColor: A_Colors.black,
               onChanged: (String? newValue) {
@@ -149,13 +217,23 @@ class _LabelDialogState extends State<LabelDialog> {
               items: [
                 DropdownMenuItem<String>(
                   value: null,
-                  child: Text("未選択", style: TextStyle(color: A_Colors.black),), // デフォルトのnull選択肢
+                  child: Text(
+                    "未選択",
+                    style: TextStyle(color: A_Colors.black),
+                  ), // デフォルトのnull選択肢
                 ),
-                ...subjectCategories.keys.toSet().toList().map((String subject) { // 重複を削除
+                ...subjectCategories.keys
+                    .toSet()
+                    .toList()
+                    .map((String subject) {
+                  // 重複を削除
                   print("DropdownMenuItem value: $subject"); // デバッグ出力
                   return DropdownMenuItem<String>(
                     value: subject,
-                    child: Text(subject, style: TextStyle(color: A_Colors.black),),
+                    child: Text(
+                      subject,
+                      style: TextStyle(color: A_Colors.black),
+                    ),
                   );
                 }).toList(),
               ],
@@ -173,23 +251,35 @@ class _LabelDialogState extends State<LabelDialog> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
-                hint: Text("未選択", style: TextStyle(color: A_Colors.black),),
+                hint: Text(
+                  "未選択",
+                  style: TextStyle(color: A_Colors.black),
+                ),
                 value: selectedCategories[index],
                 iconEnabledColor: A_Colors.black,
-                onChanged: selectedSubjects[index] == null ? null : (String? newValue) {
-                  setState(() {
-                    selectedCategories[index] = newValue;
-                  });
-                },
+                onChanged: selectedSubjects[index] == null
+                    ? null
+                    : (String? newValue) {
+                        setState(() {
+                          selectedCategories[index] = newValue;
+                        });
+                      },
                 items: [
                   DropdownMenuItem<String>(
                     value: null,
-                    child: Text("未選択", style: TextStyle(color: A_Colors.black),), // デフォルトのnull選択肢
+                    child: Text(
+                      "未選択",
+                      style: TextStyle(color: A_Colors.black),
+                    ), // デフォルトのnull選択肢
                   ),
-                  ...(subjectCategories[selectedSubjects[index]] ?? []).map((String category) {
+                  ...(subjectCategories[selectedSubjects[index]] ?? [])
+                      .map((String category) {
                     return DropdownMenuItem<String>(
                       value: category,
-                      child: Text(category, style: TextStyle(color: A_Colors.black),),
+                      child: Text(
+                        category,
+                        style: TextStyle(color: A_Colors.black),
+                      ),
                     );
                   }).toList(),
                 ],
@@ -219,23 +309,34 @@ class _LabelDialogState extends State<LabelDialog> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("ラベルを選択", style: TextStyle(color: A_Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
+                  Text(
+                    "ラベルを選択",
+                    style: TextStyle(
+                        color: A_Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                  ),
                   SizedBox(height: 16),
 
-                  // 4つのドロップダウンペアを縦に並べる=>とりあえず1つ
+                  // 4つのドロップダウンペアを縦に並べる
                   Container(
                     width: MediaQuery.of(context).size.width * 0.8,
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: A_Colors.white,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: A_Colors.black, width: 2,),
+                      border: Border.all(
+                        color: A_Colors.black,
+                        width: 2,
+                      ),
                     ),
                     child: Column(
                       children: [
                         buildDropdownPair(0),
                         for (int i = 1; i < 1; i++) ...[
-                          Divider(color: A_Colors.black,),
+                          Divider(
+                            color: A_Colors.black,
+                          ),
                           buildDropdownPair(i),
                         ],
                       ],
@@ -249,8 +350,10 @@ class _LabelDialogState extends State<LabelDialog> {
                         onPressed: () async {
                           List<String> editedLabels = [];
                           for (int i = 0; i < 4; i++) {
-                            if (selectedSubjects[i] != null && selectedCategories[i] != null) {
-                              editedLabels.add("${selectedSubjects[i]} - ${selectedCategories[i]}");
+                            if (selectedSubjects[i] != null &&
+                                selectedCategories[i] != null) {
+                              editedLabels.add(
+                                  "${selectedSubjects[i]} - ${selectedCategories[i]}");
                             }
                           }
 
@@ -267,13 +370,19 @@ class _LabelDialogState extends State<LabelDialog> {
                           }
                           */
 
-                          Navigator.pop(
-                            // ---------------------------------- ラベル選択実行　-------------------------------------------//
-                            context,
+                          // ---------------------------------- ラベル選択実行　-------------------------------------------//
 
+                          Navigator.pop(
+                            context,
                           );
                         },
-                        child: Text("開始 →", style: TextStyle(color: A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),
+                        child: Text(
+                          "開始 →",
+                          style: TextStyle(
+                              color: A_Colors.black,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),

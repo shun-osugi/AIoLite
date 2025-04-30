@@ -6,7 +6,7 @@ class FbSheet extends StatefulWidget {
   final String problem;      //問題文
   final String wrong;        //間違えてた部分
   final String wrongpartans; //間違えてた部分の正しい解き方
-  final String correctans;   //それの正しい解き方
+  final String correctans;   //全体の正しい解き方
 
   const FbSheet({
     super.key,
@@ -23,13 +23,13 @@ class FbSheet extends StatefulWidget {
 
 class _FbSheetState extends State<FbSheet> {
   // フィードバック1
-  String fbTitle1 = "aaa"; // 問題文(ラベル)
+  String fbTitle1 = "間違えてたとこ"; //　間違えてた部分
   String fbText1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   // フィードバック2
-  String fbTitle2 = "bbb"; // 間違えてた部分
+  String fbTitle2 = "ピンポイント解説"; //　間違えてた部分の正しい解き方
   String fbText2 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
   // フィードバック3
-  String fbTitle3 = "ccc"; // それの正しい解き方
+  String fbTitle3 = "全体の回答"; // 全体の正しい解き方
   String fbText3 = "cccccccccccccccccccccccccccccccc";
   // 内容が空だった場合のテキスト
   String fbErrorText = "。。。";
