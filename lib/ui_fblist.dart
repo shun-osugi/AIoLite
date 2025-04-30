@@ -24,7 +24,6 @@ class FblistPage extends StatefulWidget {
 
 class _FblistPageState extends State<FblistPage> {
   List<feedback> fblist = [];
-  int listNum = 0; //フィードバック一覧リストの選択(0で仮置き)
   // List<String> _filteredLabels = []; // 絞り込み後のラベル
   // list<String> _filteredSubjects = []; // 絞り込み後の科目リスト
   // List<String> _filteredFields = []; // 絞り込み後の分野リスト
@@ -78,19 +77,6 @@ class _FblistPageState extends State<FblistPage> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 // ▼ ---------- 左ボタン ---------- ▼ //
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, color: A_Colors.black),
-                  onPressed: listNum > 0
-                      ? () {
-                          setState(() {
-                            if (listNum > 0) {
-                              listNum--;
-                            }
-                          });
-                        }
-                      : null,
-                  color: A_Colors.black.withOpacity(listNum > 0 ? 1.0 : 0.3),
-                ),
                 // ▼ ---------- ラベルボタン ---------- ▼ //
                 /*
                 SizedBox(
@@ -108,38 +94,9 @@ class _FblistPageState extends State<FblistPage> {
                 ),
                 */
                 // ▼ ---------- 右ボタン ---------- ▼ //
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios,
-                      color: A_Colors.black),
-                  onPressed: listNum > 0
-                      ? () {
-                          setState(() {
-                            if (listNum < _filteredFbList.length - 1) {
-                              listNum++;
-                            }
-                          });
-                        }
-                      : null,
-                  color: A_Colors.black.withOpacity(listNum < _filteredFbList.length - 1 ? 1.0 : 0.3),
-                ),
               ]),
 
               // ▼ ---------- フィードバックシート ---------- ▼ //
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 16),
-                child: Stack(clipBehavior: Clip.none, children: [
-                  if (fblist.isNotEmpty)
-                    FbSheet(
-                      labels: _filteredFbList[listNum].field,
-                      problem: _filteredFbList[listNum].problem,
-                      wrong: _filteredFbList[listNum].wrong,
-                      wrongpartans: _filteredFbList[listNum].wrongpartans,
-                      correctans: _filteredFbList[listNum].correctans,
-                    )
-                  else
-                    const Text("該当なし", style: TextStyle(fontSize: 18)),
-                ]),
-              ),
 
               // ▼ ---------- ホームボタン ---------- ▼ //
               SizedBox(
@@ -163,7 +120,7 @@ class _FblistPageState extends State<FblistPage> {
   }
 }
 
-// ▼ ---------- ラベル表示 ---------- ▼ //
+// ▼ ---------- ラベル表示(使わないなら削除して) ---------- ▼ //
 
 // ラベルを編集するダイアログ
 void showLabelDialog(
