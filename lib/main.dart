@@ -1430,12 +1430,9 @@ class _LabelDialogState extends State<LabelDialog> {
 
                           // ここでラベルを保存
                           if (widget.editedText.isNotEmpty && editedLabels.isNotEmpty) {
-                            try {
-                              await ApiService.storeText(widget.editedText, editedLabels);
-                              print("テキストとラベルを保存しました");
-                            } catch (e) {
-                              print("エラー: $e");
-                            }
+                              ApiService.storeText(widget.editedText, editedLabels)
+                                  .then((_) => print("テキストとラベルを保存しました"))
+                                  .catchError((e) => print("保存エラー: $e"));
                           } else {
                             print("テキストまたはラベルが空です");
                           }
