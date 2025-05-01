@@ -23,11 +23,63 @@ class FblistPage extends StatefulWidget {
 }
 
 class _FblistPageState extends State<FblistPage> {
-  List<feedback> fblist = [];
+  // List<feedback> fblist = [];
+  List<feedback> fblist = [ //仮データ
+  feedback(
+    1,
+    'aa',
+    ['a', 'a'],
+    'aaaaaaaaa',
+    'aaaaaaaaa',
+    'aaaaaaaaa',
+    'aaaaaaaaa',
+    'aaaaaaaaa',
+  ),
+  feedback(
+    2,
+    'bb',
+    ['b', 'b'],
+    'bbbbbbbb',
+    'bbbbbbbb',
+    'bbbbbbbb',
+    'bbbbbbbb',
+    'bbbbbbbb',
+  ),
+  feedback(
+    3,
+    'cc',
+    ['c', 'c'],
+    'ccccccccc',
+    'ccccccccc',
+    'ccccccccc',
+    'ccccccccc',
+    'ccccccccc',
+  ),
+  feedback(
+    4,
+    'dd',
+    ['d', 'd'],
+    'ddddddddd',
+    'ddddddddd',
+    'ddddddddd',
+    'ddddddddd',
+    'ddddddddd',
+  ),
+  feedback(
+    5,
+    'ee',
+    ['e', 'e'],
+    'eeeeeeeee',
+    'eeeeeeeee',
+    'eeeeeeeee',
+    'eeeeeeeee',
+    'eeeeeeeee',
+  ),
+];
   // List<String> _filteredLabels = []; // 絞り込み後のラベル
   // list<String> _filteredSubjects = []; // 絞り込み後の科目リスト
   // List<String> _filteredFields = []; // 絞り込み後の分野リスト
-  List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
+  // List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
 
 /*
   @override
@@ -62,9 +114,9 @@ class _FblistPageState extends State<FblistPage> {
   */
 
   // 絞り込み処理
-  void _filterFeedbackList() {
-  }
+  void _filterFeedbackList() {}
 
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +128,6 @@ class _FblistPageState extends State<FblistPage> {
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                // ▼ ---------- 左ボタン ---------- ▼ //
                 // ▼ ---------- ラベルボタン ---------- ▼ //
                 /*
                 SizedBox(
@@ -92,11 +143,29 @@ class _FblistPageState extends State<FblistPage> {
                     child: const Text('絞り込み'),
                   ),
                 ),
-                */
-                // ▼ ---------- 右ボタン ---------- ▼ //
+              */
               ]),
 
-              // ▼ ---------- フィードバックシート ---------- ▼ //
+              // ▼ ---------- 要約された問題文 ---------- ▼ //
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: A_Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Column(
+                    children: [
+                      // 一時的に要約される前の問題文を使用
+                      // 分野は一番最初のやつ
+                      for (int i = 0; i < fblist.length; i++)
+                        builderSummery(context, fblist[i].subject, fblist[i].field[0], fblist[i].problem),
+                    ],
+                  ),
+                ),
+              ),
 
               // ▼ ---------- ホームボタン ---------- ▼ //
               SizedBox(
@@ -118,6 +187,51 @@ class _FblistPageState extends State<FblistPage> {
       ),
     );
   }
+
+    // ▼ ---------- 要約された問題文のボタンのbuider ---------- ▼ //
+  Widget builderSummery(BuildContext context, String subject, String field, String summarizedProblem) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: A_Colors.mainColor,
+        foregroundColor: A_Colors.white,
+      ),
+      onPressed: () {
+        Navigator.pushNamed(context, '/fblist');
+      },
+      child: Row(
+      children: [
+        // 科目(左寄せ)
+        Expanded(
+          flex: 1,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(subject),
+          ),
+        ),
+        // 分類(中央より左側)
+        Expanded(
+          flex: 1,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 5),
+              child: Text(field),
+            ),
+          ),
+        ),
+        // 問題文(右側全部)
+        Expanded(
+          flex: 3,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(summarizedProblem),
+          ),
+        ),
+      ],
+      ),
+    );
+  }
+  // ▲ ---------- 要約された問題文のボタンのbuider ---------- ▲ //
 }
 
 // ▼ ---------- ラベル表示(使わないなら削除して) ---------- ▼ //
@@ -290,7 +404,7 @@ class _LabelDialogState extends State<LabelDialog> {
                     child: Column(
                       children: [
                         buildDropdownPair(0),
-                        for (int i = 1; i < 1; i++) ...[
+                        for (int i = 1; i < 4; i++) ...[
                           Divider(
                             color: A_Colors.black,
                           ),
