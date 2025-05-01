@@ -17,13 +17,14 @@ class feedback {
       this.wrong, this.wrongpartans, this.correctans);
 }
 
-class FblistPage extends StatefulWidget {
+class FbdetailPage extends StatefulWidget {
   @override
-  _FblistPageState createState() => _FblistPageState();
+  _FbdetailPageState createState() => _FbdetailPageState();
 }
 
-class _FblistPageState extends State<FblistPage> {
+class _FbdetailPageState extends State<FbdetailPage> {
   List<feedback> fblist = [];
+  int listNum = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -57,13 +58,14 @@ class _FblistPageState extends State<FblistPage> {
                   onPressed: listNum > 0
                       ? () {
                           setState(() {
-                            if (listNum < _filteredFbList.length - 1) {
+                            if (listNum < fblist.length - 1) {
                               listNum++;
                             }
                           });
                         }
                       : null,
-                  color: A_Colors.black.withOpacity(listNum < _filteredFbList.length - 1 ? 1.0 : 0.3),
+                  color: A_Colors.black
+                      .withOpacity(listNum < fblist.length - 1 ? 1.0 : 0.3),
                 ),
               ]),
 
@@ -73,11 +75,11 @@ class _FblistPageState extends State<FblistPage> {
                 child: Stack(clipBehavior: Clip.none, children: [
                   if (fblist.isNotEmpty)
                     FbSheet(
-                      labels: _filteredFbList[listNum].field,
-                      problem: _filteredFbList[listNum].problem,
-                      wrong: _filteredFbList[listNum].wrong,
-                      wrongpartans: _filteredFbList[listNum].wrongpartans,
-                      correctans: _filteredFbList[listNum].correctans,
+                      labels: fblist[listNum].field,
+                      problem: fblist[listNum].problem,
+                      wrong: fblist[listNum].wrong,
+                      wrongpartans: fblist[listNum].wrongpartans,
+                      correctans: fblist[listNum].correctans,
                     )
                   else
                     const Text("該当なし", style: TextStyle(fontSize: 18)),
