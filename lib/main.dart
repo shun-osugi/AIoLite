@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:ps_hacku_osaka/ui_fbdetail.dart';
 import 'package:ps_hacku_osaka/ui_fblist.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'ui_chat.dart';
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
         '/chat_basic': (context) => ChatBasicPage(),
         '/result': (context) => ResultPage(),
         '/fblist': (context) => FblistPage(),
+        '/fbdetail': (context) => FbdetailPage(),
         '/stats': (context) =>  StatsPage(),
       },
       debugShowCheckedModeBanner: false,

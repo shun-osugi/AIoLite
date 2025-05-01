@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 import 'package:ps_hacku_osaka/widget_fbsheet.dart';
@@ -28,9 +30,9 @@ class _FblistPageState extends State<FblistPage> {
     //仮データ
     feedback(
       1,
-      'aa',
-      ['a', 'a'],
-      'aaaaaaaaa',
+      '教科',
+      ['分類11111111', '分類22222222', '分類33333333'],
+      '問題文',
       'aaaaaaaaa',
       'aaaaaaaaa',
       'aaaaaaaaa',
@@ -146,7 +148,7 @@ class _FblistPageState extends State<FblistPage> {
               */
               ]),
 
-              // ▼ ---------- 要約された問題文 ---------- ▼ //
+              // ▼ ---------- 要約された問題文リスト ---------- ▼ //
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 16),
                 padding: const EdgeInsets.all(16),
@@ -155,14 +157,19 @@ class _FblistPageState extends State<FblistPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.9,
+                  width: MediaQuery.of(context).size.width * 0.95,
                   child: Column(
                     children: [
                       // 一時的に要約される前の問題文を使用
-                      // 分野は一番最初のやつ
                       for (int i = 0; i < fblist.length; i++)
-                        builderSummery(context, fblist[i].subject,
-                            fblist[i].field[0], fblist[i].problem),
+                        Column(
+                          children: [
+                            builderSummery(context, fblist[i].subject,
+                            fblist[i].field, fblist[i].problem),  //1つの問題文
+                            SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
+                          ],
+                        )
+                        
                     ],
                   ),
                 ),
@@ -217,83 +224,106 @@ class _FblistPageState extends State<FblistPage> {
   }
 
   // ▼ ---------- 要約された問題文のボタンのbuider ---------- ▼ //
-  Widget builderSummery(
-    BuildContext context, String subject, String field, String sProblem) {
-  return Container(
-    width: MediaQuery.of(context).size.width * 0.9,
-    height: MediaQuery.of(context).size.height * 0.05,
-    decoration: BoxDecoration(
-      color: A_Colors.mainColor,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: A_Colors.white, width: 3),
-      boxShadow: [
-        BoxShadow(
-          color: A_Colors.mainColor.withOpacity(0.7),
-          offset: Offset(0, 4),
-          blurRadius: 10,
-        ),
-      ],
-    ),
-    child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+  Widget builderSummery(BuildContext context, String subject, List<String> fields, String sProblem) {
+    final combinedField = fields.join('  |  '); // 分野リストを結合
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      height: MediaQuery.of(context).size.height * 0.12,
+      decoration: BoxDecoration(
+        color: A_Colors.mainColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: A_Colors.white, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(255, 13, 13, 14).withOpacity(0.7),
+            offset: Offset(0, 4),
+            blurRadius: 10,
           ),
-        ),
-        child: Row(
-          children: [
-            // 教科(subject)
-            Expanded(
-              flex: 1, // 比率 1
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  subject,
-                  style: TextStyle(
-                    color: A_Colors.white,
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
-                    fontWeight: FontWeight.bold,
+        ],
+      ),
+      child: ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+          child: Column(
+            children: [
+              // ▼ ---------- 問題文(sProblem) ---------- ▼ //
+              Expanded(
+                flex: 6, // 上下の範囲の比率
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    sProblem,
+                    style: TextStyle(
+                      color: A_Colors.white,
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-            // 分類(field)
-            Expanded(
-              flex: 1, // 比率 1
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  field,
-                  style: TextStyle(
-                    color: A_Colors.white,
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            // 問題文(sProblem)
-            Expanded(
-              flex: 3, // 比率 4 (より広いスペース)
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  sProblem,
-                  style: TextStyle(
-                    color: A_Colors.white,
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        )),
-  );
-}
+              Expanded(
+                  flex: 4, // 上下の範囲の比率
+                  child: Row(
+                    children: [
+                      // ▼ ---------- 教科(subject) ---------- ▼ //
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.15,
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        decoration: BoxDecoration(
+                          color: A_Colors.mainColor,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: A_Colors.background, width: 3),
+                        ),
+                        child: Center(
+                          child: Text(
+                            subject,
+                            style: TextStyle(
+                              color: A_Colors.white,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.04,
+                                  fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // ▼ ---------- 分類(field) ---------- ▼ //
+                      Container(
+                          width: MediaQuery.of(context).size.width * 0.57,
+                          height: MediaQuery.of(context).size.height * 0.05,
+                          decoration: BoxDecoration(
+                            color: A_Colors.mainColor,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: A_Colors.background, width: 3),
+                          ),
+                          child: Center(
+                            child: SingleChildScrollView(
+                              //スクロールできるようにする
+                              scrollDirection: Axis.horizontal,
+                              child: Text(
+                                combinedField, //結合したテキスト
+                                style: TextStyle(
+                                  color: A_Colors.white,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.04,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          )),
+                    ],
+                  )),
+              SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
+            ],
+          )),
+    );
+  }
   // ▲ ---------- 要約された問題文のボタンのbuider ---------- ▲ //
 }
 

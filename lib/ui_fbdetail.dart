@@ -17,12 +17,12 @@ class feedback {
       this.wrong, this.wrongpartans, this.correctans);
 }
 
-class FblistPage extends StatefulWidget {
+class FbdetailPage extends StatefulWidget {
   @override
-  _FblistPageState createState() => _FblistPageState();
+  _FbdetailPageState createState() => _FbdetailPageState();
 }
 
-class _FblistPageState extends State<FblistPage> {
+class _FbdetailPageState extends State<FbdetailPage> {
   List<feedback> fblist = [];
   int listNum = 0;
 
