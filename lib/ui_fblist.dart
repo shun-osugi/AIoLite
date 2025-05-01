@@ -24,58 +24,59 @@ class FblistPage extends StatefulWidget {
 
 class _FblistPageState extends State<FblistPage> {
   // List<feedback> fblist = [];
-  List<feedback> fblist = [ //仮データ
-  feedback(
-    1,
-    'aa',
-    ['a', 'a'],
-    'aaaaaaaaa',
-    'aaaaaaaaa',
-    'aaaaaaaaa',
-    'aaaaaaaaa',
-    'aaaaaaaaa',
-  ),
-  feedback(
-    2,
-    'bb',
-    ['b', 'b'],
-    'bbbbbbbb',
-    'bbbbbbbb',
-    'bbbbbbbb',
-    'bbbbbbbb',
-    'bbbbbbbb',
-  ),
-  feedback(
-    3,
-    'cc',
-    ['c', 'c'],
-    'ccccccccc',
-    'ccccccccc',
-    'ccccccccc',
-    'ccccccccc',
-    'ccccccccc',
-  ),
-  feedback(
-    4,
-    'dd',
-    ['d', 'd'],
-    'ddddddddd',
-    'ddddddddd',
-    'ddddddddd',
-    'ddddddddd',
-    'ddddddddd',
-  ),
-  feedback(
-    5,
-    'ee',
-    ['e', 'e'],
-    'eeeeeeeee',
-    'eeeeeeeee',
-    'eeeeeeeee',
-    'eeeeeeeee',
-    'eeeeeeeee',
-  ),
-];
+  List<feedback> fblist = [
+    //仮データ
+    feedback(
+      1,
+      'aa',
+      ['a', 'a'],
+      'aaaaaaaaa',
+      'aaaaaaaaa',
+      'aaaaaaaaa',
+      'aaaaaaaaa',
+      'aaaaaaaaa',
+    ),
+    feedback(
+      2,
+      'bb',
+      ['b', 'b'],
+      'bbbbbbbb',
+      'bbbbbbbb',
+      'bbbbbbbb',
+      'bbbbbbbb',
+      'bbbbbbbb',
+    ),
+    feedback(
+      3,
+      'cc',
+      ['c', 'c'],
+      'ccccccccc',
+      'ccccccccc',
+      'ccccccccc',
+      'ccccccccc',
+      'ccccccccc',
+    ),
+    feedback(
+      4,
+      'dd',
+      ['d', 'd'],
+      'ddddddddd',
+      'ddddddddd',
+      'ddddddddd',
+      'ddddddddd',
+      'ddddddddd',
+    ),
+    feedback(
+      5,
+      'ee',
+      ['e', 'e'],
+      'eeeeeeeee',
+      'eeeeeeeee',
+      'eeeeeeeee',
+      'eeeeeeeee',
+      'eeeeeeeee',
+    ),
+  ];
   // List<String> _filteredLabels = []; // 絞り込み後のラベル
   // list<String> _filteredSubjects = []; // 絞り込み後の科目リスト
   // List<String> _filteredFields = []; // 絞り込み後の分野リスト
@@ -116,7 +117,6 @@ class _FblistPageState extends State<FblistPage> {
   // 絞り込み処理
   void _filterFeedbackList() {}
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,24 +161,52 @@ class _FblistPageState extends State<FblistPage> {
                       // 一時的に要約される前の問題文を使用
                       // 分野は一番最初のやつ
                       for (int i = 0; i < fblist.length; i++)
-                        builderSummery(context, fblist[i].subject, fblist[i].field[0], fblist[i].problem),
+                        builderSummery(context, fblist[i].subject,
+                            fblist[i].field[0], fblist[i].problem),
                     ],
                   ),
                 ),
               ),
 
               // ▼ ---------- ホームボタン ---------- ▼ //
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.mainColor,
-                    foregroundColor: A_Colors.white,
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: MediaQuery.of(context).size.height * 0.05,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [A_Colors.subColor, A_Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: A_Colors.black, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: A_Colors.black.withOpacity(0.7),
+                      offset: Offset(0, 4),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/home');
                   },
-                  child: const Text('ホーム画面へ戻る'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: Text(
+                    'ホームに戻る',
+                    style: TextStyle(
+                      color: A_Colors.black,
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -188,49 +216,84 @@ class _FblistPageState extends State<FblistPage> {
     );
   }
 
-    // ▼ ---------- 要約された問題文のボタンのbuider ---------- ▼ //
-  Widget builderSummery(BuildContext context, String subject, String field, String summarizedProblem) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: A_Colors.mainColor,
-        foregroundColor: A_Colors.white,
-      ),
-      onPressed: () {
-        Navigator.pushNamed(context, '/fblist');
-      },
-      child: Row(
-      children: [
-        // 科目(左寄せ)
-        Expanded(
-          flex: 1,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(subject),
-          ),
-        ),
-        // 分類(中央より左側)
-        Expanded(
-          flex: 1,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 5),
-              child: Text(field),
-            ),
-          ),
-        ),
-        // 問題文(右側全部)
-        Expanded(
-          flex: 3,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(summarizedProblem),
-          ),
+  // ▼ ---------- 要約された問題文のボタンのbuider ---------- ▼ //
+  Widget builderSummery(
+    BuildContext context, String subject, String field, String sProblem) {
+  return Container(
+    width: MediaQuery.of(context).size.width * 0.9,
+    height: MediaQuery.of(context).size.height * 0.05,
+    decoration: BoxDecoration(
+      color: A_Colors.mainColor,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: A_Colors.white, width: 3),
+      boxShadow: [
+        BoxShadow(
+          color: A_Colors.mainColor.withOpacity(0.7),
+          offset: Offset(0, 4),
+          blurRadius: 10,
         ),
       ],
-      ),
-    );
-  }
+    ),
+    child: ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+        child: Row(
+          children: [
+            // 教科(subject)
+            Expanded(
+              flex: 1, // 比率 1
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  subject,
+                  style: TextStyle(
+                    color: A_Colors.white,
+                    fontSize: MediaQuery.of(context).size.width * 0.05,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            // 分類(field)
+            Expanded(
+              flex: 1, // 比率 1
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  field,
+                  style: TextStyle(
+                    color: A_Colors.white,
+                    fontSize: MediaQuery.of(context).size.width * 0.05,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            // 問題文(sProblem)
+            Expanded(
+              flex: 3, // 比率 4 (より広いスペース)
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  sProblem,
+                  style: TextStyle(
+                    color: A_Colors.white,
+                    fontSize: MediaQuery.of(context).size.width * 0.05,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        )),
+  );
+}
   // ▲ ---------- 要約された問題文のボタンのbuider ---------- ▲ //
 }
 
