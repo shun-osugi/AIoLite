@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 import 'package:ps_hacku_osaka/widget_fbsheet.dart';
@@ -116,8 +114,214 @@ class _FblistPageState extends State<FblistPage> {
   }
   */
 
+  String? selectedSubjects;   // 教科ドロップダウン選択
+  String? selectedCategories; // 分類ドロップダウン選択
+  List<String> editedLabels = []; //選択した教科ラベル ["教科-ラベル",...
+
   // 絞り込み処理
   void _filterFeedbackList() {}
+
+  //大元の絞り込みUI
+  //mainからパクってきたよ
+  Widget filterUI()
+  {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+      // テキスト編集フィールド
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "ラベル絞り込み",
+            style: TextStyle(
+              color: A_Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold
+            ),
+          ),
+          SizedBox(height: 16),
+
+          // ドロップダウンペア
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: A_Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: A_Colors.black,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                //教科のドロップダウン
+                Container(
+                  width: 100,
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: A_Colors.background,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      hint: Text(
+                        "未選択",
+                        style: TextStyle(color: A_Colors.black),
+                      ),
+                      value: selectedSubjects,
+                      iconEnabledColor: A_Colors.black,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedSubjects = newValue;
+                          selectedCategories = null; // 教科変更時に分類もリセット
+                        });
+                      },
+                      items: [
+                        DropdownMenuItem<String>(
+                          value: null,
+                          child: Text(
+                            "未選択",
+                            style: TextStyle(color: A_Colors.black),
+                          ), // デフォルトのnull選択肢
+                        ),
+                        ...subjectCategories.keys
+                          .toSet()
+                          .toList()
+                          .map((String subject) {
+                          // 重複を削除
+                          // print("DropdownMenuItem value: $subject"); // デバッグ出力
+                          return DropdownMenuItem<String>(
+                            value: subject,
+                            child: Text(
+                              subject,
+                              style: TextStyle(color: A_Colors.black),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+
+                //分類のドロップダウン
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: A_Colors.background,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        hint: Text(
+                          "未選択",
+                          style: TextStyle(color: A_Colors.black),
+                        ),
+                        value: selectedCategories,
+                        iconEnabledColor: A_Colors.black,
+                        onChanged: selectedSubjects == null
+                        ? null
+                        : (String? newValue) {
+                          setState(() {
+                            selectedCategories = newValue;
+                          });
+                        },
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text(
+                              "未選択",
+                              style: TextStyle(color: A_Colors.black),
+                            ), // デフォルトのnull選択肢
+                          ),
+                          ...(subjectCategories[selectedSubjects] ?? [])
+                            .map((String category) {
+                            return DropdownMenuItem<String>(
+                              value: category,
+                              child: Text(
+                                category,
+                                style: TextStyle(color: A_Colors.black),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+
+                //追加ボタン
+                //多分，あとでiconbuttonかなんかに変える
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    "+",
+                    style: TextStyle(
+                      color: A_Colors.black,
+                      fontSize: 30,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+
+          Row(//関係ないrowあ，左寄せのためか
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              //リセットボタン
+              TextButton(
+                onPressed: () async {
+                  // ------------------------- ラベルリセット実行　--------------------------//
+                  print(editedLabels);
+                },
+                child: Text(
+                  "リセット",
+                  style: TextStyle(
+                    color: A_Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              ),
+              SizedBox(width: 5),
+
+              //絞り込みボタン
+              TextButton(
+                onPressed: () async {
+                  if (selectedSubjects != null &&
+                      selectedCategories != null) {
+                    editedLabels.add("$selectedSubjects-$selectedCategories");
+                  }
+
+                  // ------------------------- ラベル選択実行　--------------------------//
+
+                  // Navigator.pop(
+                  //   context,
+                  // );
+                  print(editedLabels);
+                },
+                child: Text(
+                  "絞り込み",
+                  style: TextStyle(
+                    color: A_Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +351,8 @@ class _FblistPageState extends State<FblistPage> {
                 ),
               */
               ]),
+
+              filterUI(), //大場担当　絞り込み部分
 
               // ▼ ---------- 要約された問題文リスト ---------- ▼ //
               Container(
@@ -326,259 +532,3 @@ class _FblistPageState extends State<FblistPage> {
   }
   // ▲ ---------- 要約された問題文のボタンのbuider ---------- ▲ //
 }
-
-// ▼ ---------- ラベル表示(使わないなら削除して) ---------- ▼ //
-
-// ラベルを編集するダイアログ
-void showLabelDialog(
-    BuildContext context, Function(List<String>) updateFilteredLabels) {
-  showDialog(
-    context: context,
-    builder: (context) => LabelDialog(onLabelsSelected: updateFilteredLabels),
-  );
-}
-
-class LabelDialog extends StatefulWidget {
-  const LabelDialog({Key? key, required this.onLabelsSelected})
-      : super(key: key);
-  final Function(List<String>) onLabelsSelected;
-
-  @override
-  _LabelDialogState createState() => _LabelDialogState();
-}
-
-class _LabelDialogState extends State<LabelDialog> {
-  List<String?> selectedSubjects = List.filled(4, null); // 教科ドロップダウン選択
-  List<String?> selectedCategories = List.filled(4, null); // 分類ドロップダウン選択
-  bool _isLoading = false;
-
-  // 教科と分類のドロップダウンペア
-  Widget buildDropdownPair(int index) {
-    return Row(
-      children: [
-        Container(
-          width: 100,
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: A_Colors.background,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              hint: Text(
-                "未選択",
-                style: TextStyle(color: A_Colors.black),
-              ),
-              value: selectedSubjects[index],
-              iconEnabledColor: A_Colors.black,
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedSubjects[index] = newValue;
-                  selectedCategories[index] = null; // 教科変更時に分類もリセット
-                });
-              },
-              items: [
-                DropdownMenuItem<String>(
-                  value: null,
-                  child: Text(
-                    "未選択",
-                    style: TextStyle(color: A_Colors.black),
-                  ), // デフォルトのnull選択肢
-                ),
-                ...subjectCategories.keys
-                    .toSet()
-                    .toList()
-                    .map((String subject) {
-                  // 重複を削除
-                  print("DropdownMenuItem value: $subject"); // デバッグ出力
-                  return DropdownMenuItem<String>(
-                    value: subject,
-                    child: Text(
-                      subject,
-                      style: TextStyle(color: A_Colors.black),
-                    ),
-                  );
-                }).toList(),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: A_Colors.background,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                hint: Text(
-                  "未選択",
-                  style: TextStyle(color: A_Colors.black),
-                ),
-                value: selectedCategories[index],
-                iconEnabledColor: A_Colors.black,
-                onChanged: selectedSubjects[index] == null
-                    ? null
-                    : (String? newValue) {
-                        setState(() {
-                          selectedCategories[index] = newValue;
-                        });
-                      },
-                items: [
-                  DropdownMenuItem<String>(
-                    value: null,
-                    child: Text(
-                      "未選択",
-                      style: TextStyle(color: A_Colors.black),
-                    ), // デフォルトのnull選択肢
-                  ),
-                  ...(subjectCategories[selectedSubjects[index]] ?? [])
-                      .map((String category) {
-                    return DropdownMenuItem<String>(
-                      value: category,
-                      child: Text(
-                        category,
-                        style: TextStyle(color: A_Colors.black),
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ダイアログ部分
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: A_Colors.background,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-              // テキスト編集フィールド
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "ラベルを選択",
-                    style: TextStyle(
-                        color: A_Colors.black,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-
-                  // 4つのドロップダウンペアを縦に並べる
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: A_Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: A_Colors.black,
-                        width: 2,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        buildDropdownPair(0),
-                        for (int i = 1; i < 4; i++) ...[
-                          Divider(
-                            color: A_Colors.black,
-                          ),
-                          buildDropdownPair(i),
-                        ],
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () async {
-                          List<String> editedLabels = [];
-                          for (int i = 0; i < 4; i++) {
-                            if (selectedSubjects[i] != null &&
-                                selectedCategories[i] != null) {
-                              editedLabels.add(
-                                  "${selectedSubjects[i]} - ${selectedCategories[i]}");
-                            }
-                          }
-
-                          /* ここでラベルを保存
-                          if (widget.editedText.isNotEmpty && editedLabels.isNotEmpty) {
-                            try {
-                              await ApiService.storeText(widget.editedText, editedLabels);
-                              print("テキストとラベルを保存しました");
-                            } catch (e) {
-                              print("エラー: $e");
-                            }
-                          } else {
-                            print("テキストまたはラベルが空です");
-                          }
-                          */
-
-                          // ---------------------------------- ラベル選択実行　-------------------------------------------//
-
-                          Navigator.pop(
-                            context,
-                          );
-                        },
-                        child: Text(
-                          "開始 →",
-                          style: TextStyle(
-                              color: A_Colors.black,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // 左上の戻るボタン
-            Positioned(
-              top: 24,
-              left: 10,
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: A_Colors.black, size: 40),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // showEditDialog(context, widget.editedText);
-                },
-              ),
-            ),
-            // ローディングインジケーター
-            if (_isLoading)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withOpacity(0.5), // 背景を半透明に
-                  child: Center(
-                    child: CircularProgressIndicator(), // ローディングインジケーター
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-// ▲ ---------- ラベル表示 ---------- ▲ //
