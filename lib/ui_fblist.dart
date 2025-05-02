@@ -38,8 +38,8 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       2,
-      'bb',
-      ['b', 'b'],
+      '数学',
+      ['正の数・負の数', 'b'],
       'bbbbbbbb',
       'bbbbbbbb',
       'bbbbbbbb',
@@ -48,8 +48,8 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       3,
-      'cc',
-      ['c', 'c'],
+      '数学',
+      ['c', "文字式"],
       'ccccccccc',
       'ccccccccc',
       'ccccccccc',
@@ -80,7 +80,10 @@ class _FblistPageState extends State<FblistPage> {
   // List<String> _filteredLabels = []; // 絞り込み後のラベル
   // list<String> _filteredSubjects = []; // 絞り込み後の科目リスト
   // List<String> _filteredFields = []; // 絞り込み後の分野リスト
-  // List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
+  String? selectedSubject;   // 教科ドロップダウン選択
+  String? selectedCategory;  // 分類ドロップダウン選択
+  List<String> selectedFilter = []; //選択した教科ラベル ["教科-ラベル",...
+  List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
 
 /*
   @override
@@ -89,44 +92,63 @@ class _FblistPageState extends State<FblistPage> {
     _filteredFbList = List.from(fblist); // 初期表示は全件
   }
 */
-  /*
-  // ダイアログからラベルを受け取るコールバック関数
-  void _updateFilteredLabels(List<String> labels) {
-    setState(() {
-      _filteredLabels = labels;
-      _filteredSubjects.clear();
-      _filteredFields.clear();
-
-      for (final label in _filteredLabels) {
-        final parts = label.split(' - ');
-        if (parts.length == 2) {
-          _filteredSubjects.add(parts[0]);
-          _filteredFields.add(parts[1]);
-        }
-      }
-      // print("選択されたラベル: $_filteredLabels");
-      // print("絞り込み科目: $_filteredSubjects");
-      // print("絞り込み分野: $_filteredFields");
-
-      // 絞り込み処理を実行
-      _filterFeedbackList();
-    });
-  }
-  */
-
-  String? selectedSubjects;   // 教科ドロップダウン選択
-  String? selectedCategories; // 分類ドロップダウン選択
-  List<String> editedLabels = []; //選択した教科ラベル ["教科-ラベル",...
 
   // 絞り込み処理
-  void _filterFeedbackList() {}
+  void _filterFeedbackList()
+  {
+    _filteredFbList.clear();
+    //絞り込み検索
+    for(int i=0;i<fblist.length;i++){
+      if(selectedFilter.contains('${fblist[i].subject}-すべて')){ //教科ごとの選択なら無条件で追加
+        _filteredFbList.add(fblist[i]);
+      }
+      else{
+        //分類も指定されているならさらに検索
+        for(int j=0;j<fblist[i].field.length;j++){
+          if(selectedFilter.contains('${fblist[i].subject}-${fblist[i].field[j]}')){
+            _filteredFbList.add(fblist[i]);
+            break;
+          }
+        }
+      }
+    }
+    for(int i=0;i<_filteredFbList.length;i++){
+      print(_filteredFbList[i].id);
+    }
+  }
+
+  //フィルター追加時の処理
+  void addFilter() {
+    if(selectedSubject == null) return;
+    final filter = '$selectedSubject-すべて';
+    //分類選択がすべての場合
+    //selectedCategory==全て　元のやつから削除
+    if(selectedCategory == null){
+      //教科が同じものは削除
+      selectedFilter.removeWhere((e) => e.contains(selectedSubject!));
+      //直前の検索で消されるので'教科-すべて'を追加
+      selectedFilter.add(filter);
+    }
+    else if (!selectedFilter.contains(filter) && 
+              !selectedFilter.contains('$selectedSubject-$selectedCategory')){ //全てがある場合は追加しない
+      selectedFilter.add('$selectedSubject-$selectedCategory');
+    }
+    setState((){});
+  }
+
+  //フィルター削除時の処理
+  void removeFilter(String filter) {
+    setState(() {
+      selectedFilter.remove(filter);
+    });
+  }
 
   //大元の絞り込みUI
   //mainからパクってきたよ
   Widget filterUI()
   {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       // テキスト編集フィールド
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -139,7 +161,7 @@ class _FblistPageState extends State<FblistPage> {
               fontWeight: FontWeight.bold
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 5),
 
           // ドロップダウンペア
           Container(
@@ -170,12 +192,12 @@ class _FblistPageState extends State<FblistPage> {
                         "未選択",
                         style: TextStyle(color: A_Colors.black),
                       ),
-                      value: selectedSubjects,
+                      value: selectedSubject,
                       iconEnabledColor: A_Colors.black,
                       onChanged: (String? newValue) {
                         setState(() {
-                          selectedSubjects = newValue;
-                          selectedCategories = null; // 教科変更時に分類もリセット
+                          selectedSubject = newValue;
+                          selectedCategory = null; // 教科変更時に分類もリセット
                         });
                       },
                       items: [
@@ -186,9 +208,7 @@ class _FblistPageState extends State<FblistPage> {
                             style: TextStyle(color: A_Colors.black),
                           ), // デフォルトのnull選択肢
                         ),
-                        ...subjectCategories.keys
-                          .toSet()
-                          .toList()
+                        ...subjectCategories.keys.toSet().toList()
                           .map((String subject) {
                           // 重複を削除
                           // print("DropdownMenuItem value: $subject"); // デバッグ出力
@@ -221,24 +241,26 @@ class _FblistPageState extends State<FblistPage> {
                           "未選択",
                           style: TextStyle(color: A_Colors.black),
                         ),
-                        value: selectedCategories,
+                        value: selectedCategory,
                         iconEnabledColor: A_Colors.black,
-                        onChanged: selectedSubjects == null
+                        onChanged: selectedSubject == null
                         ? null
                         : (String? newValue) {
                           setState(() {
-                            selectedCategories = newValue;
+                            selectedCategory = newValue;
                           });
                         },
                         items: [
                           DropdownMenuItem<String>(
                             value: null,
                             child: Text(
-                              "未選択",
+                              selectedSubject == null ?
+                              "未選択" ://何も選んでない時は未選択
+                              "すべて",
                               style: TextStyle(color: A_Colors.black),
                             ), // デフォルトのnull選択肢
                           ),
-                          ...(subjectCategories[selectedSubjects] ?? [])
+                          ...(subjectCategories[selectedSubject] ?? [])
                             .map((String category) {
                             return DropdownMenuItem<String>(
                               value: category,
@@ -257,20 +279,67 @@ class _FblistPageState extends State<FblistPage> {
 
                 //追加ボタン
                 //多分，あとでiconbuttonかなんかに変える
-                SizedBox(
-                  width: 30,
-                  child: Text(
-                    "+",
-                    style: TextStyle(
-                      color: A_Colors.black,
-                      fontSize: 30,
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    alignment: Alignment.center, //中央に配置↓
+                    padding: EdgeInsets.zero,//デフォルト値があるらしい
+                    color: A_Colors.mainColor,
+                    icon: Icon(
+                      Icons.add_circle,
+                      size: 40
                     ),
+                    onPressed: addFilter,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
+
+          //絞り込みフィルター表示
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.15, //フィルター二列が見える状態
+            padding: EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: A_Colors.black,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: SingleChildScrollView( //フィルター二列が見える状態
+              child: Wrap( //横幅に収まりきらなかったら改行して配置
+                spacing: 5,    //chipごとの横の幅
+                runSpacing: 5, //chipごとの横の幅
+                children: selectedFilter.map((filter) {
+                  return Chip( //消去できるwidget
+                    label: Text(
+                      filter,
+                      style: TextStyle(
+                        color: A_Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                    backgroundColor: A_Colors.white,
+                    deleteIconColor: A_Colors.mainColor,
+                    side: BorderSide(
+                      color: A_Colors.black,
+                      width: 0.5,
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // 追加：上下の余計なmarginを削除
+                    labelPadding: EdgeInsets.symmetric(horizontal: 3), // 追加：文字左右の多すぎるpaddingを調整
+                    visualDensity: VisualDensity(horizontal: 1.0, vertical: -3), // 追加：文字上下の多すぎるpaddingを調整
+                    onDeleted: () => removeFilter(filter),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
 
           Row(//関係ないrowあ，左寄せのためか
             mainAxisAlignment: MainAxisAlignment.end,
@@ -278,8 +347,9 @@ class _FblistPageState extends State<FblistPage> {
               //リセットボタン
               TextButton(
                 onPressed: () async {
-                  // ------------------------- ラベルリセット実行　--------------------------//
-                  print(editedLabels);
+                  selectedFilter.clear();
+                  setState((){});
+                  // print(selectedFilter);
                 },
                 child: Text(
                   "リセット",
@@ -294,19 +364,7 @@ class _FblistPageState extends State<FblistPage> {
 
               //絞り込みボタン
               TextButton(
-                onPressed: () async {
-                  if (selectedSubjects != null &&
-                      selectedCategories != null) {
-                    editedLabels.add("$selectedSubjects-$selectedCategories");
-                  }
-
-                  // ------------------------- ラベル選択実行　--------------------------//
-
-                  // Navigator.pop(
-                  //   context,
-                  // );
-                  print(editedLabels);
-                },
+                onPressed: _filterFeedbackList,
                 child: Text(
                   "絞り込み",
                   style: TextStyle(
@@ -323,6 +381,7 @@ class _FblistPageState extends State<FblistPage> {
     );
   }
 
+  //main
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -332,27 +391,9 @@ class _FblistPageState extends State<FblistPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                // ▼ ---------- ラベルボタン ---------- ▼ //
-                /*
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: A_Colors.mainColor,
-                      foregroundColor: A_Colors.white,
-                    ),
-                    onPressed: () {
-                      showLabelDialog(context, _updateFilteredLabels);
-                    },
-                    child: const Text('絞り込み'),
-                  ),
-                ),
-              */
-              ]),
-
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               filterUI(), //大場担当　絞り込み部分
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
               // ▼ ---------- 要約された問題文リスト ---------- ▼ //
               Container(
