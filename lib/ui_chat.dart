@@ -47,7 +47,7 @@ class _ChatPageState extends State<ChatPage> {
   final TTSService _ttsService = TTSService(); //音声読み上げサービス
 
   late Database _database;//データベース
-  String firstans = "";     //どういう解き方を最初したのか
+  String summary = "";     //どういう解き方を最初したのか
   String wrong = "";        //間違えてた部分
   String wrongpartans = ""; //間違えてた部分の正しい解き方
   String correctans = "";
@@ -153,6 +153,9 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _initDatabase() async {
     // データベースをオープン（存在しない場合は作成）
     try{
+      // String databasePath = await getDatabasesPath();
+      // String path = '${databasePath}/database.db';
+      // await deleteDatabase(path);
       _database = await openDatabase(
         'database.db',
         version: 1,
@@ -167,7 +170,7 @@ class _ChatPageState extends State<ChatPage> {
               subject TEXT,
               field TEXT,
               problem TEXT,
-              firstans TEXT,
+              summary TEXT,
               wrong TEXT,
               wrongpartans TEXT,
               correctans TEXT
@@ -201,7 +204,7 @@ class _ChatPageState extends State<ChatPage> {
         'subject': subject,
         'field': field,
         'problem': inputText,
-        'firstans': firstans,
+        'summary': summary,
         'wrong': wrong,
         'wrongpartans': wrongpartans,
         'correctans': correctans
@@ -668,7 +671,7 @@ class _ChatPageState extends State<ChatPage> {
                     //詳細のフィードバックを作成
                     final info = await AI.sendMessage(Content.text('''
                     今回の会話について，
-                    1,どういう解き方を最初したのか
+                    1,問題文の要約（10~15文字）
                     2,ユーザーが間違えてた部分
                     3,間違えた部分の正しい解き方
                     4,問題自体の正しい解き方
@@ -678,12 +681,12 @@ class _ChatPageState extends State<ChatPage> {
 
                     String infotext = info.text ?? '&&なし&&なし&&なし&&なし';
                     final B = infotext.substring(infotext.indexOf('&&')).split('&&');
-                    firstans = B[1];     //どういう解き方を最初したのか
+                    summary = B[1];     //問題文の要約
                     wrong = B[2];        //間違えてた部分
                     wrongpartans = B[3]; //間違えてた部分の正しい解き方
                     correctans = B[4];   //それの正しい解き方
                     // print("sdoifsdjffd");
-                    // print(firstans);
+                    // print(summary);
                     // print(wrong);
                     // print(wrongpartans);
                     // print(correctans);
@@ -696,15 +699,25 @@ class _ChatPageState extends State<ChatPage> {
                         'inputText': inputText,
                         'feedbackText': feedbackMessage,
                         'labels': labels,
-                        'firstans': firstans,
+                        'summary': summary,
                         'wrong': wrong,
                         'wrongpartans': wrongpartans,
                         'correctans': correctans,
                       },
                     );
                   } catch (e) {
-                    print("フィードバック保存エラー");
-                    print(e);
+                    Navigator.pushNamed(
+                      context, '/result',
+                      arguments: {
+                        'inputText': inputText,
+                        'feedbackText': 'フィードバックの作成に失敗しました',
+                        'labels': labels,
+                        'summary': summary,
+                        'wrong': wrong,
+                        'wrongpartans': wrongpartans,
+                        'correctans': correctans,
+                      },
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
