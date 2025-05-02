@@ -91,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                   children: [
                     SizedBox(height: MediaQuery.of(context).size.height * 0.38,),
+
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.2,
                       child: Container(
@@ -120,7 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     top: MediaQuery.of(context).size.height * 0.53,
                     right: MediaQuery.of(context).size.width * 0.25,
                     child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      alignment: Alignment.center,
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      height: MediaQuery.of(context).size.height * 0.06,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [A_Colors.subColor, A_Colors.white],
@@ -132,8 +135,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         child: Text('イオ', style: TextStyle(
                           color: _isBasicMode ? B_Colors.black : A_Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,),)
+                          fontSize: MediaQuery.of(context).size.width * 0.05,
+                          fontWeight: FontWeight.bold,
+                        ),)
                     )
                 ),
 
@@ -153,6 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         // STARTボタン
                         Container(
                           width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.15,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [A_Colors.subColor, A_Colors.white],
@@ -179,7 +184,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
-                              padding: EdgeInsets.symmetric(horizontal: 48, vertical: 24),
                             ),
                             child: Text(
                               'START',
@@ -244,7 +248,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(40),
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                               ),
                               child: Text(
                                 _isBasicMode ? 'モードきりかえ' : 'モード切替',
@@ -343,18 +346,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Padding(
                     padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height * 0.91,
-                      right: 20,
+                      right: MediaQuery.of(context).size.width * 0.1,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // 利用規約ボタン (iマーク)
                         const TermsButton(),
-                        SizedBox(width: 15),
 
                         // ライセンス表示ボタン
                         IconButton(
-                          icon: Icon(Icons.handshake, size: 50, color: A_Colors.white),
+                          icon: Icon(Icons.handshake, size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
                           onPressed: () {
                             showLicensePage(
                               context: context,
@@ -460,7 +462,7 @@ class HelpButton extends StatelessWidget {
       top: MediaQuery.of(context).size.height * 0.06,
       right: MediaQuery.of(context).size.width * 0.06,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.36,
+        width: MediaQuery.of(context).size.width * (_isBasicMode ? 0.4 : 0.3),
         height: MediaQuery.of(context).size.height * 0.06,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -482,13 +484,12 @@ class HelpButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             textStyle: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
           ),
-          label: Text(isBasic ? 'つかいかた' : '  使い方  ', style: TextStyle(
+          label: Text(isBasic ? 'つかいかた' : '使い方', style: TextStyle(
             color: _isBasicMode ? B_Colors.black : A_Colors.black,
             fontSize: MediaQuery.of(context).size.width * 0.05,
             fontWeight: FontWeight.bold,
@@ -685,7 +686,7 @@ class TermsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.info_outline, size: 50, color: A_Colors.white),
+      icon: Icon(Icons.info_outline, size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
       onPressed: () => _showTermsDialog(context),
     );
   }
@@ -1004,7 +1005,7 @@ class SendDialog extends StatelessWidget {
                 children: [
                   Center(
                     child: Text(
-                      "問題を送る",
+                      _isBasicMode ? "もんだいをおくる" : "問題を送る",
                       style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -1021,7 +1022,7 @@ class SendDialog extends StatelessWidget {
                               Navigator.pop(context);
                               showEditDialog(context, text);
                             }
-                          }), "音声入力"
+                          }), _isBasicMode ? "こえ" : "音声入力"
                       ),
                       _sendOption(context,
                           CameraButton(onImagePicked: (String text) {
@@ -1029,13 +1030,13 @@ class SendDialog extends StatelessWidget {
                               Navigator.pop(context);
                               showEditDialog(context, text);
                             }
-                            },), "画像入力"
+                            },), _isBasicMode ? "しゃしん" : "画像入力"
                       ),
                       _sendOption(context,
                           EmptyTextButton(onTextPicked: (String text) {
                             Navigator.pop(context);
                             showEditDialog(context, text);
-                            },), "テキスト"
+                            },), _isBasicMode ? "もじ" : "テキスト"
                       ),
                     ],
                   ),
