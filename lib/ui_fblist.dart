@@ -48,8 +48,8 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       3,
-      ['数学','教科'],
-      ['c', "文字式"],
+      ['理科','数学'],
+      ['物質のすがた', "文字式"],
       'ccccccccc',
       'ccccccccc',
       'ccccccccc',
@@ -58,8 +58,8 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       4,
-      ['dd','教科'],
-      ['d', 'd'],
+      ['理科','教科'],
+      ['物質のすがた', 'd'],
       'ddddddddd',
       'ddddddddd',
       'ddddddddd',
@@ -124,22 +124,23 @@ class _FblistPageState extends State<FblistPage> {
     _filteredFbList.clear();
     //絞り込み検索
     for(int i=0;i<fblist.length;i++){
-      if(selectedFilter.contains('${fblist[i].subject}-すべて')){ //教科ごとの選択なら無条件で追加
-        _filteredFbList.add(fblist[i]);
-      }
-      else{
-        //分類も指定されているならさらに検索
-        for(int j=0;j<fblist[i].field.length;j++){
-          if(selectedFilter.contains('${fblist[i].subject}-${fblist[i].field[j]}')){
-            _filteredFbList.add(fblist[i]);
-            break;
-          }
+      //分類も指定されているならさらに検索
+      for(int j=0;j<fblist[i].subject.length;j++){
+        //教科ごとの選択なら無条件で追加
+        if(selectedFilter.contains('${fblist[i].subject[j]}-すべて')){
+          _filteredFbList.add(fblist[i]);
+          break;
+        }//そうでないなら分類も含めて検索
+        else if(selectedFilter.contains('${fblist[i].subject[j]}-${fblist[i].field[j]}')){
+          _filteredFbList.add(fblist[i]);
+          break;
         }
       }
     }
-    for(int i=0;i<_filteredFbList.length;i++){
-      print(_filteredFbList[i].id);
-    }
+    // for(int i=0;i<_filteredFbList.length;i++){
+    //   print(_filteredFbList[i].id);
+    // }
+    // print('jdshfsd');
   }
 
   //フィルター追加時の処理
