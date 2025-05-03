@@ -4,7 +4,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:sqflite/sqflite.dart';
 
+class feedback {
+  //フィードバック一つのデータ
+  int id; //id
+  List<String> subject; //教科
+  List<String> field; //分野
+  String problem; //問題文
+  String summary;      //問題文の要約
+  String wrong; //間違えてた部分
+  String wrongpartans; //間違えてた部分の正しい解き方
+  String correctans; //それの正しい解き方
+  feedback(this.id, this.subject, this.field, this.problem, this.summary,
+      this.wrong, this.wrongpartans, this.correctans);
+}
 
 void main() => runApp(const MyApp());
 
@@ -49,6 +63,122 @@ class _StatsPageState extends State<StatsPage> {
   };
 
   String _selected = '国語'; // 現在タブで選択中の教科
+
+  // List<feedback> fblist = [];
+  List<feedback> fblist = [//データベース使う時は消してね
+    //仮データ
+    feedback(
+      1,
+      ['教科','教科','教科'],
+      ['分類11111111', '分類22222222', '分類33333333'],
+      '問題文',
+      'aaaaaaaaa',
+      'aaaaaaaaa',
+      'aaaaaaaaa',
+      'aaaaaaaaa',
+    ),
+    feedback(
+      2,
+      ['数学','教科'],
+      ['正の数・負の数', 'b'],
+      'bbbbbbbb',
+      'bbbbbbbb',
+      'bbbbbbbb',
+      'bbbbbbbb',
+      'bbbbbbbb',
+    ),
+    feedback(
+      3,
+      ['理科','数学'],
+      ['物質のすがた', "文字式"],
+      'ccccccccc',
+      'ccccccccc',
+      'ccccccccc',
+      'ccccccccc',
+      'ccccccccc',
+    ),
+    feedback(
+      4,
+      ['理科','教科'],
+      ['物質のすがた', 'd'],
+      'ddddddddd',
+      'ddddddddd',
+      'ddddddddd',
+      'ddddddddd',
+      'ddddddddd',
+    ),
+    feedback(
+      5,
+      ['ee','教科'],
+      ['e', 'e'],
+      'eeeeeeeee',
+      'eeeeeeeee',
+      'eeeeeeeee',
+      'eeeeeeeee',
+      'eeeeeeeee',
+    ),
+  ];
+  late Database _database;//データベース
+
+  @override
+  void initState() {
+    super.initState();
+    // _initDatabase();
+  }
+
+  //データベースから読み取り
+  Future<void> _initDatabase() async {
+    // データベースをオープン（存在しない場合は作成）
+    try{
+      // String databasePath = await getDatabasesPath();
+      // String path = '${databasePath}/database.db';
+      // await deleteDatabase(path);
+      _database = await openDatabase(
+        'database.db',
+        version: 1,
+        onCreate: (Database db, int version) async {
+          //テーブルがないなら作成
+          //フィードバックテーブルを作成
+          //fieldはリスト（flutter側に持ってくるときに変換予定）
+          return db.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS feedback(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              subject TEXT,
+              field TEXT,
+              problem TEXT,
+              summary TEXT,
+              wrong TEXT,
+              wrongpartans TEXT,
+              correctans TEXT
+            )
+            ''',
+          );
+        },
+      );
+      //全データを読み取り
+      final records = await _database.query('feedback') as List<Map<String, dynamic>>;
+      //fblistに追加
+      for(int i=0;i<records.length;i++){
+        fblist.add(feedback(
+          records[i]['id'],
+          records[i]['subject'].split('&&'),
+          records[i]['field'].split('&&'),
+          records[i]['problem'],
+          records[i]['summary'],
+          records[i]['wrong'],
+          records[i]['wrongpartans'],
+          records[i]['correctans'],
+        ));
+      }
+      print('jsdlkfjlsd');
+      print(fblist[0].correctans);
+      print(fblist[3].subject);
+    }catch(e){
+      print("データベース読み取りエラー");
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

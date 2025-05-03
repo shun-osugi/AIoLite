@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 import 'package:ps_hacku_osaka/widget_fbsheet.dart';
 import 'subject_categories.dart';
+import 'package:sqflite/sqflite.dart';
 
 class feedback {
   //フィードバック一つのデータ
@@ -87,6 +88,7 @@ class _FblistPageState extends State<FblistPage> {
   final ScrollController _scrollController = ScrollController(); // スクロールのコントローラ
   bool onFilter = false; // フィルターの表示・非表示
   bool _showScrollToTopButton = false; // トップに戻るボタンの表示・非表示
+  late Database _database;//データベース
 
 /*
   @override
@@ -110,12 +112,66 @@ class _FblistPageState extends State<FblistPage> {
         });
       }
     });
+    // _initDatabase();
+    _filteredFbList = List.from(fblist); // 初期表示は全件
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  //データベースから読み取り
+  Future<void> _initDatabase() async {
+    // データベースをオープン（存在しない場合は作成）
+    try{
+      // String databasePath = await getDatabasesPath();
+      // String path = '${databasePath}/database.db';
+      // await deleteDatabase(path);
+      _database = await openDatabase(
+        'database.db',
+        version: 1,
+        onCreate: (Database db, int version) async {
+          //テーブルがないなら作成
+          //フィードバックテーブルを作成
+          //fieldはリスト（flutter側に持ってくるときに変換予定）
+          return db.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS feedback(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              subject TEXT,
+              field TEXT,
+              problem TEXT,
+              summary TEXT,
+              wrong TEXT,
+              wrongpartans TEXT,
+              correctans TEXT
+            )
+            ''',
+          );
+        },
+      );
+      //全データを読み取り
+      final records = await _database.query('feedback') as List<Map<String, dynamic>>;
+      //fblistに追加
+      for(int i=0;i<records.length;i++){
+        fblist.add(feedback(
+          records[i]['id'],
+          records[i]['subject'].split('&&'),
+          records[i]['field'].split('&&'),
+          records[i]['problem'],
+          records[i]['summary'],
+          records[i]['wrong'],
+          records[i]['wrongpartans'],
+          records[i]['correctans'],
+        ));
+      }
+      print('jsdlkfjlsd');
+    }catch(e){
+      print("データベース読み取りエラー");
+      print(e);
+    }
   }
 
   // 絞り込み処理
