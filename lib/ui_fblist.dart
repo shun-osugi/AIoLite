@@ -31,7 +31,7 @@ class _FblistPageState extends State<FblistPage> {
       1,
       ['教科', '教科', '教科'],
       ['分類11111111', '分類22222222', '分類33333333'],
-      '問題文',
+      '問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文',
       'aaaaaaaaa',
       'aaaaaaaaa',
       'aaaaaaaaa',
@@ -626,9 +626,9 @@ class _FblistPageState extends State<FblistPage> {
     }
     final combinedLabels = labels.join('  |  '); //ラベルを統合してリストに
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       width: MediaQuery.of(context).size.width * 0.9,
-      height: MediaQuery.of(context).size.height * 0.12,
       decoration: BoxDecoration(
         color: A_Colors.mainColor,
         borderRadius: BorderRadius.circular(24),
@@ -644,6 +644,7 @@ class _FblistPageState extends State<FblistPage> {
       child: ElevatedButton(
         onPressed: () {},
         style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 16),
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -653,8 +654,8 @@ class _FblistPageState extends State<FblistPage> {
         child: Column(
           children: [
             // ▼ ---------- 問題文(sProblem) ---------- ▼ //
-            Expanded(
-              flex: 6, // 上下の範囲の比率
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -664,36 +665,50 @@ class _FblistPageState extends State<FblistPage> {
                     fontSize: MediaQuery.of(context).size.width * 0.05,
                     fontWeight: FontWeight.bold,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
+              ),),
+
+            SizedBox(height: MediaQuery.of(context).size.width * 0.02), //余白
+
+            // ▼ ---------- 分類(field) ---------- ▼ //
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              padding: EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: A_Colors.white,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ),
-            Expanded(
-              flex: 4, // 上下の範囲の比率
-              // ▼ ---------- 分類(field) ---------- ▼ //
-              child: Container(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.height * 0.05,
-                  decoration: BoxDecoration(
-                    color: A_Colors.mainColor,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: A_Colors.background, width: 3),
-                  ),
-                  child: Center(
-                    child: SingleChildScrollView(
-                      //スクロールできるようにする
-                      scrollDirection: Axis.horizontal,
-                      child: Text(
-                        combinedLabels, //結合したテキスト
+              child: Expanded(
+                child: Wrap(
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: labels.map((label) {
+                    return Chip(
+                      label: Text(
+                        label,
                         style: TextStyle(
-                          color: A_Colors.white,
-                          fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontWeight: FontWeight.bold,
+                          color: A_Colors.black,
+                          fontSize: 15,
                         ),
                       ),
-                    ),
-                  )),
-            ),
-            SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
+                      backgroundColor: A_Colors.background,
+                      side: BorderSide(
+                        color: A_Colors.black,
+                        width: 0.5,
+                      ),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      labelPadding: EdgeInsets.symmetric(horizontal: 3),
+                      visualDensity: VisualDensity(horizontal: 1.0, vertical: -3),
+                    );
+                  }).toList(),
+                ),
+              ),
+            )
           ],
         ),
       ),
