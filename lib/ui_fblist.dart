@@ -262,8 +262,8 @@ class _FblistPageState extends State<FblistPage> {
                       });
                     },
                     icon: onFilter
-                        ? Icon(Icons.expand_less)
-                        : Icon(Icons.expand_more),
+                        ? Icon(Icons.expand_more)
+                        : Icon(Icons.expand_less),
                     iconSize: MediaQuery.of(context).size.width * 0.1,
                     color: A_Colors.mainColor,
                   )
@@ -503,24 +503,36 @@ class _FblistPageState extends State<FblistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: A_Colors.white,
+        toolbarHeight: MediaQuery.of(context).size.height * 0.07,
+
+        // 戻るボタン
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: A_Colors.mainColor,
+            size: MediaQuery.of(context).size.width * 0.1,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+
+        // タイトル
+        title: Text(
+          "フィードバック一覧",
+          style: TextStyle(
+              color: A_Colors.black,
+              fontSize: MediaQuery.of(context).size.width * 0.06,
+              fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
       backgroundColor: A_Colors.background,
       body: SafeArea(
         child: Stack(children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              Text(
-                "フィードバック一覧",
-                style: TextStyle(
-                    color: A_Colors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.07,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-
-              filterUI(), //大場担当　絞り込み部分
-
               // フィードバック一覧表示
               Expanded(
                 // ▼ ---------- 要約された問題文リスト ---------- ▼ //
@@ -560,26 +572,19 @@ class _FblistPageState extends State<FblistPage> {
                   ),
                 ),
               ),
-            ],
-          ),
 
-          // 左上の戻るボタン
-          Positioned(
-            top: 8,
-            left: 8,
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: A_Colors.black),
-              iconSize: MediaQuery.of(context).size.width * 0.08,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
+              filterUI(), //大場担当　絞り込み部分
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            ],
           ),
 
           // 右下のトップに戻るボタン
           if (_showScrollToTopButton)
             Positioned(
-              bottom: 24,
+              bottom: onFilter
+                  ? MediaQuery.of(context).size.height * 0.37
+                  : MediaQuery.of(context).size.height * 0.1,
               right: 24,
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.14,
