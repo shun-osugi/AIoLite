@@ -6,14 +6,14 @@ import 'subject_categories.dart';
 class feedback {
   //フィードバック一つのデータ
   int id; //id
-  String subject; //教科
+  List<String> subject; //教科
   List<String> field; //分野
   String problem; //問題文
-  String firstans; //どういう解き方を最初したのか
+  String summary;      //問題文の要約
   String wrong; //間違えてた部分
   String wrongpartans; //間違えてた部分の正しい解き方
   String correctans; //それの正しい解き方
-  feedback(this.id, this.subject, this.field, this.problem, this.firstans,
+  feedback(this.id, this.subject, this.field, this.problem, this.summary,
       this.wrong, this.wrongpartans, this.correctans);
 }
 
@@ -28,7 +28,7 @@ class _FblistPageState extends State<FblistPage> {
     //仮データ
     feedback(
       1,
-      '教科',
+      ['教科','教科','教科'],
       ['分類11111111', '分類22222222', '分類33333333'],
       '問題文',
       'aaaaaaaaa',
@@ -38,7 +38,7 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       2,
-      '数学',
+      ['数学','教科'],
       ['正の数・負の数', 'b'],
       'bbbbbbbb',
       'bbbbbbbb',
@@ -48,7 +48,7 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       3,
-      '数学',
+      ['数学','教科'],
       ['c', "文字式"],
       'ccccccccc',
       'ccccccccc',
@@ -58,7 +58,7 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       4,
-      'dd',
+      ['dd','教科'],
       ['d', 'd'],
       'ddddddddd',
       'ddddddddd',
@@ -68,7 +68,7 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       5,
-      'ee',
+      ['ee','教科'],
       ['e', 'e'],
       'eeeeeeeee',
       'eeeeeeeee',
@@ -351,7 +351,7 @@ class _FblistPageState extends State<FblistPage> {
                 //絞り込みフィルター表示
                 Container(
                 width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.15, //フィルター二列が見える状態
+                height: MediaQuery.of(context).size.height * 0.11, //フィルター二列が見える状態
                 padding: EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -479,7 +479,7 @@ class _FblistPageState extends State<FblistPage> {
                             for (int i = 0; i < fblist.length; i++)
                               Column(
                                 children: [
-                                  builderSummery(context, fblist[i].subject,
+                                  builderSummery(context, fblist[i].subject[0],
                                       fblist[i].field, fblist[i].problem),  //1つの問題文
                                   SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
                                 ],

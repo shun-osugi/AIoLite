@@ -186,21 +186,33 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> inputDatabase() async {
-    String subject = "なし"; //教科
-    String field = "なし";   //ラベル（sqliteでは文字列の状態で保存）
+    String subject = 'なし'; //教科（sqliteでは文字列の状態で保存）
+    String field = 'なし';   //ラベル（sqliteでは文字列の状態で保存）
     if(labels.isNotEmpty){
       List<String> s=labels[0].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
-      subject = s[0]; //教科は一つ目の項目で優先
+      subject = s[0];
       field = s[1];
       for(int i=1;i<labels.length;i++){//二つ目以降のラベルも保存
+        s=labels[i].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
+        subject += '&&'; //教科1&&教科2&&...のフォーマットで保存
+        subject += s[0];
         field += '&&'; //ラベル1&&ラベル2&&...のフォーマットで保存
-        field += labels[i].replaceAll(RegExp(r'\s'), '').split('-')[1];
+        field += s[1];
+      }
+    }
+    else {
+      for(int i=0;i<labels.length;i++){//二つ目以降のラベルも保存
+        List<String> s=labels[i].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
+        subject += '&&'; //教科1&&教科2&&...のフォーマットで保存
+        subject += s[0];
+        field += '&&'; //ラベル1&&ラベル2&&...のフォーマットで保存
+        field += s[1];
       }
     }
     try{
       // var all = await _database.query('feedback');
       //recordId 主キー
-      int recordId = await _database.insert('feedback', {
+        await _database.insert('feedback', {
         'subject': subject,
         'field': field,
         'problem': inputText,
