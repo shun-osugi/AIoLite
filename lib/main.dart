@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 // import 'package:file_picker/_internal/file_picker_web.dart';
@@ -20,6 +22,7 @@ import 'api_service.dart';
 import 'terms_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_editor_plus/image_editor_plus.dart';
 
 bool _isBasicMode = false;
 
@@ -950,19 +953,44 @@ class CameraButton extends StatelessWidget {
   final Function(String) onImagePicked;
   const CameraButton({Key? key, required this.onImagePicked}) : super(key: key);
 
-  Future<void> file_to_text(File putfile) async {
-    final inputImage = InputImage.fromFile(putfile);
-    // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
-    final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
-    // 画像から文字を読み取る（OCR処理）
-    final recognizedText = await textRecognizer.processImage(inputImage);
+  Future<void> file_to_text(File putfile, BuildContext context) async {
+    //contextはmain画面のcontext
+    try{
+      //画像編集
+      final data = await putfile.readAsBytes();
+      ImageEditor.setI18n({//言語翻訳
+        'Crop': '切り取り',
+        'Save': '保存',
+        'Freeform': 'フリーフォーム',
+      });
+      //画像編集画面
+      final editedImage = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ImageCropper(
+                  image: data, // <-- Uint8List of image
+              ),
+          ),
+      );
+      await putfile.writeAsBytes(editedImage);
+      final inputImage = InputImage.fromFile(putfile);
+      // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
+      final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
+      // 画像から文字を読み取る（OCR処理）
+      final recognizedText = await textRecognizer.processImage(inputImage);
 
-    onImagePicked(recognizedText.text);
-    textRecognizer.close();
+      onImagePicked(recognizedText.text);
+      textRecognizer.close();
+    }
+    catch(e){
+      print('ファイル編集エラー');
+      print(e);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    BuildContext currentContext = context; //contextの保持
     double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () async {
@@ -989,7 +1017,7 @@ class CameraButton extends StatelessWidget {
                         print(filename);
 
                         // File型に変換し文字に変換
-                        file_to_text(File(file.files.first.path!));
+                        file_to_text(File(file.files.first.path!),currentContext);
                       }
                     },
                   ),
@@ -1004,7 +1032,7 @@ class CameraButton extends StatelessWidget {
                       if (pickedFile != null) {
                         print(pickedFile.path);
                         // File型に変換し文字に変換
-                        file_to_text(File(pickedFile.path));
+                        file_to_text(File(pickedFile.path),currentContext);
                       }
                     },
                   )
