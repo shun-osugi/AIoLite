@@ -504,14 +504,14 @@ class _FblistPageState extends State<FblistPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: A_Colors.white,
+        backgroundColor: A_Colors.black,
         toolbarHeight: MediaQuery.of(context).size.height * 0.07,
 
         // 戻るボタン
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: A_Colors.mainColor,
+            color: A_Colors.white,
             size: MediaQuery.of(context).size.width * 0.1,
           ),
           onPressed: () => Navigator.of(context).pop(),
@@ -521,7 +521,7 @@ class _FblistPageState extends State<FblistPage> {
         title: Text(
           "フィードバック一覧",
           style: TextStyle(
-              color: A_Colors.black,
+              color: A_Colors.white,
               fontSize: MediaQuery.of(context).size.width * 0.06,
               fontWeight: FontWeight.bold),
         ),
