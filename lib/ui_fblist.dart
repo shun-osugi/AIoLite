@@ -14,8 +14,7 @@ class feedback {
   String wrong; //間違えてた部分
   String wrongpartans; //間違えてた部分の正しい解き方
   String correctans; //それの正しい解き方
-  feedback(this.id, this.subject, this.field, this.problem, this.summary,
-      this.wrong, this.wrongpartans, this.correctans);
+  feedback(this.id, this.subject, this.field, this.problem, this.summary, this.wrong, this.wrongpartans, this.correctans);
 }
 
 class FblistPage extends StatefulWidget {
@@ -32,7 +31,7 @@ class _FblistPageState extends State<FblistPage> {
       ['教科', '教科', '教科'],
       ['分類11111111', '分類22222222', '分類33333333'],
       '問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文',
-      'aaaaaaaaa',
+      '要約された問題文',
       'aaaaaaaaa',
       'aaaaaaaaa',
       'aaaaaaaaa',
@@ -78,9 +77,7 @@ class _FblistPageState extends State<FblistPage> {
       'eeeeeeeee',
     ),
   ];
-  // List<String> _filteredLabels = []; // 絞り込み後のラベル
-  // list<String> _filteredSubjects = []; // 絞り込み後の科目リスト
-  // List<String> _filteredFields = []; // 絞り込み後の分野リスト
+  List<List<String>> allLabels = [];  // 教科と分類を統合したリストのリスト(ラベル)
   String? selectedSubject; // 教科ドロップダウン選択
   String? selectedCategory; // 分類ドロップダウン選択
   List<String> selectedFilter = []; //選択した教科ラベル ["教科-ラベル",...
@@ -89,14 +86,8 @@ class _FblistPageState extends State<FblistPage> {
   bool onFilter = false; // フィルターの表示・非表示
   bool _showScrollToTopButton = false; // トップに戻るボタンの表示・非表示
   late Database _database; //データベース
-
-/*
-  @override
-  void initState() {
-    super.initState();
-    _filteredFbList = List.from(fblist); // 初期表示は全件
-  }
-*/
+  bool listOrDetail = true; // フィードバックの表示方法選択[ 問題文リスト(true) or 詳細(false) ]
+  final ScrollController _fbScrollController = ScrollController(); // 詳細表示のスクロールコントローラ
 
   @override
   void initState() {
@@ -122,7 +113,8 @@ class _FblistPageState extends State<FblistPage> {
     super.dispose();
   }
 
-  //データベースから読み取り
+  // ▼ ---------- データベース読み取り ---------- ▼ //
+  // データベースから読み解り
   Future<void> _initDatabase() async {
     // データベースをオープン（存在しない場合は作成）
     try {
@@ -153,8 +145,7 @@ class _FblistPageState extends State<FblistPage> {
         },
       );
       //全データを読み取り
-      final records =
-          await _database.query('feedback') as List<Map<String, dynamic>>;
+      final records = await _database.query('feedback') as List<Map<String, dynamic>>;
       //fblistに追加
       for (int i = 0; i < records.length; i++) {
         fblist.add(feedback(
@@ -174,7 +165,9 @@ class _FblistPageState extends State<FblistPage> {
       print(e);
     }
   }
+  // ▲ ---------- データベース読み取り ---------- ▲ //
 
+  // ▼ ---------- 絞り込み処理 ---------- ▼ //
   // 絞り込み処理
   void _filterFeedbackList() {
     _filteredFbList.clear();
@@ -187,8 +180,7 @@ class _FblistPageState extends State<FblistPage> {
           _filteredFbList.add(fblist[i]);
           break;
         } //そうでないなら分類も含めて検索
-        else if (selectedFilter
-            .contains('${fblist[i].subject[j]}-${fblist[i].field[j]}')) {
+        else if (selectedFilter.contains('${fblist[i].subject[j]}-${fblist[i].field[j]}')) {
           _filteredFbList.add(fblist[i]);
           break;
         }
@@ -211,8 +203,7 @@ class _FblistPageState extends State<FblistPage> {
       selectedFilter.removeWhere((e) => e.contains(selectedSubject!));
       //直前の検索で消されるので'教科-すべて'を追加
       selectedFilter.add(filter);
-    } else if (!selectedFilter.contains(filter) &&
-        !selectedFilter.contains('$selectedSubject-$selectedCategory')) {
+    } else if (!selectedFilter.contains(filter) && !selectedFilter.contains('$selectedSubject-$selectedCategory')) {
       //全てがある場合は追加しない
       selectedFilter.add('$selectedSubject-$selectedCategory');
     }
@@ -225,7 +216,9 @@ class _FblistPageState extends State<FblistPage> {
       selectedFilter.remove(filter);
     });
   }
+  // ▲ ---------- 絞り込み処理 ---------- ▲ //
 
+  // ▼ ---------- 絞り込みUI ---------- ▼ //
   //大元の絞り込みUI
   //mainからパクってきたよ
   Widget filterUI() {
@@ -239,8 +232,7 @@ class _FblistPageState extends State<FblistPage> {
           border: Border.all(color: A_Colors.black, width: 3),
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.04),
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.04),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -250,10 +242,7 @@ class _FblistPageState extends State<FblistPage> {
                   SizedBox(width: MediaQuery.of(context).size.width * 0.1),
                   Text(
                     "フィルター設定",
-                    style: TextStyle(
-                        color: A_Colors.black,
-                        fontSize: MediaQuery.of(context).size.width * 0.05,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(color: A_Colors.black, fontSize: MediaQuery.of(context).size.width * 0.05, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     onPressed: () {
@@ -261,9 +250,7 @@ class _FblistPageState extends State<FblistPage> {
                         onFilter = !onFilter;
                       });
                     },
-                    icon: onFilter
-                        ? Icon(Icons.expand_more)
-                        : Icon(Icons.expand_less),
+                    icon: onFilter ? Icon(Icons.expand_more) : Icon(Icons.expand_less),
                     iconSize: MediaQuery.of(context).size.width * 0.1,
                     color: A_Colors.mainColor,
                   )
@@ -315,10 +302,7 @@ class _FblistPageState extends State<FblistPage> {
                                   style: TextStyle(color: A_Colors.black),
                                 ), // デフォルトのnull選択肢
                               ),
-                              ...subjectCategories.keys
-                                  .toSet()
-                                  .toList()
-                                  .map((String subject) {
+                              ...subjectCategories.keys.toSet().toList().map((String subject) {
                                 // 重複を削除
                                 // print("DropdownMenuItem value: $subject"); // デバッグ出力
                                 return DropdownMenuItem<String>(
@@ -370,8 +354,7 @@ class _FblistPageState extends State<FblistPage> {
                                     style: TextStyle(color: A_Colors.black),
                                   ), // デフォルトのnull選択肢
                                 ),
-                                ...(subjectCategories[selectedSubject] ?? [])
-                                    .map((String category) {
+                                ...(subjectCategories[selectedSubject] ?? []).map((String category) {
                                   return DropdownMenuItem<String>(
                                     value: category,
                                     child: Text(
@@ -409,8 +392,7 @@ class _FblistPageState extends State<FblistPage> {
                 //絞り込みフィルター表示
                 Container(
                   width: MediaQuery.of(context).size.width * 0.9,
-                  height:
-                      MediaQuery.of(context).size.height * 0.11, //フィルター二列が見える状態
+                  height: MediaQuery.of(context).size.height * 0.11, //フィルター二列が見える状態
                   padding: EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     border: Border.all(
@@ -441,13 +423,9 @@ class _FblistPageState extends State<FblistPage> {
                             color: A_Colors.black,
                             width: 0.5,
                           ),
-                          materialTapTargetSize: MaterialTapTargetSize
-                              .shrinkWrap, // 追加：上下の余計なmarginを削除
-                          labelPadding: EdgeInsets.symmetric(
-                              horizontal: 3), // 追加：文字左右の多すぎるpaddingを調整
-                          visualDensity: VisualDensity(
-                              horizontal: 1.0,
-                              vertical: -3), // 追加：文字上下の多すぎるpaddingを調整
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // 追加：上下の余計なmarginを削除
+                          labelPadding: EdgeInsets.symmetric(horizontal: 3), // 追加：文字左右の多すぎるpaddingを調整
+                          visualDensity: VisualDensity(horizontal: 1.0, vertical: -3), // 追加：文字上下の多すぎるpaddingを調整
                           onDeleted: () => removeFilter(filter),
                         );
                       }).toList(),
@@ -469,10 +447,7 @@ class _FblistPageState extends State<FblistPage> {
                       },
                       child: Text(
                         "リセット",
-                        style: TextStyle(
-                            color: A_Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
+                        style: TextStyle(color: A_Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                     ),
                     SizedBox(width: 5),
@@ -482,10 +457,7 @@ class _FblistPageState extends State<FblistPage> {
                       onPressed: _filterFeedbackList,
                       child: Text(
                         "絞り込み",
-                        style: TextStyle(
-                            color: A_Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
+                        style: TextStyle(color: A_Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -498,11 +470,23 @@ class _FblistPageState extends State<FblistPage> {
       ),
     );
   }
+  // ▲ ---------- 絞り込みUI ---------- ▲ //
 
-  //main
+  // ▼ ---------- メインのbuildメソッド ---------- ▼ //
   @override
   Widget build(BuildContext context) {
+    int allLength = fblist.length;
+
+    for (int i = 0; i < allLength; i++) {
+      int labelLength = fblist[i].subject.length < fblist[i].field.length ? fblist[i].subject.length : fblist[i].field.length;
+      List<String> tmpLabel = []; // 各 fblist アイテムのラベルリスト
+      for (int j = 0; j < labelLength; j++) {
+        tmpLabel.add('${fblist[i].subject[j]} - ${fblist[i].field[j]}');
+      }
+      allLabels.add(tmpLabel);
+    }
     return Scaffold(
+      // AppBar
       appBar: AppBar(
         backgroundColor: A_Colors.black,
         toolbarHeight: MediaQuery.of(context).size.height * 0.07,
@@ -520,10 +504,7 @@ class _FblistPageState extends State<FblistPage> {
         // タイトル
         title: Text(
           "フィードバック一覧",
-          style: TextStyle(
-              color: A_Colors.white,
-              fontSize: MediaQuery.of(context).size.width * 0.06,
-              fontWeight: FontWeight.bold),
+          style: TextStyle(color: A_Colors.black, fontSize: MediaQuery.of(context).size.width * 0.06, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -533,48 +514,14 @@ class _FblistPageState extends State<FblistPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // フィードバック一覧表示
-              Expanded(
-                // ▼ ---------- 要約された問題文リスト ---------- ▼ //
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: A_Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.95,
-                      child: Column(
-                        children: [
-                          SizedBox(height: 16),
-
-                          // 一時的に要約される前の問題文を使用
-                          for (int i = 0; i < fblist.length; i++)
-                            Column(
-                              children: [
-                                builderSummery(
-                                    context,
-                                    fblist[i].subject,
-                                    fblist[i].field,
-                                    fblist[i].problem), //1つの問題文
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.width *
-                                        0.01), //余白
-                              ],
-                            ),
-
-                          SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              filterUI(), //大場担当　絞り込み部分
-
+              // フィードバック表示
+              if(listOrDetail) ...[
+                summeryList(),
+                filterUI(),
+              ]
+              else ...[
+                feedbackDetails(0),
+              ],
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
             ],
           ),
@@ -582,9 +529,7 @@ class _FblistPageState extends State<FblistPage> {
           // 右下のトップに戻るボタン
           if (_showScrollToTopButton)
             Positioned(
-              bottom: onFilter
-                  ? MediaQuery.of(context).size.height * 0.37
-                  : MediaQuery.of(context).size.height * 0.1,
+              bottom: onFilter ? MediaQuery.of(context).size.height * 0.37 : MediaQuery.of(context).size.height * 0.1,
               right: 24,
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.14,
@@ -620,16 +565,45 @@ class _FblistPageState extends State<FblistPage> {
       ),
     );
   }
+  // ▲ ---------- メインのbuildメソッド ---------- ▲ //
 
-  // ▼ ---------- 要約された問題文のボタンのbuider ---------- ▼ //
-  Widget builderSummery(BuildContext context, List<String> subject,
-      List<String> fields, String sProblem) {
-    List<String> labels = []; //教科と分類を統合したリスト(ラベル)
-    int length = subject.length < fields.length ? subject.length : fields.length;
-    for (int i = 0; i <length; i++) {
-      labels.add('${subject[i]} - ${fields[i]}');
-    }
-    final combinedLabels = labels.join('  |  '); //ラベルを統合してリストに
+  // ▼ ---------- 問題文リスト ---------- ▼ //
+
+  // 問題文一覧のウィジェット
+  Widget summeryList() {
+    return Expanded(
+      // 要約された問題文リスト
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: A_Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.95,
+            child: Column(
+              children: [
+                SizedBox(height: 16),
+                for (int i = 0; i < fblist.length; i++)
+                  Column(
+                    children: [
+                      builderSummery(context, allLabels[i], fblist[i].summary), //1つの問題文
+                      SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
+                    ],
+                  ),
+                SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 問題文1つのbuilder
+  Widget builderSummery(BuildContext context, List<String> labels, String summary) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -658,13 +632,13 @@ class _FblistPageState extends State<FblistPage> {
         ),
         child: Column(
           children: [
-            // ▼ ---------- 問題文(sProblem) ---------- ▼ //
+            // 問題文(summary)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  sProblem,
+                  summary,
                   style: TextStyle(
                     color: A_Colors.white,
                     fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -673,11 +647,12 @@ class _FblistPageState extends State<FblistPage> {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
-              ),),
+              ),
+            ),
 
             SizedBox(height: MediaQuery.of(context).size.width * 0.02), //余白
 
-            // ▼ ---------- 分類(field) ---------- ▼ //
+            // 分類(field)
             Container(
               width: MediaQuery.of(context).size.width * 0.9,
               padding: EdgeInsets.all(3),
@@ -719,5 +694,63 @@ class _FblistPageState extends State<FblistPage> {
       ),
     );
   }
-  // ▲ ---------- 要約された問題文のボタンのbuider ---------- ▲ //
+  // ▲ ---------- 問題文リスト ---------- ▲ //
+
+  // ▼ ---------- フィードバック詳細 ---------- ▼ //
+  Widget feedbackDetails(int targetNum) {
+  final _scrollController = ScrollController(initialScrollOffset: MediaQuery.of(context).size.width * targetNum); // 初期位置を設定
+  return SingleChildScrollView(
+    controller: _scrollController,
+    scrollDirection: Axis.horizontal,
+    child: StatefulBuilder(builder: (context, setState) {
+      return Padding(
+        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+        child: GestureDetector(
+          onHorizontalDragEnd: (fbdrag) {
+            if (fbdrag.primaryVelocity != null) {
+              final pageWidth = MediaQuery.of(context).size.width;
+              if (fbdrag.primaryVelocity! < 0 && targetNum < fblist.length - 1) {
+                // 右→左 (fblistを1進める)
+                _scrollController.animateTo(
+                  _scrollController.offset + pageWidth,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+                setState(() {
+                  targetNum++;
+                });
+              } else if (fbdrag.primaryVelocity! > 0 && targetNum > 0) {
+                // 左→右 (fblistを1戻る)
+                _scrollController.animateTo(
+                  _scrollController.offset - pageWidth,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+                setState(() {
+                  targetNum--;
+                });
+              }
+            }
+          },
+          child: Row( // Stack の代わりに Row を使用
+            children: [
+              for (int i = 0; i < fblist.length; i++)
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.92, // Padding 分を考慮
+                  child: FbSheet(
+                    labels: allLabels[i % allLabels.length], // index に応じたラベル
+                    problem: fblist[i].problem,
+                    wrong: fblist[i].wrong,
+                    wrongpartans: fblist[i].wrongpartans,
+                    correctans: fblist[i].correctans,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }),
+  );
+}
+  // ▲ ---------- フィードバック詳細 ---------- ▲ //
 }
