@@ -3,6 +3,7 @@
 // データは仮置き、データベースとの連携は未実装
 
 import 'package:flutter/material.dart';
+import 'package:ps_hacku_osaka/colors.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -182,14 +183,35 @@ class _StatsPageState extends State<StatsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final isBasicMode = args?['isBasicMode'] ?? false;
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(), // ← 戻るボタン
-        title: const Text('全体統計'),
+        backgroundColor: isBasicMode ? B_Colors.mainColor : A_Colors.black,
+        toolbarHeight: MediaQuery.of(context).size.height * 0.07,
+
+        // 戻るボタン
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isBasicMode ? B_Colors.white : A_Colors.white,
+            size: MediaQuery.of(context).size.width * 0.1,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+
+        // タイトル
+        title: Text(
+          "全体統計",
+          style: TextStyle(
+              color: isBasicMode ? B_Colors.white : A_Colors.white,
+              fontSize: MediaQuery.of(context).size.width * 0.06,
+              fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      backgroundColor: isBasicMode ? B_Colors.background : A_Colors.background,
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -296,18 +318,6 @@ class _StatsPageState extends State<StatsPage> {
       ),
     );
   }
-
-  // 教科タブのカラーパレット
-  Color _getColor(int index) {
-    const colors = [
-      Colors.redAccent,  //国語
-      Colors.indigo,     //数学
-      Colors.green,      //理科
-      Colors.amber,      //社会
-      Colors.blueAccent, //英語
-    ];
-    return colors[index % colors.length];
-  }
 }
 
 //ドーナツグラフ（fl_chart）
@@ -369,16 +379,16 @@ class _DonutPieChartState extends State<DonutPieChart> {
       ),
     );
   }
+}
 
-  /// グラフ用カラーパレット（教科タブの色と一緒）
-  Color _getColor(int index) {
-    const colors = [
-      Colors.redAccent,
-      Colors.indigo,
-      Colors.green,
-      Colors.amber,
-      Colors.blueAccent,
-    ];
-    return colors[index % colors.length];
-  }
+/// カラーパレット
+Color _getColor(int index) {
+  const colors = [
+    Subject_Colors.japanese,  //国語
+    Subject_Colors.math,     //数学
+    Subject_Colors.science,      //理科
+    Subject_Colors.socialstudies,      //社会
+    Subject_Colors.english, //英語
+  ];
+  return colors[index % colors.length];
 }

@@ -488,14 +488,14 @@ class _FblistPageState extends State<FblistPage> {
     return Scaffold(
       // AppBar
       appBar: AppBar(
-        backgroundColor: A_Colors.white,
+        backgroundColor: A_Colors.black,
         toolbarHeight: MediaQuery.of(context).size.height * 0.07,
 
         // 戻るボタン
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: A_Colors.mainColor,
+            color: A_Colors.white,
             size: MediaQuery.of(context).size.width * 0.1,
           ),
           onPressed: () => Navigator.of(context).pop(),
