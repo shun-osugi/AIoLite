@@ -6,14 +6,14 @@ import 'subject_categories.dart';
 class feedback {
   //フィードバック一つのデータ
   int id; //id
-  String subject; //教科
+  List<String> subject; //教科
   List<String> field; //分野
   String problem; //問題文
-  String firstans; //どういう解き方を最初したのか
+  String summary; //問題文の要約
   String wrong; //間違えてた部分
   String wrongpartans; //間違えてた部分の正しい解き方
   String correctans; //それの正しい解き方
-  feedback(this.id, this.subject, this.field, this.problem, this.firstans,
+  feedback(this.id, this.subject, this.field, this.problem, this.summary,
       this.wrong, this.wrongpartans, this.correctans);
 }
 
@@ -36,6 +36,7 @@ class _FbdetailPageState extends State<FbdetailPage> {
           child: Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              /*
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 // ▼ ---------- 左ボタン ---------- ▼ //
                 IconButton(
@@ -68,6 +69,7 @@ class _FbdetailPageState extends State<FbdetailPage> {
                       .withOpacity(listNum < fblist.length - 1 ? 1.0 : 0.3),
                 ),
               ]),
+              */
 
               // ▼ ---------- フィードバックシート ---------- ▼ //
               Container(
