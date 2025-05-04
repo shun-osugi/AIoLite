@@ -83,14 +83,14 @@ class _MyHomePageState extends State<MyHomePage> {
     Color backgroundColor = _isBasicMode ? B_Colors.mainColor : A_Colors.mainColor;
     return Scaffold(
       backgroundColor: backgroundColor,
-        body: SingleChildScrollView(
+        body: SafeArea(
           child: Stack(
               children: [
                 // アバター表示
                 Center(
                   child: Column(
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.38,),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.35,),
 
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.2,
@@ -118,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 // アバター名表示
                 Positioned(
-                    top: MediaQuery.of(context).size.height * 0.53,
+                    top: MediaQuery.of(context).size.height * 0.5,
                     right: MediaQuery.of(context).size.width * 0.25,
                     child: Container(
                       alignment: Alignment.center,
@@ -143,91 +143,89 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 // メインUI
                 Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.015),
 
-                        Image.asset('assets/logo.png', height: MediaQuery.of(context).size.height * 0.38), // ロゴ画像
+                      Image.asset('assets/logo.png', height: MediaQuery.of(context).size.height * 0.38), // ロゴ画像
 
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.19),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.2),
 
-                        // STARTボタン
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.8,
-                          height: MediaQuery.of(context).size.height * 0.15,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [A_Colors.subColor, A_Colors.white],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(50),
-                            border: Border.all(color: A_Colors.white, width: 5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: A_Colors.subColor.withOpacity(0.7),
-                                offset: Offset(0, 4),
-                                blurRadius: 10,
-                              ),
-                            ],
+                      // STARTボタン
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.height * 0.15,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [A_Colors.subColor, A_Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              showSendDialog(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
+                          borderRadius: BorderRadius.circular(50),
+                          border: Border.all(color: A_Colors.white, width: 5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: A_Colors.subColor.withOpacity(0.7),
+                              offset: Offset(0, 4),
+                              blurRadius: 10,
                             ),
-                            child: Text(
-                              'START',
-                              style: TextStyle(
-                                color: A_Colors.white,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 20,
-                                    color: A_Colors.black,
-                                    offset: Offset(0, 0),
-                                  ),
-                                ],
-                                fontSize: MediaQuery.of(context).size.width * 0.15,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showSendDialog(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50),
                             ),
-                          ),),
-
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.035),
-
-                        // モード切替＋全体統計＋フィードバック一覧ボタン（横並び）
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // モード切替ボタン
-                            Container(
-                              width: _isBasicMode ? MediaQuery.of(context).size.width * 0.6 : MediaQuery.of(context).size.width * 0.44,
-                              height: MediaQuery.of(context).size.width * 0.16,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [A_Colors.accentColor, A_Colors.white],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                          ),
+                          child: Text(
+                            'START',
+                            style: TextStyle(
+                              color: A_Colors.white,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 20,
+                                  color: A_Colors.black,
+                                  offset: Offset(0, 0),
                                 ),
-                                borderRadius: BorderRadius.circular(40),
-                                border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: A_Colors.accentColor.withOpacity(0.7),
-                                    offset: Offset(0, 4),
-                                    blurRadius: 10,
-                                  ),
-                                ],
+                              ],
+                              fontSize: MediaQuery.of(context).size.width * 0.15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),),
+
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+
+                      // モード切替＋全体統計＋フィードバック一覧ボタン（横並び）
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // モード切替ボタン
+                          Container(
+                            width: _isBasicMode ? MediaQuery.of(context).size.width * 0.6 : MediaQuery.of(context).size.width * 0.44,
+                            height: MediaQuery.of(context).size.width * 0.16,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [A_Colors.accentColor, A_Colors.white],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: A_Colors.accentColor.withOpacity(0.7),
+                                  offset: Offset(0, 4),
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
                             child: ElevatedButton(
                               onPressed: () {
                                 showDialog(
@@ -258,47 +256,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               ),
                             ),
-                            ),
+                          ),
 
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.02),
 
-                            //フィードバック一覧のボタン（アドバンス時のみ）
-                            if (!_isBasicMode)
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.16,
-                                height: MediaQuery.of(context).size.width * 0.16,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [A_Colors.accentColor, A_Colors.white],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: A_Colors.accentColor.withOpacity(0.7),
-                                      offset: Offset(0, 4),
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
-                                child: IconButton(
-                                  icon: Icon(Icons.auto_stories),
-                                  iconSize: MediaQuery.of(context).size.width * 0.08,
-                                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
-                                  onPressed: () {                                    
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/fblist',
-                                    );
-                                  },
-                                ),
-                              ),
-
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-
-                            // 全体統計のボタン
+                          //フィードバック一覧のボタン（アドバンス時のみ）
+                          if (!_isBasicMode)
                             Container(
                               width: MediaQuery.of(context).size.width * 0.16,
                               height: MediaQuery.of(context).size.width * 0.16,
@@ -319,56 +282,89 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ],
                               ),
                               child: IconButton(
-                                icon: Icon(Icons.bar_chart),
-                                iconSize: MediaQuery.of(context).size.width * 0.1,
+                                icon: Icon(Icons.auto_stories),
+                                iconSize: MediaQuery.of(context).size.width * 0.08,
                                 color: _isBasicMode ? B_Colors.black : A_Colors.black,
                                 onPressed: () {
-                                  Navigator.pushNamed(context, '/stats');
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/fblist',
+                                  );
                                 },
                               ),
                             ),
 
-                          ],
-                        ),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.02),
 
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                      ],
-                    ),
+                          // 全体統計のボタン
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.16,
+                            height: MediaQuery.of(context).size.width * 0.16,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [A_Colors.accentColor, A_Colors.white],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: A_Colors.accentColor.withOpacity(0.7),
+                                  offset: Offset(0, 4),
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.bar_chart),
+                              iconSize: MediaQuery.of(context).size.width * 0.1,
+                              color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/stats',
+                                  arguments: {
+                                    'isBasicMode': _isBasicMode,
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+
+                        ],
+                      ),
+
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                      // ライセンスアイコンと利用規約ボタン
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          // 利用規約ボタン (iマーク)
+                          const TermsButton(),
+
+                          // ライセンス表示ボタン
+                          IconButton(
+                            icon: Icon(Icons.handshake, size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
+                            onPressed: () {
+                              showLicensePage(
+                                context: context,
+                                applicationName: 'AIoLite',
+                                applicationVersion: '1.0.0',
+                              );
+                            },
+                          ),
+
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
 
                 // ヘルプを表示するボタン
                 HelpButton(mode: _isBasicMode ? 'basic' : 'advanced'),
-
-                // ライセンスアイコンと利用規約ボタン
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * 0.91,
-                      right: MediaQuery.of(context).size.width * 0.1,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // 利用規約ボタン (iマーク)
-                        const TermsButton(),
-
-                        // ライセンス表示ボタン
-                        IconButton(
-                          icon: Icon(Icons.handshake, size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
-                          onPressed: () {
-                            showLicensePage(
-                              context: context,
-                              applicationName: 'AIoLite',
-                              applicationVersion: '1.0.0',
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ]
           )
         )
@@ -390,7 +386,6 @@ class ModeSelectDialog extends StatefulWidget {
   @override
   State<ModeSelectDialog> createState() => _ModeSelectDialogState();
 }
-
 class _ModeSelectDialogState extends State<ModeSelectDialog> {
   late bool currentMode; // 選択中のモード
   final ScrollController _scrollController = ScrollController(); // スクロールコントローラ
@@ -639,7 +634,7 @@ class HelpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isBasic = mode == 'basic';
     return Positioned(
-      top: MediaQuery.of(context).size.height * 0.06,
+      top: MediaQuery.of(context).size.height * 0.02,
       right: MediaQuery.of(context).size.width * 0.06,
       child: Container(
         width: MediaQuery.of(context).size.width * (_isBasicMode ? 0.4 : 0.3),
