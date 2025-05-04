@@ -202,7 +202,7 @@ class _StatsPageState extends State<StatsPage> {
 
         // タイトル
         title: Text(
-          "全体統計",
+          isBasicMode ? 'もんだいのきろく' : "全体統計",
           style: TextStyle(
               color: isBasicMode ? B_Colors.white : A_Colors.white,
               fontSize: MediaQuery.of(context).size.width * 0.06,
@@ -218,7 +218,7 @@ class _StatsPageState extends State<StatsPage> {
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-            // ドーナツグラフ＋凡例
+            // 教科の割合
             Container(
               width: MediaQuery.of(context).size.width * 0.9,
               decoration: BoxDecoration(
@@ -256,9 +256,9 @@ class _StatsPageState extends State<StatsPage> {
               ),
             ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-
-            Container(
+            // よく使うラベル
+            if(!isBasicMode)
+              Container(
               width: MediaQuery.of(context).size.width * 0.9,
               decoration: BoxDecoration(
                 color: isBasicMode ? B_Colors.white : A_Colors.white,
