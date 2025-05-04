@@ -60,7 +60,8 @@ class _ChatPageState extends State<ChatBasicPage> {
   Future<void> _initAsync() async {
     await AI.sendMessage(Content.text('''
     これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください.
-    出力は数式表現や文字効果（**A**などの），コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
+    そちらが話す文章は読み上げを行うので，そのまま読むとおかしくなるような文字は出力しないでください．
+    例えば，数式表現や文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
     こちら側は小学生を想定しているので漢字などを使う場合は難しい表現はあまりしないでください.
     もし，問題を解き終えたら，問題で使った知識が普段どういう風に使われているか教えてください.
     また全ての出力において，理解しやすいように多くても出力文字数は80文字以内になるようにしてください.
@@ -95,25 +96,31 @@ class _ChatPageState extends State<ChatBasicPage> {
 
   // AIからのメッセージを取得
   void _getAIResponse(String userMessage) async {
+    String aiMessage = '';
     try {
       final response = await AI.sendMessage(
           Content.text(userMessage)); // AIにメッセージを送信
-      String aiMessage = (response.text ?? 'イオからのメッセージが取得できませんでした').trim(); // AIの返答を取得
+      aiMessage = (response.text ?? 'イオからのメッセージが取得できませんでした').trim(); // AIの返答を取得
       setState(() {
         chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
         chatIndex = chats.length - 2; // Indexを更新
         _isSending = false;
       });
-
-      //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
-      await _ttsService.stop();
-      await _ttsService.speak(aiMessage);
     } catch (e) {
       // エラー時の処理
       setState(() {
         chats.add(chat(1, 'イオからのメッセージが取得できませんでした'));
         _isSending = false;
       });
+    }
+    try{
+      //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
+      await _ttsService.stop();
+      await _ttsService.speak(aiMessage);
+    }
+    catch(e){
+      print('読み上げエラー');
+      print(e);
     }
   }
 
@@ -599,13 +606,13 @@ class _ChatPageState extends State<ChatBasicPage> {
                             icon: Icon(Icons.question_mark),
                             iconSize: MediaQuery.of(context).size.width * 0.1,
                             color: B_Colors.black,
-                            onPressed: () {
+                            onPressed: () async {
                               setState(() {
                                 _isSending = true;
                                 chats.add(chat(0, '？')); // ユーザーのメッセージを会話リストに追加
                                 chatIndex = chats.length - 2; // Indexを更新
                               });
-                              AI.sendMessage(Content.text('今のところがわからなかったから、もう一度分かりやすく教えて！'));
+                              await AI.sendMessage(Content.text('今のところがわからなかったから、もう一度分かりやすく教えて！'));
                               _getAIResponse(inputText);
                             },
                           ),
