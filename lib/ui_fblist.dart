@@ -86,7 +86,7 @@ class _FblistPageState extends State<FblistPage> {
   bool onFilter = false; // フィルターの表示・非表示
   bool _showScrollToTopButton = false; // トップに戻るボタンの表示・非表示
   late Database _database; //データベース
-  bool listOrDetail = false; // フィードバックの表示方法選択[ 問題文リスト(true) or 詳細(false) ]
+  bool listOrDetail = true; // フィードバックの表示方法選択[ 問題文リスト(true) or 詳細(false) ]
   final ScrollController _fbScrollController = ScrollController(); // 詳細表示のスクロールコントローラ
 
   @override
