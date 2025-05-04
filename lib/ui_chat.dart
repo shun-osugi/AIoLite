@@ -67,7 +67,8 @@ class _ChatPageState extends State<ChatPage> {
     await AI.sendMessage(Content.text('''
     これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください.
     こちらが答えるとき，文章で説明し回答しなければならないような質問を，ときどきお願いします.
-    出力は数式表現や文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
+    そちらが話す文章は読み上げを行うので，そのまま読むとおかしくなるような文字は出力しないでください．
+    例えば，数式表現や文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
     出力文字数は,多くても100文字程度になるようにしてください.
     中高生（受験生）を対象とするので，必ず最初に「どこまで自力で解けるか解いてみて」などと聞いて，それに伴って会話を進めてください.
     口調は友達のような感じで大丈夫だよ！
@@ -100,24 +101,30 @@ class _ChatPageState extends State<ChatPage> {
 
   // AIからのメッセージを取得
   void _getAIResponse(String userMessage) async {
+    String aiMessage = '';
     try {
       final response = await AI.sendMessage(
           Content.text(userMessage)); // AIにメッセージを送信
-      String aiMessage = response.text ?? 'イオからのメッセージが取得できませんでした'; // AIの返答を取得
+      aiMessage = response.text ?? 'イオからのメッセージが取得できませんでした'; // AIの返答を取得
       setState(() {
         chats.add(chat(1, aiMessage.trimRight())); // AIの返答を会話リストに追加
         _isSending = false;
       });
-
-      //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
-      await _ttsService.stop();
-      await _ttsService.speak(aiMessage);
     } catch (e) {
       // エラー時の処理
       setState(() {
         chats.add(chat(1, 'イオからのメッセージが取得できませんでした'));
         _isSending = false;
       });
+    }
+    try{
+      //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
+      await _ttsService.stop();
+      await _ttsService.speak(aiMessage);
+    }
+    catch(e){
+      print('読み上げエラー');
+      print(e);
     }
   }
 
@@ -572,13 +579,13 @@ class _ChatPageState extends State<ChatPage> {
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               setState(() {
                                 chats.clear();
                                 chats.add(chat(0, inputText));
                                 openMenu = false;
                               });
-                              AI.sendMessage(Content.text('もう一度始めから教えて！'));
+                              await AI.sendMessage(Content.text('もう一度始めから教えて！'));
                               _getAIResponse(inputText);
 
                             },
