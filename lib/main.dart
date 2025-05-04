@@ -75,10 +75,63 @@ class _MyHomePageState extends State<MyHomePage> {
   // モード読込
   Future<void> _loadMode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isBasicMode = prefs.getBool('isBasicMode') ?? true;
-    });
+    if (prefs.containsKey('isBasicMode')) {
+      // 保存されていれば読み込み
+      setState(() {
+        _isBasicMode = prefs.getBool('isBasicMode') ?? true;
+      });
+    } else {
+      // 保存されていなければダイアログ表示
+      await Future.delayed(Duration.zero); // ダイアログ表示のために必要
+      _showModeSelectDialog(prefs);
+    }
   }
+
+  // モード選択ダイアログの表示
+  void _showModeSelectDialog(SharedPreferences prefs) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false, // 画面外タップでは閉じない
+      barrierColor: A_Colors.white, // 背景を白に
+      pageBuilder: (context, _, __) {
+        return SafeArea(
+          child: Stack(
+            children: [
+              // 上部の案内テキスト
+              Positioned(
+                top: MediaQuery.of(context).size.height * 0.05,
+                left: 20,
+                right: 20,
+                child: Text(
+                  "はじめにモードを選んでね！",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.06,
+                    fontWeight: FontWeight.bold,
+                    color: A_Colors.black,
+                  ),
+                ),
+              ),
+
+              // ダイアログ本体
+              Center(
+                child: ModeSelectDialog(
+                  isBasicMode: false,
+                  onChanged: (selectedMode) async {
+                    setState(() {
+                      _isBasicMode = selectedMode;
+                    });
+                    await prefs.setBool('isBasicMode', selectedMode); // フラグ保存
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +304,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               ),
                               child: Text(
-                                _isBasicMode ? 'モードをかえる' : 'モード変更',
+                                _isBasicMode ? 'モードをえらぶ' : 'モード選択',
                                 style: TextStyle(
                                   color: _isBasicMode ? B_Colors.black : A_Colors.black,
                                   fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -458,7 +511,7 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
 
                       // タイトル
                       Text(
-                        _isBasicMode ? "モードをかえる" : "モード変更",
+                        _isBasicMode ? "モードをえらぶ" : "モード選択",
                         style: TextStyle(
                           color: _isBasicMode ? B_Colors.black : A_Colors.black,
                           fontSize: MediaQuery.of(context).size.width * 0.07,
