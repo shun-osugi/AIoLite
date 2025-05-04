@@ -212,37 +212,86 @@ class _StatsPageState extends State<StatsPage> {
       ),
       backgroundColor: isBasicMode ? B_Colors.background : A_Colors.background,
       body: SafeArea(
-        child: Column(
+        child: SingleChildScrollView(
+          child:  Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
             // ドーナツグラフ＋凡例
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // ドーナツグラフをできるだけ大きく表示
-                Expanded(child: DonutPieChart(data: _pieData)),
-                const SizedBox(width: 16),
-                // グラフと凡例を縦並びで
-                _buildLegend(),
-              ],
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              decoration: BoxDecoration(
+                color: isBasicMode ? B_Colors.white : A_Colors.white,
+                borderRadius: BorderRadius.circular(32),
+              ),
+              padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+              margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    isBasicMode ? 'きょうか' : '教科の割合',
+                    style: TextStyle(
+                      color: isBasicMode ? B_Colors.black : A_Colors.black,
+                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // ドーナツグラフをできるだけ大きく表示
+                      Expanded(child: DonutPieChart(data: _pieData)),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                      // グラフと凡例を縦並びで
+                      _buildLegend(),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                    ],
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
-            //ラベルタブ（よく使うラベル）
-            Text(
-              'よく使うラベル',
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              decoration: BoxDecoration(
+                color: isBasicMode ? B_Colors.white : A_Colors.white,
+                borderRadius: BorderRadius.circular(32),
+              ),
+              padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+              margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'よく使うラベル',
+                    style: TextStyle(
+                      color: isBasicMode ? B_Colors.black : A_Colors.black,
+                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                  // 教科選択
+                  _buildSubjectChips(),
+
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                  // 選択中教科の詳細
+                  _buildDetailCard(),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            _buildSubjectChips(),
-
-            const SizedBox(height: 16),
-
-            // 選択中教科の詳細
-            _buildDetailCard(),
           ],
+        ),
         ),
       ),
     );
@@ -263,7 +312,14 @@ class _StatsPageState extends State<StatsPage> {
             children: [
               Container(width: 14, height: 14, color: _getColor(index)),
               const SizedBox(width: 6),
-              Text(subject, style: const TextStyle(fontSize: 14)),
+              Text(
+                subject,
+                style: TextStyle(
+                color: A_Colors.black,
+                fontSize: MediaQuery.of(context).size.width * 0.04,
+                fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         );
@@ -281,11 +337,19 @@ class _StatsPageState extends State<StatsPage> {
         children: _pieData.keys.map((subject) {
           final bool selected = _selected == subject;
           return ChoiceChip(
-            label: Text(subject),
+            label: Text(
+              subject,
+              style: TextStyle(
+                color: A_Colors.black,
+                fontSize: MediaQuery.of(context).size.width * 0.04,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             selected: selected,
             onSelected: (_) => setState(() => _selected = subject),
             selectedColor:
-            _getColor(_pieData.keys.toList().indexOf(subject)).withOpacity(0.25),
+            _getColor(_pieData.keys.toList().indexOf(subject)).withOpacity(0.5),
+            backgroundColor: A_Colors.background.withOpacity(0.5),
           );
         }).toList(),
       ),
@@ -298,8 +362,14 @@ class _StatsPageState extends State<StatsPage> {
 
     return Card(
       elevation: 2,
-      color: Colors.pink[50],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: A_Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+        color: _getColor(_pieData.keys.toList().indexOf(_selected)),
+        width: 2,
+      ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -308,9 +378,30 @@ class _StatsPageState extends State<StatsPage> {
               // (index, (title, count))
               return ListTile(
                 dense: true,
-                leading: Text('${e.key + 1}.'),
-                title: Text(e.value.$1),
-                trailing: Text('${e.value.$2}回'),
+                leading: Text(
+                  '${e.key + 1}.',
+                  style: TextStyle(
+                    color: A_Colors.black,
+                    fontSize: MediaQuery.of(context).size.width * 0.04,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                title: Text(
+                  e.value.$1,
+                  style: TextStyle(
+                  color: A_Colors.black,
+                  fontSize: MediaQuery.of(context).size.width * 0.04,
+                  fontWeight: FontWeight.bold,
+                  ),
+                ),
+                trailing: Text(
+                  '${e.value.$2}回',
+                  style: TextStyle(
+                  color: A_Colors.black,
+                  fontSize: MediaQuery.of(context).size.width * 0.04,
+                  fontWeight: FontWeight.bold,
+                  ),
+                ),
               );
             },
           ).toList(),
@@ -339,7 +430,7 @@ class _DonutPieChartState extends State<DonutPieChart> {
     widget.data.values.fold(0.0, (sum, value) => sum + value);
 
     return AspectRatio(
-      aspectRatio: 1.2, // 幅:高さ ≒ 1:1.2
+      aspectRatio: 1.0,
       child: PieChart(
         PieChartData(
           sectionsSpace: 2,      // セクション間の隙間
