@@ -722,55 +722,26 @@ class _ChatPageState extends State<ChatBasicPage> {
                 onPressed: () async { //フィードバックへ遷移
                   try {
                     final feedback = await AI.sendMessage(Content.text(//簡単なフィードバック
-                        '今回の会話はどうだった？私が苦手なところとか分かったら短く(50文字程度)一文で教えてほしいな．'));
+                        'これまでの会話でよかったところをほめて！ また別の問題にも一緒に取り組みたくなるようなメッセージを一言で教えてほしいな'));
                     final feedbackMessage = feedback.text ??
-                        'フィードバックの作成に失敗しました';
-
-                    //詳細のフィードバックを作成
-                    final info = await AI.sendMessage(Content.text('''
-                          今回の会話について，
-                          1,どういう解き方を最初したのか
-                          2,ユーザーが間違えてた部分
-                          3,間違えた部分の正しい解き方
-                          4,問題自体の正しい解き方
-                          を，必ず以下のフォーマットで送ってください
-                          &&内容1&&内容2&&内容3&&内容4
-                          '''));
-                    String infotext = info.text ?? '作成失敗';
-                    final B = infotext.substring(infotext.indexOf('&&')).split('&&');
-                    String firstans = B[1];     //どういう解き方を最初したのか
-                    String wrong = B[2];        //間違えてた部分
-                    String wrongpartans = B[3]; //間違えてた部分の正しい解き方
-                    String correctans = B[4];   //それの正しい解き方
-                    // print("sdoifsdjffd");
-                    // print(firstans);
-                    // print(wrong);
-                    // print(wrongpartans);
-                    // print(correctans);
-
-                    Navigator.pushNamed(
-                      context, '/result',
-                      arguments: {
-                        'inputText': inputText,
-                        'feedbackText': feedbackMessage,
-                        'labels': labels,
-                        'firstans': firstans,
-                        'wrong': wrong,
-                        'wrongpartans': wrongpartans,
-                        'correctans': correctans,
-                      },
+                        'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！';
+                    showDialog(
+                      context: context,
+                      builder: (context) => MessageDialog(
+                        feedbackMessage: feedbackMessage,
+                      ),
+                      barrierDismissible: false,
                     );
+
                   } catch (e) {
-                    Navigator.pushNamed(
-                      context, '/result',
-                      arguments: {
-                        'inputText': inputText,
-                        'feedbackText': 'フィードバックの作成に失敗しました',
-                        'labels': labels,
-                      },
+                    showDialog(
+                      context: context,
+                      builder: (context) => MessageDialog(
+                        feedbackMessage: 'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！',
+                      ),
+                      barrierDismissible: false,
                     );
                   }
-
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
@@ -792,7 +763,6 @@ class _ChatPageState extends State<ChatBasicPage> {
               ),
             ),
           ),
-
         ],
       ),
     );
@@ -872,4 +842,162 @@ class ChatBubbleTriangle extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class MessageDialog extends StatelessWidget {
+  final String feedbackMessage;
+  final String modelPath;
+
+  const MessageDialog({
+    super.key,
+    required this.feedbackMessage,
+    this.modelPath = 'assets/avatar0.glb',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      child: Container(
+        width: size.width * 0.95,
+        height: size.height * 0.6,
+        decoration: BoxDecoration(
+          color: B_Colors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: B_Colors.accentColor, width: 4),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              // アバター表示
+              SizedBox(
+                height: size.height * 0.2,
+                child: ModelViewer(
+                  src: modelPath,
+                  alt: 'A 3D model of AI avatar',
+                  cameraOrbit: "0deg 90deg 0deg",
+                  ar: false,
+                  autoRotate: false,
+                  disableZoom: true,
+                  disableTap: true,
+                  cameraControls: false,
+                  interactionPrompt: null,
+                  interactionPromptThreshold: 0,
+                  autoPlay: true,
+                  animationName: 'hello',
+                ),
+              ),
+
+              // 一言メッセージ
+              SizedBox(
+                height: size.height * 0.28,
+                child: SingleChildScrollView(
+                  child: FeedbackBubble(feedbackText: feedbackMessage),
+                ),
+              ),
+
+              SizedBox(height: size.height * 0.01,),
+
+              //ホーム画面に戻るボタン
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: B_Colors.mainColor,
+                    foregroundColor: B_Colors.white,
+                  ),
+                  onPressed: () {
+                    // ルート指定でホーム画面へ戻る
+                    Navigator.pushNamed(context, '/home');
+                  },
+                  child: Text(
+                    'ホームにもどる',
+                    style: TextStyle(
+                      color: B_Colors.white,
+                      fontSize: MediaQuery.of(context).size.width * 0.055,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FeedbackBubble extends StatelessWidget {
+  final String feedbackText;
+
+  FeedbackBubble({required this.feedbackText});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 吹き出しの本体
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: B_Colors.subColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              feedbackText,
+              style: TextStyle(
+                color: B_Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // 吹き出しの上に表示する三角形
+          Positioned(
+            top: -10,
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: CustomPaint(
+                size: const Size(40, 20),
+                painter: TrianglePainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = A_Colors.subColor;
+
+    final Path path = Path()
+      ..moveTo(size.width / 2, 0) // 三角形の頂点（中央上）
+      ..lineTo(0, size.height) // 左下
+      ..lineTo(size.width, size.height) // 右下
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }
