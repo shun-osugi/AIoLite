@@ -68,11 +68,11 @@ class StatsPage extends StatefulWidget {
 }
 
 class _StatsPageState extends State<StatsPage> {
-  final List<FeedbackData> _fbList = [];
+  final List<FeedbackData> _fbList = [];                   //取得したレコード
   final Map<String, double> _pieData = {};                 // 教科別割合 (%)
   final Map<String, List<(String, int)>> _details = {};    // 教科 → 上位(3分野, 回数)
 
-  String _selected = '国語';
+  String _selected = '国語';                                //ラベル使用回数ランキング表示で最初に選択してある教科
   late Database _database;
   bool _isLoading = true;                                  //読み込みが終わらない問題の対策
 
@@ -86,19 +86,20 @@ class _StatsPageState extends State<StatsPage> {
   //統計データを画面に表示
   Future<void> _initDatabaseAndStats() async {
     try {
-      await _openDatabase();
-      await _readAllFeedback();
+      await _openDatabase();         //DBつくる
+      await _readAllFeedback();      //全データ読み出す
     } catch (e) {
       // エラー内容をデバッグ出力して無視（空データで継続）
       debugPrint('DB Error: $e');
     } finally {
       _calcStats();             //データが無くても必ず円グラフ用データを作る
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => _isLoading = false);  //UIの再ビルド
       }
     }
   }
 
+  //googleCromeで動作確認するための処理 後で消す？
   Future<void> _openDatabase() async {
     // Android/iOS: /data/data/<pkg>/databases
     // macOS/Windows/linux: getDatabasesPath() がホーム配下を返す
@@ -124,8 +125,9 @@ class _StatsPageState extends State<StatsPage> {
           )''');
       },
     );
-  }
+  }//↑後で消すかもここまで
 
+  //フィードバックデータを読んで要素ごとに格納
   Future<void> _readAllFeedback() async {
     final rows = await _database.query('feedback');
     for (final r in rows) {
@@ -144,7 +146,9 @@ class _StatsPageState extends State<StatsPage> {
     }
   }
 
+  //データ集計
   void _calcStats() {
+    //データがなかったらデータなしと書いたグラフを表示
     if (_fbList.isEmpty) {
       _pieData.clear();
       _pieData['データなし'] = 1;
@@ -153,9 +157,10 @@ class _StatsPageState extends State<StatsPage> {
       return;
     }
 
+    //教科・分野をカウント
     final subjectCount = <String, int>{};
     final fieldCountBySubject = <String, Map<String, int>>{};
-
+    //複数ラベルが含まれていいる時用
     for (final fb in _fbList) {
       for (final sub in fb.subject) {
         subjectCount[sub] = (subjectCount[sub] ?? 0) + 1;
@@ -167,6 +172,7 @@ class _StatsPageState extends State<StatsPage> {
       }
     }
 
+    //円グラフ用のデータを作成
     final total = _fbList.length;
     _pieData
       ..clear()
@@ -174,18 +180,19 @@ class _StatsPageState extends State<StatsPage> {
             (e) => MapEntry(e.key, e.value / total * 100),
       ));
 
+    //各教科のラベル使用ランキング生成
     _details.clear();
     for (final sub in subjectCount.keys) {
       final fieldMap = fieldCountBySubject[sub] ?? {};
       if (fieldMap.length < 3) {
-        _details[sub] = [];
+        _details[sub] = [];    //データ不足の時用
         continue;
       }
       final top3 = fieldMap.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
       _details[sub] = top3.take(3).map((e) => (e.key, e.value)).toList();
     }
-
+    //最初「国語」のタブを開く
     _selected = _pieData.keys.first;
   }
 
@@ -196,6 +203,7 @@ class _StatsPageState extends State<StatsPage> {
     ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final isBasicMode = args?['isBasicMode'] ?? false;
 
+    //ローディングインジケータ
     if (_isLoading) {
       return Scaffold(
         backgroundColor:
@@ -204,6 +212,7 @@ class _StatsPageState extends State<StatsPage> {
       );
     }
 
+    //画面本体
     return Scaffold(
       appBar: _buildAppBar(isBasicMode, context),
       backgroundColor:
@@ -214,9 +223,9 @@ class _StatsPageState extends State<StatsPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              _buildPieArea(isBasicMode),
+              _buildPieArea(isBasicMode),//円グラフと凡例用
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              _buildLabelArea(isBasicMode),
+              _buildLabelArea(isBasicMode),//ラベルランキング用
             ],
           ),
         ),
@@ -228,7 +237,7 @@ class _StatsPageState extends State<StatsPage> {
   AppBar _buildAppBar(bool isBasicMode, BuildContext context) => AppBar(
     backgroundColor: isBasicMode ? B_Colors.mainColor : A_Colors.black,
     toolbarHeight: MediaQuery.of(context).size.height * 0.07,
-    leading: IconButton(
+    leading: IconButton(  //戻るボタン
       icon: Icon(
         Icons.arrow_back,
         color: A_Colors.white,
@@ -237,7 +246,7 @@ class _StatsPageState extends State<StatsPage> {
       onPressed: () => Navigator.of(context).pop(),
     ),
     title: Text(
-      isBasicMode ? 'おべんきょうのきろく' : '全体統計',
+      isBasicMode ? 'おべんきょうのきろく' : '全体統計',  //ヘッダータイトル
       style: TextStyle(
         color: A_Colors.white,
         fontSize: MediaQuery.of(context).size.width * 0.06,
@@ -247,6 +256,7 @@ class _StatsPageState extends State<StatsPage> {
     centerTitle: true,
   );
 
+  //円グラフ＋凡例部分
   Widget _buildPieArea(bool isBasicMode) => Container(
     width: MediaQuery.of(context).size.width * 0.9,
     decoration: BoxDecoration(
@@ -281,6 +291,7 @@ class _StatsPageState extends State<StatsPage> {
     ),
   );
 
+  //ラベル使用ランキング部分
   Widget _buildLabelArea(bool isBasicMode) => Container(
     width: MediaQuery.of(context).size.width * 0.9,
     decoration: BoxDecoration(
@@ -302,9 +313,9 @@ class _StatsPageState extends State<StatsPage> {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-        _buildSubjectChips(),
+        _buildSubjectChips(),  //タブ切り替えボタン
         SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-        _buildDetailCard(),
+        _buildDetailCard(),    //ランキングデータ表示部分
       ],
     ),
   );
@@ -332,7 +343,7 @@ class _StatsPageState extends State<StatsPage> {
     }).toList(),
   );
 
-  // ---------- 教科チップ ----------
+  // 教科タブ（クリックできるところ）
   Widget _buildSubjectChips() => SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: Wrap(
