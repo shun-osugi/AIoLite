@@ -319,6 +319,7 @@ class _ResultPageState extends State<ResultPage> {
                     foregroundColor: A_Colors.white,
                   ),
                   onPressed: () {
+                     _ttsService.stop();
                     // ルート指定でホーム画面へ戻る
                     Navigator.pushNamed(context, '/home');
                   },
