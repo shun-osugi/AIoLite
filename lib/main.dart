@@ -23,6 +23,7 @@ import 'terms_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
 
 bool _isBasicMode = false;
 
@@ -1632,6 +1633,23 @@ class _EditDialogState extends State<EditDialog> {
           ),
         ),
       ),
+    );
+  }
+
+  KeyboardActionsConfig _buildConfig(BuildContext context) {
+    return KeyboardActionsConfig(
+      keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
+      actions: [
+        KeyboardActionsItem(
+          focusNode: _focusNode,
+          toolbarButtons: [
+                (node) => TextButton(
+              onPressed: () => node.unfocus(),
+              child: const Text("閉じる"),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
