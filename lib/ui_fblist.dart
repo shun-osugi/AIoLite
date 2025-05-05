@@ -512,20 +512,15 @@ class _FblistPageState extends State<FblistPage> {
       // body
       body: SafeArea(
         child: Stack(children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // フィードバック表示
-              if (listOrDetail) ...[
-                summeryList(),
-                filterUI(),
-              ] else ...[
-                feedbackDetails(targetNum - 1),
+           Column(
+              children: [
+                  listOrDetail
+                      ? summeryList() // 一覧表示
+                      : feedbackDetails(targetNum - 1), // 詳細表示
+                filterUI(), // フィルターボタン
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               ],
-              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-            ],
-          ),
-
+            ),
           // 右下のトップに戻るボタン
           if (_showScrollToTopButton)
             Positioned(
@@ -719,74 +714,79 @@ class _FblistPageState extends State<FblistPage> {
       }
     });
 
-    return SingleChildScrollView(
+    return Expanded(
+        child: SingleChildScrollView(
       controller: fbScrollController,
       scrollDirection: Axis.horizontal,
       child: StatefulBuilder(builder: (context, setState) {
         return Padding(
           padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
           child: GestureDetector(
-            onHorizontalDragEnd: (fbdrag) {
-              if (fbdrag.primaryVelocity != null) {
-                final pageWidth = MediaQuery.of(context).size.width;
-                if (fbdrag.primaryVelocity! < 0 && targetNum < fblist.length - 1) {
-                  // 右→左 (fblistを1進める)
-                  setState(() {
-                    targetNum++;
-                  });
-                  // 中央配置
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
-                      Scrollable.ensureVisible(
-                        fbSheetKeys[targetNum].currentContext!,
-                        alignment: 0.5,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    }
-                  });
-                } else if (fbdrag.primaryVelocity! > 0 && targetNum > 0) {
-                  // 左→右 (fblistを1戻る)
-                  // target変更
-                  setState(() {
-                    targetNum--;
-                  });
+              onHorizontalDragEnd: (fbdrag) {
+                if (fbdrag.primaryVelocity != null) {
+                  if (fbdrag.primaryVelocity! < 0 && targetNum < fblist.length - 1) {
+                    // 右→左 (fblistを1進める)
+                    setState(() {
+                      targetNum++;
+                    });
+                    // 中央配置
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
+                        Scrollable.ensureVisible(
+                          fbSheetKeys[targetNum].currentContext!,
+                          alignment: 0.5,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      }
+                    });
+                  } else if (fbdrag.primaryVelocity! > 0 && targetNum > 0) {
+                    // 左→右 (fblistを1戻る)
+                    // target変更
+                    setState(() {
+                      targetNum--;
+                    });
 
-                  // 中央配置
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
-                      Scrollable.ensureVisible(
-                        fbSheetKeys[targetNum].currentContext!,
-                        alignment: 0.5,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    }
-                  });
+                    // 中央配置
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
+                        Scrollable.ensureVisible(
+                          fbSheetKeys[targetNum].currentContext!,
+                          alignment: 0.5,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      }
+                    });
+                  }
                 }
-              }
-            },
-            // fbSheetの一覧
-            child: Row(
-              children: [
-                for (int i = 0; i < fblist.length; i++)
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: FbSheet(
-                      key: fbSheetKeys[i],
-                      labels: allLabels[0], // 仮指定
-                      problem: fblist[i].problem,
-                      wrong: fblist[i].wrong,
-                      wrongpartans: fblist[i].wrongpartans,
-                      correctans: fblist[i].correctans,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+              },
+              // fbSheetの一覧
+              child: Container(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                    for (int i = 0; i < fblist.length; i++) ...[
+                      
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        child: FbSheet(
+                          key: fbSheetKeys[i],
+                          labels: allLabels[0], // 仮指定
+                          problem: fblist[i].problem,
+                          wrong: fblist[i].wrong,
+                          wrongpartans: fblist[i].wrongpartans,
+                          correctans: fblist[i].correctans,
+                        ),
+                      ),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.05), ]
+                  ],
+                ),
+              )),
         );
       }),
-    );
+    ));
   }
   // ▲ ---------- フィードバック詳細 ---------- ▲ //
 }
