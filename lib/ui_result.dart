@@ -8,6 +8,8 @@ import 'api_service.dart';
 import 'colors.dart';
 import 'tts_service.dart';
 import 'widget_fbsheet.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -33,13 +35,28 @@ class _ResultPageState extends State<ResultPage> {
   //フィードバック保存
   ScreenshotController ssController = ScreenshotController();
 
+  // AIモデル
+  late final GenerativeModel _model;
+  late final ChatSession AI;
+  bool isread = false; //データが読み込まれたかどうか
+
+  // はじめにAIの初期化
+  @override
+  void initState() {
+    super.initState();
+    var apiKey = dotenv.get('GEMINI_API_KEY');
+    _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
+    AI = _model.startChat();
+    // _initdata();
+  }
+
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
+    super.didChangeDependencies();  
     // 引数を受け取る
     final Object? args = ModalRoute.of(context)?.settings.arguments;
 
-    if (args is Map<String, dynamic>) {
+    if (args is Map<String, dynamic> && !isread) {
       setState(() {
         // inputTextを取得
         inputText = args['inputText']?.toString() ?? "";
@@ -64,7 +81,6 @@ class _ResultPageState extends State<ResultPage> {
         wrongpartans = args['wrongpartans']?.toString() ?? "";
         // correctansを取得
         correctans = args['correctans']?.toString() ?? "";
-        
       });
 
       if (feedbackText.isNotEmpty && !_hasReadFeedback) {
@@ -72,6 +88,38 @@ class _ResultPageState extends State<ResultPage> {
         _ttsService.stop();
         _ttsService.speak(feedbackText); //フィードバックを読み上げ
       }
+    }
+    isread = true;
+  }
+
+  //RAGによる問題生成
+  Future<void> generateRAG() async {
+    try{
+      //出力制限
+      await AI.sendMessage(Content.text('''
+      これから伝える各情報ごとに，適切な学習問題の提示をお願いします．
+      そちらの出力は，挨拶などはいらないので，問題文の出力だけお願いします．
+      そちらが話す文章は読み上げを行うので，そのまま読むとおかしくなるような文字は出力しないでください．
+      例えば，数式表現や文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
+      '''));
+      List<String> list = [];
+      for(int i=0;i<similarQuestions.length;i++){
+        final response = await AI.sendMessage(Content.text('''
+        ユーザーが解いた問題：$inputText
+        ユーザーが間違えた部分：$wrong
+        ユーザーへのフィードバック：$feedbackText
+        元の問題に似た問題：${similarQuestions[i]['text']}
+        '''));
+        list.add(response.text ?? similarQuestions[i]['text']);
+      }
+      setState(() {
+        for(int i=0;i<similarQuestions.length;i++){
+          similarQuestions[i]['ragtext'] = list[i];
+        }
+      });
+    }catch(e){
+      print('AI生成エラー');
+      print(e);
     }
   }
 
@@ -86,11 +134,15 @@ class _ResultPageState extends State<ResultPage> {
 
         // 重複を削除しながらリストを作成
         response["similar_texts"]?.forEach((item) {
+          item['ragtext'] = '類題検索中';
           uniqueQuestions[item['text']] = item; // textをキーにして保存
         });
 
         similarQuestions = uniqueQuestions.values.toList();
       });
+
+      //RAGにより問題をAI生成
+      generateRAG();
     } catch (e) {
       debugPrint("類題検索エラー: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -250,7 +302,7 @@ class _ResultPageState extends State<ResultPage> {
                                           Expanded(
                                             child: SingleChildScrollView(
                                               child: Text(
-                                                item['text'],
+                                                item['ragtext'],
                                                 style: TextStyle(
                                                   color: A_Colors.black,
                                                   fontSize: 16,
@@ -262,7 +314,7 @@ class _ResultPageState extends State<ResultPage> {
                                           TextButton(
                                             onPressed: () {
                                               // ボタンを押した時に渡すデータ
-                                              final inputText = item['text'];
+                                              final inputText = item['ragtext'];
                                               final remainingLabels = itemLabels;
 
                                               Navigator.pushNamed(
@@ -293,7 +345,7 @@ class _ResultPageState extends State<ResultPage> {
                           ),
                           child: Padding(padding: EdgeInsets.all(16),
                             child: Text(
-                              item['text'],
+                              item['ragtext'],
                               style: TextStyle(
                                 color: A_Colors.black,
                                 fontSize: 16,
@@ -319,6 +371,7 @@ class _ResultPageState extends State<ResultPage> {
                     foregroundColor: A_Colors.white,
                   ),
                   onPressed: () {
+                     _ttsService.stop();
                     // ルート指定でホーム画面へ戻る
                     Navigator.pushNamed(context, '/home');
                   },
