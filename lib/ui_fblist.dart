@@ -504,7 +504,7 @@ class _FblistPageState extends State<FblistPage> {
         // タイトル
         title: Text(
           "フィードバック一覧",
-          style: TextStyle(color: A_Colors.black, fontSize: MediaQuery.of(context).size.width * 0.06, fontWeight: FontWeight.bold),
+          style: TextStyle(color: A_Colors.white, fontSize: MediaQuery.of(context).size.width * 0.06, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -529,7 +529,7 @@ class _FblistPageState extends State<FblistPage> {
           // 右下のトップに戻るボタン
           if (_showScrollToTopButton)
             Positioned(
-              bottom: onFilter ? MediaQuery.of(context).size.height * 0.37 : MediaQuery.of(context).size.height * 0.1,
+              bottom: onFilter ? MediaQuery.of(context).size.height * 0.38 : MediaQuery.of(context).size.height * 0.1,
               right: 24,
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.14,
