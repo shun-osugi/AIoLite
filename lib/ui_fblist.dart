@@ -77,7 +77,7 @@ class _FblistPageState extends State<FblistPage> {
       'eeeeeeeee',
     ),
   ];
-  List<List<String>> allLabels = [];  // 教科と分類を統合したリストのリスト(ラベル)
+  List<List<String>> allLabels = []; // 教科と分類を統合したリストのリスト(ラベル)
   String? selectedSubject; // 教科ドロップダウン選択
   String? selectedCategory; // 分類ドロップダウン選択
   List<String> selectedFilter = []; //選択した教科ラベル ["教科-ラベル",...
@@ -87,7 +87,7 @@ class _FblistPageState extends State<FblistPage> {
   bool _showScrollToTopButton = false; // トップに戻るボタンの表示・非表示
   late Database _database; //データベース
   bool listOrDetail = true; // フィードバックの表示方法選択[ 問題文リスト(true) or 詳細(false) ]
-  final ScrollController _fbScrollController = ScrollController(); // 詳細表示のスクロールコントローラ
+  int targetNum = 0; // 対象としているフィードバック(fblistのid-1)
 
   @override
   void initState() {
@@ -509,18 +509,18 @@ class _FblistPageState extends State<FblistPage> {
         centerTitle: true,
       ),
       backgroundColor: A_Colors.background,
+      // body
       body: SafeArea(
         child: Stack(children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // フィードバック表示
-              if(listOrDetail) ...[
+              if (listOrDetail) ...[
                 summeryList(),
                 filterUI(),
-              ]
-              else ...[
-                feedbackDetails(0),
+              ] else ...[
+                feedbackDetails(targetNum - 1),
               ],
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
             ],
@@ -589,7 +589,7 @@ class _FblistPageState extends State<FblistPage> {
                 for (int i = 0; i < fblist.length; i++)
                   Column(
                     children: [
-                      builderSummery(context, allLabels[i], fblist[i].summary), //1つの問題文
+                      builderSummery(context, fblist[i].id, allLabels[i], fblist[i].summary), //1つの問題文
                       SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
                     ],
                   ),
@@ -603,7 +603,7 @@ class _FblistPageState extends State<FblistPage> {
   }
 
   // 問題文1つのbuilder
-  Widget builderSummery(BuildContext context, List<String> labels, String summary) {
+  Widget builderSummery(BuildContext context, int id, List<String> labels, String summary) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -621,7 +621,13 @@ class _FblistPageState extends State<FblistPage> {
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          // ボタンが押された
+          setState(() {
+            targetNum = id;
+            listOrDetail = false;
+          });
+        },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(horizontal: 16),
           backgroundColor: Colors.transparent,
@@ -698,59 +704,89 @@ class _FblistPageState extends State<FblistPage> {
 
   // ▼ ---------- フィードバック詳細 ---------- ▼ //
   Widget feedbackDetails(int targetNum) {
-  final _scrollController = ScrollController(initialScrollOffset: MediaQuery.of(context).size.width * targetNum); // 初期位置を設定
-  return SingleChildScrollView(
-    controller: _scrollController,
-    scrollDirection: Axis.horizontal,
-    child: StatefulBuilder(builder: (context, setState) {
-      return Padding(
-        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
-        child: GestureDetector(
-          onHorizontalDragEnd: (fbdrag) {
-            if (fbdrag.primaryVelocity != null) {
-              final pageWidth = MediaQuery.of(context).size.width;
-              if (fbdrag.primaryVelocity! < 0 && targetNum < fblist.length - 1) {
-                // 右→左 (fblistを1進める)
-                _scrollController.animateTo(
-                  _scrollController.offset + pageWidth,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-                setState(() {
-                  targetNum++;
-                });
-              } else if (fbdrag.primaryVelocity! > 0 && targetNum > 0) {
-                // 左→右 (fblistを1戻る)
-                _scrollController.animateTo(
-                  _scrollController.offset - pageWidth,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-                setState(() {
-                  targetNum--;
-                });
+    final fbScrollController = ScrollController();
+    final List<GlobalKey> fbSheetKeys = List.generate(fblist.length, (_) => GlobalKey()); //fbSheetを判別するためのkey
+
+    // 描画完了後、ウィジェットを中央に配置
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
+        Scrollable.ensureVisible(
+          fbSheetKeys[targetNum].currentContext!,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 0),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+
+    return SingleChildScrollView(
+      controller: fbScrollController,
+      scrollDirection: Axis.horizontal,
+      child: StatefulBuilder(builder: (context, setState) {
+        return Padding(
+          padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+          child: GestureDetector(
+            onHorizontalDragEnd: (fbdrag) {
+              if (fbdrag.primaryVelocity != null) {
+                final pageWidth = MediaQuery.of(context).size.width;
+                if (fbdrag.primaryVelocity! < 0 && targetNum < fblist.length - 1) {
+                  // 右→左 (fblistを1進める)
+                  setState(() {
+                    targetNum++;
+                  });
+                  // 中央配置
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
+                      Scrollable.ensureVisible(
+                        fbSheetKeys[targetNum].currentContext!,
+                        alignment: 0.5,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
+                } else if (fbdrag.primaryVelocity! > 0 && targetNum > 0) {
+                  // 左→右 (fblistを1戻る)
+                  // target変更
+                  setState(() {
+                    targetNum--;
+                  });
+
+                  // 中央配置
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
+                      Scrollable.ensureVisible(
+                        fbSheetKeys[targetNum].currentContext!,
+                        alignment: 0.5,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
+                }
               }
-            }
-          },
-          child: Row( // Stack の代わりに Row を使用
-            children: [
-              for (int i = 0; i < fblist.length; i++)
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.92, // Padding 分を考慮
-                  child: FbSheet(
-                    labels: allLabels[i % allLabels.length], // index に応じたラベル
-                    problem: fblist[i].problem,
-                    wrong: fblist[i].wrong,
-                    wrongpartans: fblist[i].wrongpartans,
-                    correctans: fblist[i].correctans,
+            },
+            // fbSheetの一覧
+            child: Row(
+              children: [
+                for (int i = 0; i < fblist.length; i++)
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: FbSheet(
+                      key: fbSheetKeys[i],
+                      labels: allLabels[0], // 仮指定
+                      problem: fblist[i].problem,
+                      wrong: fblist[i].wrong,
+                      wrongpartans: fblist[i].wrongpartans,
+                      correctans: fblist[i].correctans,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    }),
-  );
-}
+        );
+      }),
+    );
+  }
   // ▲ ---------- フィードバック詳細 ---------- ▲ //
 }
