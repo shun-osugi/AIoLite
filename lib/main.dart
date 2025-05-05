@@ -753,7 +753,7 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                       // モード選択ボタン
                       Container(
                         width: _isBasicMode ? MediaQuery.of(context).size.width * 0.8 : MediaQuery.of(context).size.width * 0.6,
-                        height: MediaQuery.of(context).size.width * 0.1,
+                        height: MediaQuery.of(context).size.width * 0.15,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [A_Colors.accentColor, A_Colors.white],
@@ -893,7 +893,7 @@ class _HelpDialogState extends State<HelpDialog> {
       helpPages = [
         // ベーシック用
         {"image": "assets/help0.png", "head": "はじめに", "text": "『START』ボタンをおして、もんだいをはじめよう！\nこのアプリのつかいかたがわからなくなったら、いつでもこのヘルプをみてね！"},
-        {"image": "assets/help1.png", "head": "もんだいの いれかた", "text": "もんだいを いれるほうほうは、こえ・しゃしん・てがき の３つ！\nさっそくいれてみようか！"},
+        {"image": "assets/help1.png", "head": "もんだいの いれかた", "text": "もんだいを いれるほうほうは、こえ・しゃしん・もじ の３つ！\nさっそくいれてみようか！"},
         {"image": "assets/help2.png", "head": "もんだいを なおそう！", "text": "こえ・しゃしんでいれたもんだいが まちがっていたら、なおすことができるよ。"},
         {"image": "assets/help3.png", "head": "もんだいの ぶんるい", "text": "\nもんだいにあう『かもく』を えらんでね！\nまちがっていても だいじょうぶ。\nえらびなおすことができるよ。"},
         {"image": "assets/help4.png", "head": "AIと おしゃべりしながら といてみよう！", "text": "もんだいが できたら、AIが おてつだいしてくれるよ。\nこたえがわかったら『とけた！』ボタンを おしてね。\nみぎうえにあるおうちのボタンからいちばんさいしょのページにもどることができるよ。\nそれと、やじるしのマークをおすともういちどさいしょからAIがおてつだいしてくれるよ。"},
@@ -922,7 +922,19 @@ class _HelpDialogState extends State<HelpDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(widget.mode == 'basic' ? "つかいかた" : "使い方", style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+                widget.mode == 'basic'
+                    ? "つかいかた"
+                    : "使い方",
+                style: TextStyle(
+                    color: _isBasicMode
+                        ? B_Colors.black
+                        : A_Colors.black,
+                    fontSize: widget.mode == 'basic'
+                        ? MediaQuery.of(context).size.width * 0.07
+                        : MediaQuery.of(context).size.width * 0.06,
+                    fontWeight: FontWeight.bold)
+            ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
@@ -958,7 +970,14 @@ class _HelpDialogState extends State<HelpDialog> {
                           Text(
                             helpPages[index]['head'].toString(),
                             textAlign: TextAlign.left,
-                            style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: _isBasicMode
+                                    ? B_Colors.black
+                                    : A_Colors.black,
+                                fontSize: widget.mode == 'basic'
+                                    ? MediaQuery.of(context).size.width * 0.06
+                                    : MediaQuery.of(context).size.width * 0.05,
+                                fontWeight: FontWeight.bold),
                           ),
 
                           SizedBox(height: MediaQuery.of(context).size.height * 0.02),
@@ -966,7 +985,14 @@ class _HelpDialogState extends State<HelpDialog> {
                           Text(
                             helpPages[index]['text'].toString(),
                             textAlign: TextAlign.left,
-                            style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 14),
+                            style: TextStyle(
+                                color: _isBasicMode
+                                    ? B_Colors.black
+                                    : A_Colors.black,
+                              fontSize: widget.mode == 'basic'
+                                  ? MediaQuery.of(context).size.width * 0.05
+                                  : MediaQuery.of(context).size.width * 0.04,
+                            ),
                           ),
 
                           SizedBox(height: MediaQuery.of(context).size.height * 0.05),

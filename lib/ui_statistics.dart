@@ -148,10 +148,10 @@ class _StatsPageState extends State<StatsPage> {
 
   //データ集計
   void _calcStats() {
-    //データがなかったらデータなしと書いたグラフを表示
+    //データがなかったらなしと書いたグラフを表示
     if (_fbList.isEmpty) {
       _pieData.clear();
-      _pieData['データなし'] = 1;
+      _pieData['なし'] = 1;
       _details.clear();
       _selected = _pieData.keys.first;
       return;
@@ -225,7 +225,8 @@ class _StatsPageState extends State<StatsPage> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               _buildPieArea(isBasicMode),//円グラフと凡例用
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              _buildLabelArea(isBasicMode),//ラベルランキング用
+              if(!isBasicMode)
+                _buildLabelArea(isBasicMode),//ラベルランキング用
             ],
           ),
         ),
@@ -271,7 +272,7 @@ class _StatsPageState extends State<StatsPage> {
         Text(
           isBasicMode ? 'きょうか' : '教科の割合',
           style: TextStyle(
-            color: A_Colors.black,
+            color: isBasicMode ? B_Colors.black : A_Colors.black,
             fontSize: MediaQuery.of(context).size.width * 0.06,
             fontWeight: FontWeight.bold,
           ),
@@ -281,12 +282,14 @@ class _StatsPageState extends State<StatsPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
             Expanded(child: DonutPieChart(data: _pieData)),
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-            _buildLegend(),
+            _buildLegend(isBasicMode),
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
           ],
         ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
       ],
     ),
   );
@@ -313,15 +316,15 @@ class _StatsPageState extends State<StatsPage> {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-        _buildSubjectChips(),  //タブ切り替えボタン
+        _buildSubjectChips(isBasicMode),  //タブ切り替えボタン
         SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-        _buildDetailCard(),    //ランキングデータ表示部分
+        _buildDetailCard(isBasicMode),    //ランキングデータ表示部分
       ],
     ),
   );
 
   /* ---------- 凡例 ---------- */
-  Widget _buildLegend() => Column(
+  Widget _buildLegend(bool isBasicMode) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: _pieData.keys.toList().asMap().entries.map((entry) {
       final index = entry.key;
@@ -335,7 +338,7 @@ class _StatsPageState extends State<StatsPage> {
             const SizedBox(width: 6),
             Text(
               subject,
-              style: _tileTextStyle(context),
+              style: _tileTextStyle(context, isBasicMode),
             ),
           ],
         ),
@@ -344,14 +347,14 @@ class _StatsPageState extends State<StatsPage> {
   );
 
   // 教科タブ（クリックできるところ）
-  Widget _buildSubjectChips() => SingleChildScrollView(
+  Widget _buildSubjectChips(bool isBasicMode) => SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: Wrap(
       spacing: 8,
       children: _pieData.keys.map((subject) {
         final selected = _selected == subject;
         return ChoiceChip(
-          label: Text(subject, style: _tileTextStyle(context)),
+          label: Text(subject, style: _tileTextStyle(context, isBasicMode)),
           selected: selected,
           onSelected: (_) => setState(() => _selected = subject),
           selectedColor: _getColor(_pieData.keys.toList().indexOf(subject))
@@ -363,7 +366,7 @@ class _StatsPageState extends State<StatsPage> {
   );
 
   //各教科のラベル使用ランキングをカード表示
-  Widget _buildDetailCard() {
+  Widget _buildDetailCard(bool isBasicMode) {
     final items = _details[_selected] ?? [];
 
     //データ不足の時
@@ -372,7 +375,7 @@ class _StatsPageState extends State<StatsPage> {
         padding: const EdgeInsets.all(24),
         child: Text(
           'データが不足しています',
-          style: _tileTextStyle(context),
+          style: _tileTextStyle(context, isBasicMode),
           textAlign: TextAlign.center,
         ),
       );
@@ -394,10 +397,10 @@ class _StatsPageState extends State<StatsPage> {
           children: items.asMap().entries.map((e) {
             return ListTile(
               dense: true,
-              leading: Text('${e.key + 1}.', style: _tileTextStyle(context)),
-              title: Text(e.value.$1, style: _tileTextStyle(context)),
+              leading: Text('${e.key + 1}.', style: _tileTextStyle(context, isBasicMode)),
+              title: Text(e.value.$1, style: _tileTextStyle(context, isBasicMode)),
               trailing:
-              Text('${e.value.$2}回', style: _tileTextStyle(context)),
+              Text('${e.value.$2}回', style: _tileTextStyle(context, isBasicMode)),
             );
           }).toList(),
         ),
@@ -405,8 +408,8 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-  TextStyle _tileTextStyle(BuildContext context) => TextStyle(
-    color: A_Colors.black,
+  TextStyle _tileTextStyle(BuildContext context, bool isBasicMode) => TextStyle(
+    color: isBasicMode ? B_Colors.black : A_Colors.black,
     fontSize: MediaQuery.of(context).size.width * 0.04,
     fontWeight: FontWeight.bold,
   );
