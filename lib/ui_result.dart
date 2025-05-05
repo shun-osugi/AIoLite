@@ -225,10 +225,8 @@ class _ResultPageState extends State<ResultPage> {
               // フィードバックシート(widget_fbsheet.dart)
               Visibility(
                 visible: _isFbsheetVisible, //ボタンが押されるたびに可視/不可視を切り替え
-                child: Screenshot(
-                  controller: ssController,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 16),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
                     child: Stack(clipBehavior: Clip.none,children: [
                       FbSheet(
                         labels: labels,
@@ -238,7 +236,6 @@ class _ResultPageState extends State<ResultPage> {
                         correctans: correctans,
                         )]),
                   ),
-                ),
               ),
               // ▲ ---------- フィードバックシート ---------- ▲ //
 
