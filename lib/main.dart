@@ -133,7 +133,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     file = null;
@@ -172,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     autoRotate: false,
                                     disableZoom: true,
                                     disableTap: true,
+                                    disablePan: true,
                                     cameraControls: false,
                                     interactionPrompt: null,
                                     interactionPromptThreshold: 0,
