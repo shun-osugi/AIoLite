@@ -23,7 +23,6 @@ import 'terms_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
-import 'package:keyboard_actions/keyboard_actions.dart';
 
 bool _isBasicMode = false;
 
@@ -1558,7 +1557,18 @@ class _EditDialogState extends State<EditDialog> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(_isBasicMode ? "もんだいをつくる" : "問題を編集", style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 24, fontWeight: FontWeight.bold)),
+                    Text(
+                        _isBasicMode
+                            ? "もんだいをつくる"
+                            : "問題を編集",
+                        style: TextStyle(
+                            color: _isBasicMode
+                                ? B_Colors.black
+                                : A_Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold
+                        ),
+                    ),
 
                     SizedBox(height: 16),
 
@@ -1567,13 +1577,25 @@ class _EditDialogState extends State<EditDialog> {
                       decoration: BoxDecoration(
                         color: A_Colors.white,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 2,),
+                        border: Border.all(
+                          color: _isBasicMode
+                              ? B_Colors.black
+                              : A_Colors.black,
+                          width: 2,
+                        ),
                       ),
                       child: SingleChildScrollView(
                         child: TextField(
                           controller: _textController,
                           focusNode: _focusNode, // FocusNodeを設定
-                          style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                          style: TextStyle(
+                              color: _isBasicMode
+                                  ? B_Colors.black
+                                  : A_Colors.black,
+                              fontSize: _isBasicMode
+                                  ? MediaQuery.of(context).size.width * 0.05
+                                  : MediaQuery.of(context).size.width * 0.04
+                          ),
                           minLines: null,
                           maxLines: null,
                           decoration: InputDecoration(
@@ -1610,7 +1632,16 @@ class _EditDialogState extends State<EditDialog> {
                               showLabelDialog(context, editedText);
                             }
                           },
-                          child: Text("次へ →", style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
+                          child: Text(
+                              "次へ →",
+                              style: TextStyle(
+                                  color: _isBasicMode
+                                      ? B_Colors.black
+                                      : A_Colors.black,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold
+                              ),
+                          ),
                         ),
                       ],
                     ),
@@ -1629,27 +1660,25 @@ class _EditDialogState extends State<EditDialog> {
                   },
                 ),
               ),
+
+              _focusNode.hasFocus ?
+                  Positioned(
+                      top: 24,
+                      right: 10,
+                      child: IconButton(
+                        icon: Icon(Icons.close),
+                        iconSize: MediaQuery.of(context).size.width * 0.08,
+                        onPressed: () {
+                          _focusNode.unfocus();
+                          setState(() {});
+                          },
+                      ),
+                  ) :
+                  Container(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  KeyboardActionsConfig _buildConfig(BuildContext context) {
-    return KeyboardActionsConfig(
-      keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
-      actions: [
-        KeyboardActionsItem(
-          focusNode: _focusNode,
-          toolbarButtons: [
-                (node) => TextButton(
-              onPressed: () => node.unfocus(),
-              child: const Text("閉じる"),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
