@@ -481,6 +481,8 @@ Color _getColor(int index) {
     Subject_Colors.science,
     Subject_Colors.socialstudies,
     Subject_Colors.english,
+    Subject_Colors.information,
+    Subject_Colors.other,
   ];
   return colors[index % colors.length];
 }
