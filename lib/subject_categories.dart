@@ -80,7 +80,6 @@ const Map<String, List<String>> subjectCategories = {
     "大気と海洋",
     "移り変わる地球",
     "自然との共生",
-    "生物の進化",
     "生命現象と物質",
     "遺伝子情報の発現と発生",
     "生物の環境応答",
