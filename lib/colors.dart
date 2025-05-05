@@ -24,4 +24,6 @@ class Subject_Colors {
   static const Color science = Color(0xff3e9571); // 理科
   static const Color socialstudies = Color(0xffa57a1f); // 社会
   static const Color english = Color(0xff962fff); // 英語
+  static const Color information = Color(0xff4b569e); // 情報
+  static const Color other = Color(0xff9a9a9a); // その他
 }
