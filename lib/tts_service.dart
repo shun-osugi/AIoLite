@@ -12,6 +12,17 @@ class TTSService {
   final String baseUrl;               // 合成エンドポイント
   final int speaker;                  // 話者 ID
   final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isMuted = false;
+  bool get isMuted => _isMuted;
+
+  /// ミュート状態を直接指定（UI のスイッチ用）
+  Future<void> setMuted(bool value) async {
+    _isMuted = value;
+    await _audioPlayer.setVolume(_isMuted ? 0 : 1); // 0:無音, 1:通常
+  }
+
+  /// ミュートするか否か
+  Future<void> toggleMute() => setMuted(!_isMuted);
 
   TTSService({
     String? apiKey,
@@ -21,6 +32,7 @@ class TTSService {
 
   /// 長文は自動で分割→順番に読み上げ
   Future<void> speak(String text) async {
+    if (_isMuted) return;
     // 1. 句読点 3 つごとに分割
     final chunks = _splitText(text);
     for (final chunk in chunks) {
