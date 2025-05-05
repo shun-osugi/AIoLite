@@ -32,6 +32,8 @@ class _ChatPageState extends State<ChatBasicPage> {
 
   bool openMenu = false; // メニュー管理
 
+  bool _isMuted = false; //音声読み上げを行うか否か
+
   List<String> labels = []; // ラベルの格納用リスト
 
   // テキストのコントローラー
@@ -443,6 +445,52 @@ class _ChatPageState extends State<ChatBasicPage> {
 
                         SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
 
+                        // ミュート切替ボタン －－－－－－－－－－－－－－－－－－－－－－
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.06,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [B_Colors.subColor, B_Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: B_Colors.white, width: 3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: B_Colors.mainColor.withOpacity(0.7),
+                                offset: Offset(0, 4),
+                                blurRadius: 16,
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              // トグルして UI を更新
+                              await _ttsService.toggleMute();
+                              setState(() => _isMuted = _ttsService.isMuted);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                            ),
+                            child: Text(
+                              _isMuted ? 'おとをだす' : 'おとをださない',
+                              style: TextStyle(
+                                color: B_Colors.white,
+                                fontSize: MediaQuery.of(context).size.width * 0.06,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
+
                         // ホームに戻るボタン
                         Container(
                           width: MediaQuery.of(context).size.width * 0.8,
@@ -464,7 +512,9 @@ class _ChatPageState extends State<ChatBasicPage> {
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: () {Navigator.pushNamed(context, '/home');},
+                            onPressed: () async {
+                              Navigator.pushNamed(context, '/home');
+                              await _ttsService.stop(); },  //画面遷移するときに読み上げ停止
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
@@ -727,6 +777,7 @@ class _ChatPageState extends State<ChatBasicPage> {
               ),
               child: ElevatedButton(
                 onPressed: () async { //フィードバックへ遷移
+                  await _ttsService.stop();
                   try {
                     final feedback = await AI.sendMessage(Content.text(//簡単なフィードバック
                         'これまでの会話でよかったところをほめて！ また別の問題にも一緒に取り組みたくなるようなメッセージを一言で教えてほしいな'));
