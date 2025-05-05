@@ -244,9 +244,9 @@ class _ChatPageState extends State<ChatPage> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
+                child: IntrinsicHeight(
+              child: SizedBox(
+              height: constraints.maxHeight,
                     child: Stack(
                       children: [
                         // アバター表示
