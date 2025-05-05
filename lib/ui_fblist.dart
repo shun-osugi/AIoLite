@@ -493,13 +493,22 @@ class _FblistPageState extends State<FblistPage> {
 
         // 戻るボタン
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: A_Colors.white,
-            size: MediaQuery.of(context).size.width * 0.1,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+            icon: Icon(
+              Icons.arrow_back,
+              color: A_Colors.white,
+              size: MediaQuery.of(context).size.width * 0.1,
+            ),
+            onPressed: () {
+              if (listOrDetail) {
+                // 一覧表示：ホームにもどる
+                Navigator.of(context).pop();
+              } else {
+                // 詳細表示：一覧に戻る
+                setState(() {
+                  listOrDetail = true;
+                });
+              }
+            }),
 
         // タイトル
         title: Text(
@@ -512,15 +521,15 @@ class _FblistPageState extends State<FblistPage> {
       // body
       body: SafeArea(
         child: Stack(children: [
-           Column(
-              children: [
-                  listOrDetail
-                      ? summeryList() // 一覧表示
-                      : feedbackDetails(targetNum - 1), // 詳細表示
-                filterUI(), // フィルターボタン
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              ],
-            ),
+          Column(
+            children: [
+              listOrDetail
+                  ? summeryList() // 一覧表示
+                  : feedbackDetails(targetNum - 1), // 詳細表示
+              filterUI(), // フィルターボタン
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            ],
+          ),
           // 右下のトップに戻るボタン
           if (_showScrollToTopButton)
             Positioned(
@@ -768,7 +777,6 @@ class _FblistPageState extends State<FblistPage> {
                   children: [
                     SizedBox(width: MediaQuery.of(context).size.width * 0.05),
                     for (int i = 0; i < fblist.length; i++) ...[
-                      
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.8,
                         child: FbSheet(
@@ -780,7 +788,8 @@ class _FblistPageState extends State<FblistPage> {
                           correctans: fblist[i].correctans,
                         ),
                       ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.05), ]
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                    ]
                   ],
                 ),
               )),
