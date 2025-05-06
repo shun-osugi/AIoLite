@@ -656,7 +656,7 @@ class _ChatPageState extends State<ChatPage> {
                                       ),
                                     ),
                                     child: Text(
-                                      _isMuted ? '音声読み上げ:ON' : '音声読み上げ:OFF',
+                                      _isMuted ? '音声読み上げ:OFF' : '音声読み上げ:ON',
                                       style: TextStyle(
                                         color: A_Colors.black,
                                         fontSize:

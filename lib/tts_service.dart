@@ -87,8 +87,8 @@ class TTSService {
   Future<String> _fetchAudioUrl(String chunk) async {
     final encoded = Uri.encodeComponent(chunk);
     final uri = Uri.parse(
-      '$baseUrl?text=$encoded&speedScale=2&intonationScale=2'
-          '&speaker=$speaker&key=$apiKey',
+      '$baseUrl?text=$encoded&speed=2&speaker=$speaker&key=$apiKey',
+
     );
 
     final res = await http.get(uri);
