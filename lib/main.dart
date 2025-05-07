@@ -27,7 +27,7 @@ import 'widget_help_dialog.dart';
 
 bool _isBasicMode = false;
 
-Future<void> main() async{
+Future<void> main() async {
   await dotenv.load(); // 環境変数の読み込み
   runApp(const MyApp());
 }
@@ -43,6 +43,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: A_Colors.black),
         useMaterial3: true,
       ),
+      builder: (context, child) {
+        return ScrollConfiguration(
+          behavior: NoBounceScrollBehavior(),
+          child: child!,
+        );
+      },
       home: MyHomePage(),
       routes: {
         '/home': (context) => MyHomePage(),
@@ -51,7 +57,7 @@ class MyApp extends StatelessWidget {
         '/result': (context) => ResultPage(),
         '/fblist': (context) => FblistPage(),
         '/fbdetail': (context) => FbdetailPage(),
-        '/stats': (context) =>  StatsPage(),
+        '/stats': (context) => StatsPage(),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -136,428 +142,380 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     file = null;
-    Color backgroundColor = _isBasicMode ? B_Colors.mainColor : A_Colors.mainColor;
+    Color backgroundColor =
+        _isBasicMode ? B_Colors.mainColor : A_Colors.mainColor;
+    final safeAreaPadding = MediaQuery.of(context).padding;
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                  child: Stack(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: Container(
+                height: MediaQuery.of(context).size.height -
+                    safeAreaPadding.top -
+                    safeAreaPadding.bottom,
+                child: Stack(children: [
+                  // アバター表示
+                  Center(
+                    child: Column(
                       children: [
-                        // アバター表示
-                        Center(
-                          child: Column(
-                            children: [
-                              SizedBox(height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.35,),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.35,
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          child: Container(
+                            child: ModelViewer(
+                              src: 'assets/avatar0.glb',
+                              alt: 'A 3D model of AI avatar',
+                              cameraOrbit: "0deg 90deg 0deg",
+                              ar: false,
+                              autoRotate: false,
+                              disableZoom: true,
+                              disableTap: true,
+                              disablePan: true,
+                              cameraControls: false,
+                              interactionPrompt: null,
+                              interactionPromptThreshold: 0,
+                              loading: Loading.eager,
+                              autoPlay: true,
+                              animationName: 'wait',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                              SizedBox(
-                                height: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.2,
-                                child: Container(
-                                  child: ModelViewer(
-                                    src: 'assets/avatar0.glb',
-                                    alt: 'A 3D model of AI avatar',
-                                    cameraOrbit: "0deg 90deg 0deg",
-                                    ar: false,
-                                    autoRotate: false,
-                                    disableZoom: true,
-                                    disableTap: true,
-                                    disablePan: true,
-                                    cameraControls: false,
-                                    interactionPrompt: null,
-                                    interactionPromptThreshold: 0,
-                                    loading: Loading.eager,
-                                    autoPlay: true,
-                                    animationName: 'wait',
-                                  ),
-                                ),
+                  // アバター名表示
+                  Positioned(
+                      top: MediaQuery.of(context).size.height * 0.5,
+                      right: MediaQuery.of(context).size.width * 0.25,
+                      child: Container(
+                          alignment: Alignment.center,
+                          width: MediaQuery.of(context).size.width * 0.2,
+                          height: MediaQuery.of(context).size.height * 0.06,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [A_Colors.subColor, A_Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(40),
+                            border: Border.all(color: A_Colors.white, width: 4),
+                          ),
+                          child: Text(
+                            'イオ',
+                            style: TextStyle(
+                              color: _isBasicMode
+                                  ? B_Colors.black
+                                  : A_Colors.black,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.05,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ))),
+
+                  // メインUI
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.015),
+
+                        Image.asset('assets/logo.png',
+                            height: MediaQuery.of(context).size.height *
+                                0.38), // ロゴ画像
+
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.2),
+
+                        // STARTボタン
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.15,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [A_Colors.subColor, A_Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(color: A_Colors.white, width: 5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: A_Colors.subColor.withOpacity(0.7),
+                                offset: Offset(0, 4),
+                                blurRadius: 10,
                               ),
                             ],
                           ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showSendDialog(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                            ),
+                            child: Text(
+                              'START',
+                              style: TextStyle(
+                                color: A_Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 20,
+                                    color: A_Colors.black,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
 
-                        // アバター名表示
-                        Positioned(
-                            top: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.5,
-                            right: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.25,
-                            child: Container(
-                                alignment: Alignment.center,
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width * 0.2,
-                                height: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.06,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [A_Colors.subColor, A_Colors.white],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(40),
-                                  border: Border.all(
-                                      color: A_Colors.white, width: 4),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.015),
+
+                        // モード切替＋全体統計＋フィードバック一覧ボタン（横並び）
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // モード切替ボタン
+                            Container(
+                              width: _isBasicMode
+                                  ? MediaQuery.of(context).size.width * 0.6
+                                  : MediaQuery.of(context).size.width * 0.44,
+                              height: MediaQuery.of(context).size.width * 0.16,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    A_Colors.accentColor,
+                                    A_Colors.white
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                                child: Text('イオ', style: TextStyle(
-                                  color: _isBasicMode
-                                      ? B_Colors.black
-                                      : A_Colors.black,
-                                  fontSize: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width * 0.05,
-                                  fontWeight: FontWeight.bold,
-                                ),)
-                            )
-                        ),
+                                borderRadius: BorderRadius.circular(40),
+                                border: Border.all(
+                                    color: _isBasicMode
+                                        ? B_Colors.black
+                                        : A_Colors.black,
+                                    width: 3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        A_Colors.accentColor.withOpacity(0.7),
+                                    offset: Offset(0, 4),
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => ModeSelectDialog(
+                                      isBasicMode: _isBasicMode,
+                                      onChanged: (newMode) {
+                                        setState(() {
+                                          _isBasicMode = newMode;
+                                        });
+                                      },
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                  ),
+                                ),
+                                child: Text(
+                                  _isBasicMode ? 'モードをえらぶ' : 'モード選択',
+                                  style: TextStyle(
+                                    color: _isBasicMode
+                                        ? B_Colors.black
+                                        : A_Colors.black,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.05,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
 
-                        // メインUI
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              SizedBox(height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.015),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.02),
 
-                              Image.asset('assets/logo.png', height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.38), // ロゴ画像
-
-                              SizedBox(height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.2),
-
-                              // STARTボタン
+                            //フィードバック一覧のボタン（アドバンス時のみ）
+                            if (!_isBasicMode)
                               Container(
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width * 0.8,
-                                height: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.15,
+                                width: MediaQuery.of(context).size.width * 0.16,
+                                height:
+                                    MediaQuery.of(context).size.width * 0.16,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
-                                    colors: [A_Colors.subColor, A_Colors.white],
+                                    colors: [
+                                      A_Colors.accentColor,
+                                      A_Colors.white
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
-                                  borderRadius: BorderRadius.circular(50),
+                                  shape: BoxShape.circle,
                                   border: Border.all(
-                                      color: A_Colors.white, width: 5),
+                                      color: _isBasicMode
+                                          ? B_Colors.black
+                                          : A_Colors.black,
+                                      width: 3),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: A_Colors.subColor.withOpacity(0.7),
+                                      color:
+                                          A_Colors.accentColor.withOpacity(0.7),
                                       offset: Offset(0, 4),
                                       blurRadius: 10,
                                     ),
                                   ],
                                 ),
-                                child: ElevatedButton(
+                                child: IconButton(
+                                  icon: Icon(Icons.auto_stories),
+                                  iconSize:
+                                      MediaQuery.of(context).size.width * 0.08,
+                                  color: _isBasicMode
+                                      ? B_Colors.black
+                                      : A_Colors.black,
                                   onPressed: () {
-                                    showSendDialog(context);
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/fblist',
+                                    );
                                   },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'START',
-                                    style: TextStyle(
-                                      color: A_Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          blurRadius: 20,
-                                          color: A_Colors.black,
-                                          offset: Offset(0, 0),
-                                        ),
-                                      ],
-                                      fontSize: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),),
-
-                              SizedBox(height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.015),
-
-                              // モード切替＋全体統計＋フィードバック一覧ボタン（横並び）
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // モード切替ボタン
-                                  Container(
-                                    width: _isBasicMode ? MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width * 0.6 : MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width * 0.44,
-                                    height: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width * 0.16,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          A_Colors.accentColor,
-                                          A_Colors.white
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(40),
-                                      border: Border.all(color: _isBasicMode
-                                          ? B_Colors.black
-                                          : A_Colors.black, width: 3),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: A_Colors.accentColor
-                                              .withOpacity(0.7),
-                                          offset: Offset(0, 4),
-                                          blurRadius: 10,
-                                        ),
-                                      ],
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) =>
-                                              ModeSelectDialog(
-                                                isBasicMode: _isBasicMode,
-                                                onChanged: (newMode) {
-                                                  setState(() {
-                                                    _isBasicMode = newMode;
-                                                  });
-                                                },
-                                              ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              40),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        _isBasicMode
-                                            ? 'モードをえらぶ'
-                                            : 'モード選択',
-                                        style: TextStyle(
-                                          color: _isBasicMode
-                                              ? B_Colors.black
-                                              : A_Colors.black,
-                                          fontSize: MediaQuery
-                                              .of(context)
-                                              .size
-                                              .width * 0.05,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  SizedBox(width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width * 0.02),
-
-                                  //フィードバック一覧のボタン（アドバンス時のみ）
-                                  if (!_isBasicMode)
-                                    Container(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.16,
-                                      height: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.16,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            A_Colors.accentColor,
-                                            A_Colors.white
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: _isBasicMode
-                                            ? B_Colors.black
-                                            : A_Colors.black, width: 3),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: A_Colors.accentColor
-                                                .withOpacity(0.7),
-                                            offset: Offset(0, 4),
-                                            blurRadius: 10,
-                                          ),
-                                        ],
-                                      ),
-                                      child: IconButton(
-                                        icon: Icon(Icons.auto_stories),
-                                        iconSize: MediaQuery
-                                            .of(context)
-                                            .size
-                                            .width * 0.08,
-                                        color: _isBasicMode
-                                            ? B_Colors.black
-                                            : A_Colors.black,
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            '/fblist',
-                                          );
-                                        },
-                                      ),
-                                    ),
-
-                                  SizedBox(width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width * 0.02),
-
-                                  // 全体統計のボタン
-                                  Container(
-                                    width: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width * 0.16,
-                                    height: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width * 0.16,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          A_Colors.accentColor,
-                                          A_Colors.white
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: _isBasicMode
-                                          ? B_Colors.black
-                                          : A_Colors.black, width: 3),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: A_Colors.accentColor
-                                              .withOpacity(0.7),
-                                          offset: Offset(0, 4),
-                                          blurRadius: 10,
-                                        ),
-                                      ],
-                                    ),
-                                    child: IconButton(
-                                      icon: Icon(Icons.bar_chart),
-                                      iconSize: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.1,
-                                      color: _isBasicMode
-                                          ? B_Colors.black
-                                          : A_Colors.black,
-                                      onPressed: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          '/stats',
-                                          arguments: {
-                                            'isBasicMode': _isBasicMode,
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ),
-
-                                ],
+                                ),
                               ),
 
-                              SizedBox(height: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height * 0.02),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.02),
 
-                              // ライセンスアイコンと利用規約ボタン
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  // 利用規約ボタン (iマーク)
-                                  const TermsButton(),
-
-                                  // ライセンス表示ボタン
-                                  IconButton(
-                                    icon: Icon(Icons.handshake, size: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width * 0.1, color: A_Colors.white),
-                                    onPressed: () {
-                                      showLicensePage(
-                                        context: context,
-                                        applicationName: 'AIoLite',
-                                        applicationVersion: '1.0.0',
-                                      );
+                            // 全体統計のボタン
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.16,
+                              height: MediaQuery.of(context).size.width * 0.16,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    A_Colors.accentColor,
+                                    A_Colors.white
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: _isBasicMode
+                                        ? B_Colors.black
+                                        : A_Colors.black,
+                                    width: 3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        A_Colors.accentColor.withOpacity(0.7),
+                                    offset: Offset(0, 4),
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.bar_chart),
+                                iconSize:
+                                    MediaQuery.of(context).size.width * 0.1,
+                                color: _isBasicMode
+                                    ? B_Colors.black
+                                    : A_Colors.black,
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/stats',
+                                    arguments: {
+                                      'isBasicMode': _isBasicMode,
                                     },
-                                  ),
-
-                                  SizedBox(width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width * 0.1),
-                                ],
+                                  );
+                                },
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
 
-                        // ヘルプを表示するボタン
-                        HelpButton(
-                          mode: _isBasicMode ? 'basic' : 'advanced',
-                          content: 'home',
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02),
+
+                        // ライセンスアイコンと利用規約ボタン
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            // 利用規約ボタン (iマーク)
+                            const TermsButton(),
+
+                            // ライセンス表示ボタン
+                            IconButton(
+                              icon: Icon(Icons.handshake,
+                                  size: MediaQuery.of(context).size.width * 0.1,
+                                  color: A_Colors.white),
+                              onPressed: () {
+                                showLicensePage(
+                                  context: context,
+                                  applicationName: 'AIoLite',
+                                  applicationVersion: '1.0.0',
+                                );
+                              },
+                            ),
+
+                            SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.1),
+                          ],
                         ),
-                      ]
-                  )
+                      ],
+                    ),
+                  ),
+
+                  // ヘルプを表示するボタン
+                  HelpButton(
+                    mode: _isBasicMode ? 'basic' : 'advanced',
+                    content: 'home',
+                  ),
+                ]),
               ),
-            ),
-          );
-        },),
+            );
+          },
+        ),
       ),
     );
+  }
+}
+
+// バウンススクロール禁止
+class NoBounceScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const ClampingScrollPhysics(); // Androidと同じようなスクロールにする
   }
 }
 
@@ -575,6 +533,7 @@ class ModeSelectDialog extends StatefulWidget {
   @override
   State<ModeSelectDialog> createState() => _ModeSelectDialogState();
 }
+
 class _ModeSelectDialogState extends State<ModeSelectDialog> {
   late bool currentMode; // 選択中のモード
   final ScrollController _scrollController = ScrollController(); // スクロールコントローラ
@@ -586,7 +545,7 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (currentMode) {
         _scrollController.jumpTo(0);
-      }else{
+      } else {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     });
@@ -640,7 +599,8 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01),
 
                       // タイトル
                       Text(
@@ -649,9 +609,11 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                           color: _isBasicMode ? B_Colors.black : A_Colors.black,
                           fontSize: MediaQuery.of(context).size.width * 0.07,
                           fontWeight: FontWeight.bold,
-                        ),),
+                        ),
+                      ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01),
 
                       // モード説明部
                       SingleChildScrollView(
@@ -668,28 +630,38 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                                 color: B_Colors.mainColor,
                                 borderRadius: BorderRadius.circular(32),
                               ),
-                              padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+                              padding: EdgeInsets.all(
+                                  MediaQuery.of(context).size.width * 0.04),
                               child: Column(
                                 children: [
                                   // イメージ
                                   Image.asset(
                                     'assets/logo.png',
-                                    width: MediaQuery.of(context).size.width * 0.5,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
                                   ),
 
-                                  SizedBox(height: MediaQuery.of(context).size.width * 0.07),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.07),
 
                                   // モード名
                                   Text(
                                     'ベーシックモード',
                                     style: TextStyle(
                                       color: A_Colors.white,
-                                      fontSize: MediaQuery.of(context).size.width * 0.07,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.07,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
 
-                                  SizedBox(height: MediaQuery.of(context).size.width * 0.05),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.05),
 
                                   // モード説明文
                                   Text(
@@ -697,14 +669,19 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: A_Colors.white,
-                                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.05,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],),
+                                ],
+                              ),
                             ),
 
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.03),
 
                             // モード説明部(Advanced)
                             Container(
@@ -713,28 +690,38 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                                 color: A_Colors.mainColor,
                                 borderRadius: BorderRadius.circular(32),
                               ),
-                              padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+                              padding: EdgeInsets.all(
+                                  MediaQuery.of(context).size.width * 0.04),
                               child: Column(
                                 children: [
                                   // イメージ
                                   Image.asset(
                                     'assets/logo.png',
-                                    width: MediaQuery.of(context).size.width * 0.5,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
                                   ),
 
-                                  SizedBox(height: MediaQuery.of(context).size.width * 0.07),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.07),
 
                                   // モード名
                                   Text(
                                     'アドバンスドモード',
                                     style: TextStyle(
                                       color: A_Colors.white,
-                                      fontSize: MediaQuery.of(context).size.width * 0.07,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.07,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
 
-                                  SizedBox(height: MediaQuery.of(context).size.width * 0.05),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.05),
 
                                   // モード説明文
                                   Text(
@@ -742,21 +729,27 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: A_Colors.white,
-                                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.05,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03),
 
                       // モード選択ボタン
                       Container(
-                        width: _isBasicMode ? MediaQuery.of(context).size.width * 0.8 : MediaQuery.of(context).size.width * 0.6,
+                        width: _isBasicMode
+                            ? MediaQuery.of(context).size.width * 0.8
+                            : MediaQuery.of(context).size.width * 0.6,
                         height: MediaQuery.of(context).size.width * 0.15,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -765,7 +758,11 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(40),
-                          border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+                          border: Border.all(
+                              color: _isBasicMode
+                                  ? B_Colors.black
+                                  : A_Colors.black,
+                              width: 3),
                           boxShadow: [
                             BoxShadow(
                               color: A_Colors.accentColor.withOpacity(0.7),
@@ -792,15 +789,19 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                           child: Text(
                             _isBasicMode ? 'このモードをえらぶ' : 'このモードを選ぶ',
                             style: TextStyle(
-                              color: _isBasicMode ? B_Colors.black : A_Colors.black,
-                              fontSize: MediaQuery.of(context).size.width * 0.05,
+                              color: _isBasicMode
+                                  ? B_Colors.black
+                                  : A_Colors.black,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.05,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01),
                     ],
                   ),
                 ],
@@ -818,7 +819,8 @@ class HelpButton extends StatelessWidget {
   final String mode; // モード: 'basic' or 'advanced'
   final String content; // 内容: 'home'
 
-  const HelpButton({Key? key, required this.mode, required this.content}) : super(key: key);
+  const HelpButton({Key? key, required this.mode, required this.content})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -836,7 +838,8 @@ class HelpButton extends StatelessWidget {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+          border: Border.all(
+              color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
           boxShadow: [
             BoxShadow(
               color: A_Colors.accentColor.withOpacity(0.7),
@@ -849,16 +852,22 @@ class HelpButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            textStyle: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            textStyle: TextStyle(
+                color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
           ),
-          label: Text(isBasic ? 'つかいかた' : '使い方', style: TextStyle(
-            color: _isBasicMode ? B_Colors.black : A_Colors.black,
-            fontSize: MediaQuery.of(context).size.width * 0.05,
-            fontWeight: FontWeight.bold,
-          ),),
+          label: Text(
+            isBasic ? 'つかいかた' : '使い方',
+            style: TextStyle(
+              color: _isBasicMode ? B_Colors.black : A_Colors.black,
+              fontSize: MediaQuery.of(context).size.width * 0.05,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           onPressed: () {
             _showHelpDialog(context);
           },
@@ -871,7 +880,10 @@ class HelpButton extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        return HelpDialog(mode: mode, content: content,);
+        return HelpDialog(
+          mode: mode,
+          content: content,
+        );
       },
     );
   }
@@ -884,7 +896,8 @@ class TermsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.info_outline, size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
+      icon: Icon(Icons.info_outline,
+          size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
       onPressed: () => _showTermsDialog(context),
     );
   }
@@ -898,6 +911,7 @@ class TermsButton extends StatelessWidget {
     );
   }
 }
+
 // 利用規約ダイアログ
 class TermsDialog extends StatelessWidget {
   const TermsDialog({Key? key}) : super(key: key);
@@ -937,7 +951,9 @@ class TermsDialog extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                              color: _isBasicMode
+                                  ? B_Colors.black
+                                  : A_Colors.black,
                             ),
                           ),
                           SizedBox(height: 4),
@@ -946,7 +962,9 @@ class TermsDialog extends StatelessWidget {
                             article['body'] ?? '',
                             style: TextStyle(
                               fontSize: 14,
-                              color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                              color: _isBasicMode
+                                  ? B_Colors.black
+                                  : A_Colors.black,
                             ),
                           ),
                         ],
@@ -982,38 +1000,40 @@ class TermsDialog extends StatelessWidget {
 // カメラを起動するボタン
 class CameraButton extends StatelessWidget {
   final Function(String) onImagePicked;
+
   const CameraButton({Key? key, required this.onImagePicked}) : super(key: key);
 
   Future<void> file_to_text(File putfile, BuildContext context) async {
     //contextはmain画面のcontext
-    try{
+    try {
       //画像編集
       final data = await putfile.readAsBytes();
-      ImageEditor.setI18n({//言語翻訳
+      ImageEditor.setI18n({
+        //言語翻訳
         'Crop': '切り取り',
         'Save': '保存',
         'Freeform': 'フリーフォーム',
       });
       //画像編集画面
       final editedImage = await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ImageCropper(
-                  image: data, // <-- Uint8List of image
-              ),
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageCropper(
+            image: data, // <-- Uint8List of image
           ),
+        ),
       );
       await putfile.writeAsBytes(editedImage);
       final inputImage = InputImage.fromFile(putfile);
       // TextRecognizerの初期化（scriptで日本語の読み取りを指定しています※androidは日本語指定は失敗するのでデフォルトで使用すること）
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.japanese);
+      final textRecognizer =
+          TextRecognizer(script: TextRecognitionScript.japanese);
       // 画像から文字を読み取る（OCR処理）
       final recognizedText = await textRecognizer.processImage(inputImage);
 
       onImagePicked(recognizedText.text);
       textRecognizer.close();
-    }
-    catch(e){
+    } catch (e) {
       print('ファイル編集エラー');
       print(e);
     }
@@ -1032,14 +1052,29 @@ class CameraButton extends StatelessWidget {
             context: context,
             builder: (context) {
               return SimpleDialog(
-                title: Text('選択：', style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold,),),
+                title: Text(
+                  '選択：',
+                  style: TextStyle(
+                    color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 children: [
                   SimpleDialogOption(
-                    child: Text('写真ライブラリから選択', style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 16, fontWeight: FontWeight.bold,),),
+                    child: Text(
+                      '写真ライブラリから選択',
+                      style: TextStyle(
+                        color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     onPressed: () async {
                       Navigator.pop(context);
-                      FilePickerResult? file = await FilePicker.platform.pickFiles(
-                        type:  FileType.image, //写真ファイルのみ抽出
+                      FilePickerResult? file =
+                          await FilePicker.platform.pickFiles(
+                        type: FileType.image, //写真ファイルのみ抽出
                         // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
                       );
 
@@ -1048,36 +1083,47 @@ class CameraButton extends StatelessWidget {
                         print(filename);
 
                         // File型に変換し文字に変換
-                        file_to_text(File(file.files.first.path!),currentContext);
+                        file_to_text(
+                            File(file.files.first.path!), currentContext);
                       }
                     },
                   ),
                   SimpleDialogOption(
-                    child: Text('写真を撮影', style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 16, fontWeight: FontWeight.bold,),),
+                    child: Text(
+                      '写真を撮影',
+                      style: TextStyle(
+                        color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     onPressed: () async {
                       Navigator.pop(context);
                       ImagePicker picker = ImagePicker();
                       //写真を撮る
-                      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+                      final pickedFile =
+                          await picker.pickImage(source: ImageSource.camera);
 
                       if (pickedFile != null) {
                         print(pickedFile.path);
                         // File型に変換し文字に変換
-                        file_to_text(File(pickedFile.path),currentContext);
+                        file_to_text(File(pickedFile.path), currentContext);
                       }
                     },
                   )
                 ],
               );
-            }
-        );
+            });
       },
       child: Container(
         padding: EdgeInsets.all(screenWidth * 0.03),
         decoration: BoxDecoration(
           color: A_Colors.white,
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
-          border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3,),
+          border: Border.all(
+            color: _isBasicMode ? B_Colors.black : A_Colors.black,
+            width: 3,
+          ),
           boxShadow: [
             BoxShadow(
               color: _isBasicMode ? B_Colors.black : A_Colors.black,
@@ -1086,7 +1132,11 @@ class CameraButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(Icons.camera_alt, size: screenWidth * 0.15, color: _isBasicMode ? B_Colors.black : A_Colors.black,),
+        child: Icon(
+          Icons.camera_alt,
+          size: screenWidth * 0.15,
+          color: _isBasicMode ? B_Colors.black : A_Colors.black,
+        ),
       ),
     );
   }
@@ -1101,6 +1151,7 @@ class AudioButton extends StatefulWidget {
   @override
   _AudioButtonState createState() => _AudioButtonState();
 }
+
 class _AudioButtonState extends State<AudioButton> {
   SpeechToText _speech = SpeechToText();
   bool _isListening = false;
@@ -1126,6 +1177,7 @@ class _AudioButtonState extends State<AudioButton> {
       widget.onTextPicked("音声認識の初期化に失敗しました");
     }
   }
+
   //音声認識停止
   void _stopListening() {
     _speech.stop();
@@ -1133,6 +1185,7 @@ class _AudioButtonState extends State<AudioButton> {
       _isListening = false;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -1151,7 +1204,10 @@ class _AudioButtonState extends State<AudioButton> {
         decoration: BoxDecoration(
           color: A_Colors.white,
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
-          border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3,),
+          border: Border.all(
+            color: _isBasicMode ? B_Colors.black : A_Colors.black,
+            width: 3,
+          ),
           boxShadow: [
             BoxShadow(
               color: _isBasicMode ? B_Colors.black : A_Colors.black,
@@ -1173,7 +1229,9 @@ class _AudioButtonState extends State<AudioButton> {
 // 空の文字列を返すボタン
 class EmptyTextButton extends StatelessWidget {
   final Function(String) onTextPicked;
-  const EmptyTextButton({Key? key, required this.onTextPicked}) : super(key: key);
+
+  const EmptyTextButton({Key? key, required this.onTextPicked})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1187,7 +1245,10 @@ class EmptyTextButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: A_Colors.white,
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
-          border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3,),
+          border: Border.all(
+            color: _isBasicMode ? B_Colors.black : A_Colors.black,
+            width: 3,
+          ),
           boxShadow: [
             BoxShadow(
               color: _isBasicMode ? B_Colors.black : A_Colors.black,
@@ -1196,7 +1257,11 @@ class EmptyTextButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(Icons.text_snippet_outlined, size: screenWidth * 0.15, color: _isBasicMode ? B_Colors.black : A_Colors.black,),
+        child: Icon(
+          Icons.text_snippet_outlined,
+          size: screenWidth * 0.15,
+          color: _isBasicMode ? B_Colors.black : A_Colors.black,
+        ),
       ),
     );
   }
@@ -1209,6 +1274,7 @@ void showSendDialog(BuildContext context) {
     builder: (context) => SendDialog(),
   );
 }
+
 class SendDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1230,7 +1296,10 @@ class SendDialog extends StatelessWidget {
                   Center(
                     child: Text(
                       _isBasicMode ? "もんだいをおくる" : "問題を送る",
-                      style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                   SizedBox(height: 30),
@@ -1241,27 +1310,26 @@ class SendDialog extends StatelessWidget {
                       // マイクボタン
                       _sendOption(context,
                           AudioButton(onTextPicked: (String text) {
-                            print("音声認識: $text");
-                            if (text.isNotEmpty) {
-                              Navigator.pop(context);
-                              showEditDialog(context, text);
-                            }
-                          }), _isBasicMode ? "こえ" : "音声入力"
-                      ),
-                      _sendOption(context,
-                          CameraButton(onImagePicked: (String text) {
-                            if (text.isNotEmpty) {
-                              Navigator.pop(context);
-                              showEditDialog(context, text);
-                            }
-                            },), _isBasicMode ? "しゃしん" : "画像入力"
-                      ),
-                      _sendOption(context,
-                          EmptyTextButton(onTextPicked: (String text) {
+                        print("音声認識: $text");
+                        if (text.isNotEmpty) {
+                          Navigator.pop(context);
+                          showEditDialog(context, text);
+                        }
+                      }), _isBasicMode ? "こえ" : "音声入力"),
+                      _sendOption(context, CameraButton(
+                        onImagePicked: (String text) {
+                          if (text.isNotEmpty) {
                             Navigator.pop(context);
                             showEditDialog(context, text);
-                            },), _isBasicMode ? "もじ" : "テキスト"
-                      ),
+                          }
+                        },
+                      ), _isBasicMode ? "しゃしん" : "画像入力"),
+                      _sendOption(context, EmptyTextButton(
+                        onTextPicked: (String text) {
+                          Navigator.pop(context);
+                          showEditDialog(context, text);
+                        },
+                      ), _isBasicMode ? "もじ" : "テキスト"),
                     ],
                   ),
                   SizedBox(height: 20),
@@ -1273,7 +1341,9 @@ class SendDialog extends StatelessWidget {
               top: 24,
               left: 10,
               child: IconButton(
-                icon: Icon(Icons.arrow_back, color: _isBasicMode ? B_Colors.black : A_Colors.black, size: 40),
+                icon: Icon(Icons.arrow_back,
+                    color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                    size: 40),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
@@ -1282,12 +1352,19 @@ class SendDialog extends StatelessWidget {
       ),
     );
   }
+
   Widget _sendOption(BuildContext context, Widget sendButton, String label) {
     return Column(
       children: [
         sendButton,
         SizedBox(height: 8),
-        Text(label, style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.05, color: _isBasicMode ? B_Colors.black : A_Colors.black, fontWeight: FontWeight.bold),),
+        Text(
+          label,
+          style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.05,
+              color: _isBasicMode ? B_Colors.black : A_Colors.black,
+              fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
@@ -1317,13 +1394,16 @@ void showEditDialog(BuildContext context, String text) {
     },
   );
 }
+
 class EditDialog extends StatefulWidget {
   final String editedText;
+
   const EditDialog({Key? key, required this.editedText}) : super(key: key);
 
   @override
   _EditDialogState createState() => _EditDialogState();
 }
+
 class _EditDialogState extends State<EditDialog> {
   late TextEditingController _textController;
   late FocusNode _focusNode;
@@ -1353,13 +1433,14 @@ class _EditDialogState extends State<EditDialog> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         child: GestureDetector(
-          onLongPressStart: (details){
+          onLongPressStart: (details) {
             _focusNode.unfocus();
           },
           onTap: () {
             FocusScope.of(context).requestFocus(_focusNode);
-            _textController.selection = TextSelection.collapsed(offset: _textController.text.length);
-            setState((){});
+            _textController.selection =
+                TextSelection.collapsed(offset: _textController.text.length);
+            setState(() {});
           },
           child: Stack(
             children: [
@@ -1369,44 +1450,35 @@ class _EditDialogState extends State<EditDialog> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                        _isBasicMode
-                            ? "もんだいをつくる"
-                            : "問題を編集",
-                        style: TextStyle(
-                            color: _isBasicMode
-                                ? B_Colors.black
-                                : A_Colors.black,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold
-                        ),
+                      _isBasicMode ? "もんだいをつくる" : "問題を編集",
+                      style: TextStyle(
+                          color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
                     ),
-
                     SizedBox(height: 16),
-
                     Container(
                       height: MediaQuery.of(context).size.height * 0.5,
                       decoration: BoxDecoration(
                         color: A_Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: _isBasicMode
-                              ? B_Colors.black
-                              : A_Colors.black,
+                          color: _isBasicMode ? B_Colors.black : A_Colors.black,
                           width: 2,
                         ),
                       ),
                       child: SingleChildScrollView(
                         child: TextField(
                           controller: _textController,
-                          focusNode: _focusNode, // FocusNodeを設定
+                          focusNode: _focusNode,
+                          // FocusNodeを設定
                           style: TextStyle(
                               color: _isBasicMode
                                   ? B_Colors.black
                                   : A_Colors.black,
                               fontSize: _isBasicMode
                                   ? MediaQuery.of(context).size.width * 0.05
-                                  : MediaQuery.of(context).size.width * 0.04
-                          ),
+                                  : MediaQuery.of(context).size.width * 0.04),
                           minLines: null,
                           maxLines: null,
                           decoration: InputDecoration(
@@ -1421,9 +1493,7 @@ class _EditDialogState extends State<EditDialog> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 20),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -1439,19 +1509,18 @@ class _EditDialogState extends State<EditDialog> {
                                   'inputText': editedText,
                                 },
                               );
-                            }else{
+                            } else {
                               showLabelDialog(context, editedText);
                             }
                           },
                           child: Text(
-                              "次へ →",
-                              style: TextStyle(
-                                  color: _isBasicMode
-                                      ? B_Colors.black
-                                      : A_Colors.black,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold
-                              ),
+                            "次へ →",
+                            style: TextStyle(
+                                color: _isBasicMode
+                                    ? B_Colors.black
+                                    : A_Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -1464,7 +1533,9 @@ class _EditDialogState extends State<EditDialog> {
                 top: 24,
                 left: 10,
                 child: IconButton(
-                  icon: Icon(Icons.arrow_back, color: _isBasicMode ? B_Colors.black : A_Colors.black, size: 40),
+                  icon: Icon(Icons.arrow_back,
+                      color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                      size: 40),
                   onPressed: () {
                     Navigator.of(context).pop();
                     showSendDialog(context);
@@ -1472,8 +1543,8 @@ class _EditDialogState extends State<EditDialog> {
                 ),
               ),
 
-              _focusNode.hasFocus ?
-                  Positioned(
+              _focusNode.hasFocus
+                  ? Positioned(
                       top: 24,
                       right: 10,
                       child: IconButton(
@@ -1482,10 +1553,10 @@ class _EditDialogState extends State<EditDialog> {
                         onPressed: () {
                           _focusNode.unfocus();
                           setState(() {});
-                          },
+                        },
                       ),
-                  ) :
-                  Container(),
+                    )
+                  : Container(),
             ],
           ),
         ),
@@ -1498,23 +1569,27 @@ class _EditDialogState extends State<EditDialog> {
 void showLabelDialog(BuildContext context, String text) {
   showDialog(
     context: context,
-    builder: (context) => LabelDialog(editedText: text,),
+    builder: (context) => LabelDialog(
+      editedText: text,
+    ),
   );
 }
+
 class LabelDialog extends StatefulWidget {
   final String editedText;
+
   const LabelDialog({Key? key, required this.editedText}) : super(key: key);
 
   @override
   _LabelDialogState createState() => _LabelDialogState();
 }
+
 class _LabelDialogState extends State<LabelDialog> {
   List<String> _suggestedLabels = []; // 推奨ラベル
   List<String?> selectedSubjects = List.filled(4, null); // 教科ドロップダウン選択
   List<String?> selectedCategories = List.filled(4, null); // 分類ドロップダウン選択
   bool _isLoading = false; // ローディング状態を管理する変数
   bool _isBasicMode = false;
-
 
   @override
   void initState() {
@@ -1562,7 +1637,7 @@ class _LabelDialogState extends State<LabelDialog> {
 
         List<String> parts = label.split(" - ");
         if (parts.length == 2) {
-          selectedSubjects[i] = parts[0];  // 教科
+          selectedSubjects[i] = parts[0]; // 教科
           selectedCategories[i] = parts[1]; // 分類
         }
       }
@@ -1583,7 +1658,10 @@ class _LabelDialogState extends State<LabelDialog> {
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               isExpanded: true,
-              hint: Text("未選択", style: TextStyle(color: A_Colors.black),),
+              hint: Text(
+                "未選択",
+                style: TextStyle(color: A_Colors.black),
+              ),
               value: selectedSubjects[index],
               iconEnabledColor: A_Colors.black,
               onChanged: (String? newValue) {
@@ -1595,13 +1673,23 @@ class _LabelDialogState extends State<LabelDialog> {
               items: [
                 DropdownMenuItem<String>(
                   value: null,
-                  child: Text("未選択", style: TextStyle(color: A_Colors.black),), // デフォルトのnull選択肢
+                  child: Text(
+                    "未選択",
+                    style: TextStyle(color: A_Colors.black),
+                  ), // デフォルトのnull選択肢
                 ),
-                ...subjectCategories.keys.toSet().toList().map((String subject) { // 重複を削除
+                ...subjectCategories.keys
+                    .toSet()
+                    .toList()
+                    .map((String subject) {
+                  // 重複を削除
                   print("DropdownMenuItem value: $subject"); // デバッグ出力
                   return DropdownMenuItem<String>(
                     value: subject,
-                    child: Text(subject, style: TextStyle(color: A_Colors.black),),
+                    child: Text(
+                      subject,
+                      style: TextStyle(color: A_Colors.black),
+                    ),
                   );
                 }).toList(),
               ],
@@ -1619,23 +1707,35 @@ class _LabelDialogState extends State<LabelDialog> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
-                hint: Text("未選択", style: TextStyle(color: A_Colors.black),),
+                hint: Text(
+                  "未選択",
+                  style: TextStyle(color: A_Colors.black),
+                ),
                 value: selectedCategories[index],
                 iconEnabledColor: A_Colors.black,
-                onChanged: selectedSubjects[index] == null ? null : (String? newValue) {
-                  setState(() {
-                    selectedCategories[index] = newValue;
-                  });
-                },
+                onChanged: selectedSubjects[index] == null
+                    ? null
+                    : (String? newValue) {
+                        setState(() {
+                          selectedCategories[index] = newValue;
+                        });
+                      },
                 items: [
                   DropdownMenuItem<String>(
                     value: null,
-                    child: Text("未選択", style: TextStyle(color: A_Colors.black),), // デフォルトのnull選択肢
+                    child: Text(
+                      "未選択",
+                      style: TextStyle(color: A_Colors.black),
+                    ), // デフォルトのnull選択肢
                   ),
-                  ...(subjectCategories[selectedSubjects[index]] ?? []).map((String category) {
+                  ...(subjectCategories[selectedSubjects[index]] ?? [])
+                      .map((String category) {
                     return DropdownMenuItem<String>(
                       value: category,
-                      child: Text(category, style: TextStyle(color: A_Colors.black),),
+                      child: Text(
+                        category,
+                        style: TextStyle(color: A_Colors.black),
+                      ),
                     );
                   }).toList(),
                 ],
@@ -1666,7 +1766,13 @@ class _LabelDialogState extends State<LabelDialog> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("ラベルを編集", style: TextStyle(color: A_Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
+                  Text(
+                    "ラベルを編集",
+                    style: TextStyle(
+                        color: A_Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                  ),
                   SizedBox(height: 16),
 
                   // 4つのドロップダウンペアを縦に並べる
@@ -1676,13 +1782,18 @@ class _LabelDialogState extends State<LabelDialog> {
                     decoration: BoxDecoration(
                       color: A_Colors.white,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: A_Colors.black, width: 2,),
+                      border: Border.all(
+                        color: A_Colors.black,
+                        width: 2,
+                      ),
                     ),
                     child: Column(
                       children: [
                         buildDropdownPair(0),
                         for (int i = 1; i < 4; i++) ...[
-                          Divider(color: A_Colors.black,),
+                          Divider(
+                            color: A_Colors.black,
+                          ),
                           buildDropdownPair(i),
                         ],
                       ],
@@ -1696,16 +1807,20 @@ class _LabelDialogState extends State<LabelDialog> {
                         onPressed: () async {
                           List<String> editedLabels = [];
                           for (int i = 0; i < 4; i++) {
-                            if (selectedSubjects[i] != null && selectedCategories[i] != null) {
-                              editedLabels.add("${selectedSubjects[i]} - ${selectedCategories[i]}");
+                            if (selectedSubjects[i] != null &&
+                                selectedCategories[i] != null) {
+                              editedLabels.add(
+                                  "${selectedSubjects[i]} - ${selectedCategories[i]}");
                             }
                           }
 
                           // ここでラベルを保存
-                          if (widget.editedText.isNotEmpty && editedLabels.isNotEmpty) {
-                              ApiService.storeText(widget.editedText, editedLabels)
-                                  .then((_) => print("テキストとラベルを保存しました"))
-                                  .catchError((e) => print("保存エラー: $e"));
+                          if (widget.editedText.isNotEmpty &&
+                              editedLabels.isNotEmpty) {
+                            ApiService.storeText(
+                                    widget.editedText, editedLabels)
+                                .then((_) => print("テキストとラベルを保存しました"))
+                                .catchError((e) => print("保存エラー: $e"));
                           } else {
                             print("テキストまたはラベルが空です");
                           }
@@ -1719,7 +1834,13 @@ class _LabelDialogState extends State<LabelDialog> {
                             },
                           );
                         },
-                        child: Text("開始 →", style: TextStyle(color: A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),
+                        child: Text(
+                          "開始 →",
+                          style: TextStyle(
+                              color: A_Colors.black,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
