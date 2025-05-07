@@ -103,8 +103,9 @@ class _FblistPageState extends State<FblistPage> {
         });
       }
     });
-    // _initDatabase();
-    _filteredFbList = List.from(fblist); // 初期表示は全件
+    // setState(() {
+    //   _initDatabase();
+    // });
   }
 
   @override
@@ -164,6 +165,7 @@ class _FblistPageState extends State<FblistPage> {
       print("データベース読み取りエラー");
       print(e);
     }
+    _filteredFbList = List.from(fblist); // 初期表示は全件
   }
   // ▲ ---------- データベース読み取り ---------- ▲ //
 
@@ -194,20 +196,45 @@ class _FblistPageState extends State<FblistPage> {
 
   //フィルター追加時の処理
   void addFilter() {
-    if (selectedSubject == null) return;
-    final filter = '$selectedSubject-すべて';
+    if (selectedSubject == null) return; //教科が選択されていないなら何もしない
+    String filter = '$selectedSubject-';
+    filter += selectedCategory ?? 'すべて';
+
+    if(selectedFilter.contains(filter)){ //すでに選択されているなら何もしない
+      //選択できないことを通知
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('そのラベルはすでに選択されています'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    
     //分類選択がすべての場合
-    //selectedCategory==全て　元のやつから削除
     if (selectedCategory == null) {
       //教科が同じものは削除
       selectedFilter.removeWhere((e) => e.contains(selectedSubject!));
       //直前の検索で消されるので'教科-すべて'を追加
       selectedFilter.add(filter);
-    } else if (!selectedFilter.contains(filter) && !selectedFilter.contains('$selectedSubject-$selectedCategory')) {
-      //全てがある場合は追加しない
-      selectedFilter.add('$selectedSubject-$selectedCategory');
     }
-    setState(() {});
+    else { //分類も選択されている場合
+      if (selectedFilter.contains('$selectedSubject-すべて')) {//全てがある場合は追加しない
+        //全てがすでに追加されていることを通知
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('その分類は，"すべて"がすでに選択されています'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+      else{
+        //全てがないなら追加
+        selectedFilter.add(filter);
+      }
+    }
+    setState((){});
   }
 
   //フィルター削除時の処理
@@ -442,7 +469,8 @@ class _FblistPageState extends State<FblistPage> {
                     TextButton(
                       onPressed: () async {
                         selectedFilter.clear();
-                        setState(() {});
+                        _filteredFbList = List.from(fblist);
+                        setState((){});
                         // print(selectedFilter);
                       },
                       child: Text(
