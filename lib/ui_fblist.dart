@@ -23,7 +23,8 @@ class FblistPage extends StatefulWidget {
 }
 
 class _FblistPageState extends State<FblistPage> {
-  // List<feedback> fblist = [];
+  List<feedback> fblist = [];
+  /*
   List<feedback> fblist = [
     //仮データ
     feedback(
@@ -77,6 +78,7 @@ class _FblistPageState extends State<FblistPage> {
       'eeeeeeeee',
     ),
   ];
+  */
   List<List<String>> allLabels = []; // 教科と分類を統合したリストのリスト(ラベル)
   String? selectedSubject; // 教科ドロップダウン選択
   String? selectedCategory; // 分類ドロップダウン選択
@@ -618,10 +620,10 @@ class _FblistPageState extends State<FblistPage> {
             child: Column(
               children: [
                 SizedBox(height: 16),
-                for (int i = 0; i < fblist.length; i++)
+                for (int i = 0; i < _filteredFbList.length; i++)
                   Column(
                     children: [
-                      builderSummery(context, fblist[i].id, allLabels[i], fblist[i].summary), //1つの問題文
+                      builderSummery(context, _filteredFbList[i].id, allLabels[i], _filteredFbList[i].summary), //1つの問題文
                       SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
                     ],
                   ),
@@ -737,7 +739,7 @@ class _FblistPageState extends State<FblistPage> {
   // ▼ ---------- フィードバック詳細 ---------- ▼ //
   Widget feedbackDetails(int targetNum) {
     final fbScrollController = ScrollController();
-    final List<GlobalKey> fbSheetKeys = List.generate(fblist.length, (_) => GlobalKey()); //fbSheetを判別するためのkey
+    final List<GlobalKey> fbSheetKeys = List.generate(_filteredFbList.length, (_) => GlobalKey()); //fbSheetを判別するためのkey
 
     // 描画完了後、ウィジェットを中央に配置
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -761,7 +763,7 @@ class _FblistPageState extends State<FblistPage> {
           child: GestureDetector(
               onHorizontalDragEnd: (fbdrag) {
                 if (fbdrag.primaryVelocity != null) {
-                  if (fbdrag.primaryVelocity! < 0 && targetNum < fblist.length - 1) {
+                  if (fbdrag.primaryVelocity! < 0 && targetNum < _filteredFbList.length - 1) {
                     // 右→左 (fblistを1進める)
                     setState(() {
                       targetNum++;
@@ -799,28 +801,27 @@ class _FblistPageState extends State<FblistPage> {
                 }
               },
               // fbSheetの一覧
-              child: Container(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                    for (int i = 0; i < fblist.length; i++) ...[
+                    for (int i = 0; i < _filteredFbList.length; i++) ...[
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.8,
                         child: FbSheet(
                           key: fbSheetKeys[i],
                           labels: allLabels[0], // 仮指定
-                          problem: fblist[i].problem,
-                          wrong: fblist[i].wrong,
-                          wrongpartans: fblist[i].wrongpartans,
-                          correctans: fblist[i].correctans,
+                          problem: _filteredFbList[i].problem,
+                          wrong: _filteredFbList[i].wrong,
+                          wrongpartans: _filteredFbList[i].wrongpartans,
+                          correctans: _filteredFbList[i].correctans,
                         ),
                       ),
                       SizedBox(width: MediaQuery.of(context).size.width * 0.05),
                     ]
                   ],
                 ),
-              )),
+              ),
         );
       }),
     ));
