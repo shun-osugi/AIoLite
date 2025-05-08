@@ -23,6 +23,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
 import 'widget_help_dialog.dart';
+import 'math_popup.dart';
+
 
 bool _isBasicMode = false;
 
@@ -1491,6 +1493,36 @@ class _EditDialogState extends State<EditDialog> {
                         ),
                       ),
                     ),
+
+                    //ーーーーーーー数式入力セット(ここから)ーーーーーーーー
+                    SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => MathPopup(
+                            onInsert: (latex) {
+                              final selection = _textController.selection;
+                              final newText = _textController.text.replaceRange(
+                                selection.start,
+                                selection.end,
+                                latex,
+                              );
+                              setState(() {
+                                _textController.text = newText;
+                                _textController.selection = TextSelection.collapsed(
+                                  offset: selection.start + latex.length,
+                                );
+                              });
+                              Navigator.pop(context); // MathPopupを閉じる
+                            },
+                          ),
+                        );
+                      },
+                      child: Text("数式・単位を挿入"),
+                    ),
+                    //ーーーーーーー数式入力セット(ここまで)ーーーーーーーー
+
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
