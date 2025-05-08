@@ -75,6 +75,11 @@ class _ChatPageState extends State<ChatPage> {
     中高生（受験生）を対象とするので，必ず最初に「どこまで自力で解けるか解いてみて」などと聞いて，それに伴って会話を進めてください.
     口調は友達のような感じで大丈夫だよ！
     '''));
+
+    final AIsummary = await AI.sendMessage(Content.text('''
+    先ほどの問題文を10~15文字で要約してください
+    '''));
+    this.summary = AIsummary.text ?? '問題文の要約に失敗しました';
   }
 
   // AIへメッセージを送信
@@ -159,7 +164,7 @@ class _ChatPageState extends State<ChatPage> {
   //データベース初期化
   Future<void> _initDatabase() async {
     // データベースをオープン（存在しない場合は作成）
-    bool b=true;
+    bool b = true;
     try {
       // String databasePath = await getDatabasesPath();
       // String path = '${databasePath}/database.db';
@@ -171,7 +176,7 @@ class _ChatPageState extends State<ChatPage> {
           //テーブルがないなら作成
           //フィードバックテーブルを作成
           //fieldはリスト（flutter側に持ってくるときに変換予定）
-          b=false;
+          b = false;
           return db.execute(
             '''
             CREATE TABLE IF NOT EXISTS feedback(
@@ -188,7 +193,7 @@ class _ChatPageState extends State<ChatPage> {
           );
         },
       );
-      if(b) {
+      if (b) {
         _database.execute(
           '''
           CREATE TABLE IF NOT EXISTS feedback(
@@ -389,7 +394,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 thumbVisibility: true,
                                                 child: SingleChildScrollView(
                                                   child: Text(
-                                                    inputText,
+                                                    summary,
                                                     style: TextStyle(
                                                       color: A_Colors.black,
                                                       fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -416,7 +421,7 @@ class _ChatPageState extends State<ChatPage> {
                               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                             ),
                             child: Text(
-                              inputText,
+                              summary,
                               style: TextStyle(
                                 color: A_Colors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -792,20 +797,18 @@ class _ChatPageState extends State<ChatPage> {
                               //詳細のフィードバックを作成
                               final info = await AI.sendMessage(Content.text('''
                                 今回の会話について，
-                                1,問題文の要約（10~15文字）
-                                2,ユーザーが間違えてた部分
-                                3,間違えた部分の正しい解き方
-                                4,問題自体の正しい解き方
+                                1,ユーザーが間違えてた部分
+                                2,間違えた部分の正しい解き方
+                                3,問題自体の正しい解き方
                                 を，必ず以下のフォーマットで送ってください
                                 &&内容1&&内容2&&内容3&&内容4
                               '''));
 
                               String infotext = info.text ?? '&&なし&&なし&&なし&&なし';
                               final B = infotext.substring(infotext.indexOf('&&')).split('&&');
-                              summary = B[1]; //問題文の要約
-                              wrong = B[2]; //間違えてた部分
-                              wrongpartans = B[3]; //間違えてた部分の正しい解き方
-                              correctans = B[4]; //それの正しい解き方
+                              wrong = B[1]; //間違えてた部分
+                              wrongpartans = B[2]; //間違えてた部分の正しい解き方
+                              correctans = B[3]; //それの正しい解き方
                               // print("sdoifsdjffd");
                               // print(summary);
                               // print(wrong);
