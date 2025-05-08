@@ -7,6 +7,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'widget_help_dialog.dart';
+import 'package:sqflite/sqflite.dart';
 
 class chat {
   int p; //0:自分 1:相手
@@ -48,6 +49,8 @@ class _ChatPageState extends State<ChatBasicPage> {
 
   final TTSService _ttsService = TTSService(); //音声読み上げサービス
 
+  late Database _database; //データベース
+
   // はじめにAIに送る指示
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _ChatPageState extends State<ChatBasicPage> {
     _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
     AI = _model.startChat();
     _initAsync();
+    _initDatabase();
   }
 
   Future<void> _initAsync() async {
@@ -120,6 +124,96 @@ class _ChatPageState extends State<ChatBasicPage> {
       await _ttsService.speak(aiMessage);
     } catch (e) {
       print('読み上げエラー');
+      print(e);
+    }
+  }
+
+  //データベース初期化
+  Future<void> _initDatabase() async {
+    // データベースをオープン（存在しない場合は作成）
+    bool b=true;
+    try {
+      // String databasePath = await getDatabasesPath();
+      // String path = '${databasePath}/database.db';
+      // await deleteDatabase(path);
+      _database = await openDatabase(
+        'database.db',
+        version: 1,
+        onCreate: (Database db, int version) async {
+          //テーブルがないなら作成
+          //フィードバックテーブルを作成
+          //basic用のテーブル
+          b=false;
+          return db.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS feedbackbasic(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              subject TEXT,
+              count INTEGER
+            )
+            ''',
+          );
+        },
+      );
+      if(b) {
+        _database.execute(
+          '''
+          CREATE TABLE IF NOT EXISTS feedbackbasic(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject TEXT,
+            count INTEGER
+          )
+          ''',
+        );
+      }
+    } catch (e) {
+      print("データベース読み取りエラー");
+      print(e);
+    }
+  }
+
+  Future<void> adddatabase() async
+  {
+    String aiMessage = 'なし';
+    try{
+      final response = await AI.sendMessage(Content.text('''
+      次の問題文がどの教科に分類にされるか選択肢から一つ選んでください
+      教科の選択肢：こくご，さんすう，えいご，しゃかい，りか
+      問題文：$inputText
+
+      出力は教科のみにしてください．
+      例）こくご
+      ''')); // AIにメッセージを送信
+      aiMessage = (response.text ?? 'なし').trim(); // AIの返答を取得
+    }catch(e){
+      print('AIエラー');
+      print(e);
+    }
+
+    try{
+      final records = await _database.query(
+        'feedbackbasic',
+        where: 'subject = ?',
+        whereArgs: [aiMessage],
+      ) as List<Map<String, dynamic>>;
+
+      //すでに教科がある場合
+      if(records.isNotEmpty){
+        int count = records[0]['count'];
+        await _database.update('feedbackbasic',
+          {'count': count+1},  // 新しい値
+          where: 'subject = ?',  // 更新する条件
+          whereArgs: [aiMessage],//更新場所
+        );
+      }
+      else{
+        await _database.insert('feedbackbasic',{ 
+          'subject': aiMessage,
+          'count': 1,
+        });
+      }
+    }catch(e){
+      print('データベース保存エラー');
       print(e);
     }
   }
@@ -1012,6 +1106,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                 barrierDismissible: false,
                               );
                             }
+                            adddatabase();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,

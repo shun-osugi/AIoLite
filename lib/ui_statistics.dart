@@ -9,6 +9,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 
 //フィードバックデータの定義
 class FeedbackData {
@@ -76,6 +77,7 @@ class _StatsPageState extends State<StatsPage> {
   late Database _database;
   bool _isLoading = true;                                  //読み込みが終わらない問題の対策
 
+  final List<Map<String, int>> _fbbasicList = [];          //basicモードのレコード　{教科：解いた数}の配列
 
   @override
   void initState() {
@@ -129,20 +131,29 @@ class _StatsPageState extends State<StatsPage> {
 
   //フィードバックデータを読んで要素ごとに格納
   Future<void> _readAllFeedback() async {
-    final rows = await _database.query('feedback');
-    for (final r in rows) {
-      _fbList.add(
-        FeedbackData(
-          r['id'] as int,
-          (r['subject'] as String).split('&&'),
-          (r['field'] as String).split('&&'),
-          r['problem'] as String,
-          r['summary'] as String,
-          r['wrong'] as String,
-          r['wrongpartans'] as String,
-          r['correctans'] as String,
-        ),
-      );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.getBool('isBasicMode') ?? true){//basicモードの場合
+      final rows = await _database.query('feedbackbasic');
+      for(final r in rows){
+        _fbbasicList.add({r['subject'] as String : r['count'] as int});
+      }
+    }
+    else{//advancedモードの場合
+      final rows = await _database.query('feedback');
+      for (final r in rows) {
+        _fbList.add(
+          FeedbackData(
+            r['id'] as int,
+            (r['subject'] as String).split('&&'),
+            (r['field'] as String).split('&&'),
+            r['problem'] as String,
+            r['summary'] as String,
+            r['wrong'] as String,
+            r['wrongpartans'] as String,
+            r['correctans'] as String,
+          ),
+        );
+      }
     }
   }
 
