@@ -25,8 +25,7 @@ class FblistPage extends StatefulWidget {
 
 class _FblistPageState extends State<FblistPage> {
   List<feedback> fblist = [];
-
-  /*
+/*
   List<feedback> fblist = [
     //仮データ
     feedback(
@@ -35,8 +34,8 @@ class _FblistPageState extends State<FblistPage> {
       ['2次方程式'],
       '問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文',
       '2次方程式。x² - 5x + 6 = 0',
-      'aaaaaaaaa',
-      'bbbbbbbbb',
+      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'ccccccccc',
     ),
     feedback(
@@ -69,15 +68,26 @@ class _FblistPageState extends State<FblistPage> {
       'ddddddddd',
       'ddddddddd',
     ),
+    feedback(
+      4,
+      ['理科'],
+      ['物質の姿'],
+      'ddddddddd',
+      'あ',
+      'ddddddddd',
+      'ddddddddd',
+      'ddddddddd',
+    ),
   ];
-   */
+  */
 
   List<List<String>> allLabels = []; // 教科と分類を統合したリストのリスト(ラベル)
   String? selectedSubject; // 教科ドロップダウン選択
   String? selectedCategory; // 分類ドロップダウン選択
   List<String> selectedFilter = []; //選択した教科ラベル ["教科-ラベル",...
   List<feedback> _filteredFbList = []; // 絞り込み後のフィードバックリスト
-  final ScrollController _scrollController = ScrollController(); // スクロールのコントローラ
+  final ScrollController _listScrollController = ScrollController(); // スクロールのコントローラ(一覧表示)
+  final ScrollController _detailScrollController = ScrollController(); // スクロールのコントローラ(詳細表示)
   bool onFilter = false; // フィルターの表示・非表示
   bool _showScrollToTopButton = false; // トップに戻るボタンの表示・非表示
   late Database _database; //データベース
@@ -87,12 +97,12 @@ class _FblistPageState extends State<FblistPage> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.offset > 0 && !_showScrollToTopButton) {
+    _listScrollController.addListener(() {
+      if (_listScrollController.offset > 0 && !_showScrollToTopButton) {
         setState(() {
           _showScrollToTopButton = true;
         });
-      } else if (_scrollController.offset <= 0 && _showScrollToTopButton) {
+      } else if (_listScrollController.offset <= 0 && _showScrollToTopButton) {
         setState(() {
           _showScrollToTopButton = false;
         });
@@ -108,7 +118,8 @@ class _FblistPageState extends State<FblistPage> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _listScrollController.dispose();
+    _detailScrollController.dispose();
     super.dispose();
   }
 
@@ -592,7 +603,7 @@ class _FblistPageState extends State<FblistPage> {
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                   onPressed: () {
-                    _scrollController.animateTo(
+                    _listScrollController.animateTo(
                       0,
                       duration: Duration(milliseconds: 300),
                       curve: Curves.easeOut,
@@ -623,7 +634,7 @@ class _FblistPageState extends State<FblistPage> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: SingleChildScrollView(
-            controller: _scrollController,
+            controller: _detailScrollController,
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.95,
               child: Column(
