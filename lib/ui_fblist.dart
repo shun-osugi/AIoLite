@@ -36,8 +36,8 @@ class _FblistPageState extends State<FblistPage> {
       '問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文',
       '2次方程式。x² - 5x + 6 = 0',
       'aaaaaaaaa',
-      'aaaaaaaaa',
-      'aaaaaaaaa',
+      'bbbbbbbbb',
+      'ccccccccc',
     ),
     feedback(
       2,
@@ -98,6 +98,9 @@ class _FblistPageState extends State<FblistPage> {
         });
       }
     });
+    selectedFilter.clear();
+    _filteredFbList = List.from(fblist);
+    setState(() {});
     // setState(() {
     //   _initDatabase();
     // });
@@ -821,6 +824,7 @@ class _FblistPageState extends State<FblistPage> {
                       labels: allLabels[0],
                       // 仮指定
                       problem: _filteredFbList[i].problem,
+                      summary: _filteredFbList[i].summary,
                       wrong: _filteredFbList[i].wrong,
                       wrongpartans: _filteredFbList[i].wrongpartans,
                       correctans: _filteredFbList[i].correctans,
