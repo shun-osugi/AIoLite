@@ -159,6 +159,7 @@ class _ChatPageState extends State<ChatPage> {
   //データベース初期化
   Future<void> _initDatabase() async {
     // データベースをオープン（存在しない場合は作成）
+    bool b=true;
     try {
       // String databasePath = await getDatabasesPath();
       // String path = '${databasePath}/database.db';
@@ -170,6 +171,7 @@ class _ChatPageState extends State<ChatPage> {
           //テーブルがないなら作成
           //フィードバックテーブルを作成
           //fieldはリスト（flutter側に持ってくるときに変換予定）
+          b=false;
           return db.execute(
             '''
             CREATE TABLE IF NOT EXISTS feedback(
@@ -186,6 +188,22 @@ class _ChatPageState extends State<ChatPage> {
           );
         },
       );
+      if(b) {
+        _database.execute(
+          '''
+          CREATE TABLE IF NOT EXISTS feedback(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject TEXT,
+            field TEXT,
+            problem TEXT,
+            summary TEXT,
+            wrong TEXT,
+            wrongpartans TEXT,
+            correctans TEXT
+          )
+          ''',
+        );
+      }
     } catch (e) {
       print("データベース保存エラー");
       print(e);
