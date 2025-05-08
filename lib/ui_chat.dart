@@ -594,53 +594,6 @@ class _ChatPageState extends State<ChatPage> {
                                 height: MediaQuery.of(context).size.height * 0.05,
                               ),
 
-                              // ホームに戻るボタン
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                height: MediaQuery.of(context).size.height * 0.05,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [A_Colors.subColor, A_Colors.white],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(color: A_Colors.black, width: 3),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: A_Colors.black.withOpacity(0.7),
-                                      offset: Offset(0, 4),
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    Navigator.pushNamed(context, '/home');
-                                    await _ttsService.stop();
-                                  }, //画面遷移するときに読み上げ停止
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(24),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'ホームに戻る',
-                                    style: TextStyle(
-                                      color: A_Colors.black,
-                                      fontSize: MediaQuery.of(context).size.width * 0.05,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              SizedBox(
-                                height: MediaQuery.of(context).size.height * 0.05,
-                              ),
-
                               // 今の問題をやり直すボタン
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.8,
@@ -680,6 +633,53 @@ class _ChatPageState extends State<ChatPage> {
                                   ),
                                   child: Text(
                                     '今の問題をやりなおす',
+                                    style: TextStyle(
+                                      color: A_Colors.black,
+                                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.05,
+                              ),
+
+                              // ホームに戻るボタン
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.height * 0.05,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [A_Colors.subColor, A_Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: A_Colors.black, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: A_Colors.black.withOpacity(0.7),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    Navigator.pushNamed(context, '/home');
+                                    await _ttsService.stop();
+                                  }, //画面遷移するときに読み上げ停止
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'ホームに戻る',
                                     style: TextStyle(
                                       color: A_Colors.black,
                                       fontSize: MediaQuery.of(context).size.width * 0.05,
