@@ -803,10 +803,10 @@ class _ChatPageState extends State<ChatPage> {
                                 2,間違えた部分の正しい解き方
                                 3,問題自体の正しい解き方
                                 を，必ず以下のフォーマットで送ってください
-                                &&内容1&&内容2&&内容3&&内容4
+                                &&内容1&&内容2&&内容3
                               '''));
 
-                              String infotext = info.text ?? '&&なし&&なし&&なし&&なし';
+                              String infotext = info.text ?? '&&なし&&なし&&なし';
                               final B = infotext.substring(infotext.indexOf('&&')).split('&&');
                               wrong = B[1]; //間違えてた部分
                               wrongpartans = B[2]; //間違えてた部分の正しい解き方
