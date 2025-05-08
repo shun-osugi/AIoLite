@@ -79,7 +79,9 @@ class _ChatPageState extends State<ChatPage> {
     final AIsummary = await AI.sendMessage(Content.text('''
     先ほどの問題文を10~15文字で要約してください
     '''));
-    this.summary = AIsummary.text ?? '問題文の要約に失敗しました';
+    setState(() {
+      this.summary = AIsummary.text ?? '問題文の要約に失敗しました';
+    });
   }
 
   // AIへメッセージを送信
@@ -394,7 +396,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 thumbVisibility: true,
                                                 child: SingleChildScrollView(
                                                   child: Text(
-                                                    summary,
+                                                    inputText,
                                                     style: TextStyle(
                                                       color: A_Colors.black,
                                                       fontSize: MediaQuery.of(context).size.width * 0.04,

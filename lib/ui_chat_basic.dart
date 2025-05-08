@@ -26,6 +26,7 @@ class ChatBasicPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatBasicPage> {
   String inputText = ""; // 入力文章用文字列
+  String summary = ""; // 表示用文字列
 
   bool isFirstSend = false; // はじめの問題文の送信をしたか
   bool _isSending = false; // 二度目以降、問題文の送信中を判断
@@ -72,6 +73,13 @@ class _ChatPageState extends State<ChatBasicPage> {
     また全ての出力において，理解しやすいように多くても出力文字数は80文字以内になるようにしてください.
     口調は友達（小学生）のような感じで大丈夫だよ！
     '''));
+
+    final AIsummary = await AI.sendMessage(Content.text('''
+    先ほどの問題文を10~15文字で要約してください
+    '''));
+    setState(() {
+      this.summary = AIsummary.text ?? '問題文の要約に失敗しました';
+    });
   }
 
   // AIへメッセージを送信
@@ -410,7 +418,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                             ),
                             child: Text(
-                              inputText,
+                              summary,
                               style: TextStyle(
                                 color: B_Colors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.06,
@@ -461,10 +469,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                                       constraints: BoxConstraints(minWidth: 80),
                                                       decoration: BoxDecoration(
                                                         gradient: LinearGradient(
-                                                          colors: [
-                                                            chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.subColor,
-                                                            chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.white
-                                                          ],
+                                                          colors: [chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.subColor, chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.white],
                                                           begin: Alignment.topLeft,
                                                           end: Alignment.bottomRight,
                                                         ),
