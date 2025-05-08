@@ -83,7 +83,10 @@ flutter:
 
   assets:
     - assets/
-    - assets/help_home/
+    - assets/help_home_basic/
+    - assets/help_home_advanced/
+    - assets/help_chat_basic/
+    - assets/help_chat_advanced/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

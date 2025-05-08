@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'tts_service.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sqflite/sqflite.dart';
+
+import 'colors.dart';
+import 'tts_service.dart';
 import 'widget_help_dialog.dart';
 
 class chat {
@@ -48,6 +49,8 @@ class _ChatPageState extends State<ChatBasicPage> {
 
   final TTSService _ttsService = TTSService(); //音声読み上げサービス
 
+  late Database _database; //データベース
+
   // はじめにAIに送る指示
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _ChatPageState extends State<ChatBasicPage> {
     _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
     AI = _model.startChat();
     _initAsync();
+    _initDatabase();
   }
 
   Future<void> _initAsync() async {
@@ -63,7 +67,7 @@ class _ChatPageState extends State<ChatBasicPage> {
     これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください.
     そちらが話す文章は読み上げを行うので，そのまま読むとおかしくなるような文字は出力しないでください．
     例えば，数式表現や文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
-    こちら側は小学生を想定しているので漢字などを使う場合は難しい表現はあまりしないでください.
+    こちら側は小学生を想定しているので漢字は使わないでください.
     もし，問題を解き終えたら，問題で使った知識が普段どういう風に使われているか教えてください.
     また全ての出力において，理解しやすいように多くても出力文字数は80文字以内になるようにしてください.
     口調は友達（小学生）のような感じで大丈夫だよ！
@@ -99,8 +103,7 @@ class _ChatPageState extends State<ChatBasicPage> {
   void _getAIResponse(String userMessage) async {
     String aiMessage = '';
     try {
-      final response =
-          await AI.sendMessage(Content.text(userMessage)); // AIにメッセージを送信
+      final response = await AI.sendMessage(Content.text(userMessage)); // AIにメッセージを送信
       aiMessage = (response.text ?? 'イオからのメッセージが取得できませんでした').trim(); // AIの返答を取得
       setState(() {
         chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
@@ -120,6 +123,95 @@ class _ChatPageState extends State<ChatBasicPage> {
       await _ttsService.speak(aiMessage);
     } catch (e) {
       print('読み上げエラー');
+      print(e);
+    }
+  }
+
+  //データベース初期化
+  Future<void> _initDatabase() async {
+    // データベースをオープン（存在しない場合は作成）
+    bool b = true;
+    try {
+      // String databasePath = await getDatabasesPath();
+      // String path = '${databasePath}/database.db';
+      // await deleteDatabase(path);
+      _database = await openDatabase(
+        'database.db',
+        version: 1,
+        onCreate: (Database db, int version) async {
+          //テーブルがないなら作成
+          //フィードバックテーブルを作成
+          //basic用のテーブル
+          b = false;
+          return db.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS feedbackbasic(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              subject TEXT,
+              count INTEGER
+            )
+            ''',
+          );
+        },
+      );
+      if (b) {
+        _database.execute(
+          '''
+          CREATE TABLE IF NOT EXISTS feedbackbasic(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject TEXT,
+            count INTEGER
+          )
+          ''',
+        );
+      }
+    } catch (e) {
+      print("データベース読み取りエラー");
+      print(e);
+    }
+  }
+
+  Future<void> adddatabase() async {
+    String aiMessage = 'なし';
+    try {
+      final response = await AI.sendMessage(Content.text('''
+      次の問題文がどの教科に分類にされるか選択肢から一つ選んでください
+      教科の選択肢：こくご，さんすう，えいご，しゃかい，りか
+      問題文：$inputText
+
+      出力は教科のみにしてください．
+      例）こくご
+      ''')); // AIにメッセージを送信
+      aiMessage = (response.text ?? 'なし').trim(); // AIの返答を取得
+    } catch (e) {
+      print('AIエラー');
+      print(e);
+    }
+
+    try {
+      final records = await _database.query(
+        'feedbackbasic',
+        where: 'subject = ?',
+        whereArgs: [aiMessage],
+      ) as List<Map<String, dynamic>>;
+
+      //すでに教科がある場合
+      if (records.isNotEmpty) {
+        int count = records[0]['count'];
+        await _database.update(
+          'feedbackbasic',
+          {'count': count + 1}, // 新しい値
+          where: 'subject = ?', // 更新する条件
+          whereArgs: [aiMessage], //更新場所
+        );
+      } else {
+        await _database.insert('feedbackbasic', {
+          'subject': aiMessage,
+          'count': 1,
+        });
+      }
+    } catch (e) {
+      print('データベース保存エラー');
       print(e);
     }
   }
@@ -149,89 +241,49 @@ class _ChatPageState extends State<ChatBasicPage> {
 
   @override
   Widget build(BuildContext context) {
+    final safeAreaPadding = MediaQuery.of(context).padding;
     return Scaffold(
       backgroundColor: B_Colors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              child: IntrinsicHeight(
-                child: SizedBox(
-                  height: constraints.maxHeight,
-                  child: Stack(
-                    children: [
-                      // アバター表示
-                      Positioned(
-                        top: MediaQuery.of(context).size.height * 0.18,
-                        left: MediaQuery.of(context).size.width * -0.05,
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.26,
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          child: ModelViewer(
-                            src: 'assets/avatar0.glb',
-                            alt: 'A 3D model of AI avatar',
-                            cameraOrbit: "-25deg 90deg 0deg",
-                            ar: false,
-                            autoRotate: false,
-                            disableZoom: true,
-                            disableTap: true,
-                            disablePan: true,
-                            cameraControls: false,
-                            interactionPrompt: null,
-                            interactionPromptThreshold: 0,
-                            autoPlay: true,
-                            animationName: 'wait',
-                          ),
+              child: Container(
+                height: MediaQuery.of(context).size.height - safeAreaPadding.top - safeAreaPadding.bottom,
+                width: MediaQuery.of(context).size.width,
+                child: Stack(
+                  children: [
+                    // アバター表示
+                    Positioned(
+                      top: MediaQuery.of(context).size.height * 0.18,
+                      left: MediaQuery.of(context).size.width * -0.05,
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.26,
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        child: ModelViewer(
+                          src: 'assets/avatar0.glb',
+                          alt: 'A 3D model of AI avatar',
+                          cameraOrbit: "-25deg 90deg 0deg",
+                          ar: false,
+                          autoRotate: false,
+                          disableZoom: true,
+                          disableTap: true,
+                          disablePan: true,
+                          cameraControls: false,
+                          interactionPrompt: null,
+                          interactionPromptThreshold: 0,
+                          autoPlay: true,
+                          animationName: 'wait',
                         ),
                       ),
+                    ),
 
-                      // アバター名表示
-                      Positioned(
-                          top: MediaQuery.of(context).size.height * 0.2,
-                          left: MediaQuery.of(context).size.width * 0.05,
-                          child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 16),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [B_Colors.subColor, B_Colors.white],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(40),
-                                border: Border.all(
-                                    color: B_Colors.background, width: 4),
-                              ),
-                              child: Text(
-                                'イオ',
-                                style: TextStyle(
-                                  color: B_Colors.black,
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.06,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ))),
-
-                      // メニュー⇆チャット切替ボタン
-                      Positioned(
-                          top: MediaQuery.of(context).size.height * 0.12,
-                          right: MediaQuery.of(context).size.width * 0.15,
-                          child: MenuButton(
-                            icon: openMenu ? Icons.chat : Icons.menu,
-                            onPressed: () {
-                              setState(() {
-                                openMenu = !openMenu;
-                              });
-                            },
-                          )),
-
-                      // 会話部分
-                      Column(
-                        children: [
-                          // 問題文を表示するボタン
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            height: MediaQuery.of(context).size.height * 0.12,
+                    // アバター名表示
+                    Positioned(
+                        top: MediaQuery.of(context).size.height * 0.2,
+                        left: MediaQuery.of(context).size.width * 0.05,
+                        child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [B_Colors.subColor, B_Colors.white],
@@ -239,832 +291,655 @@ class _ChatPageState extends State<ChatBasicPage> {
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(40),
-                              border:
-                                  Border.all(color: B_Colors.black, width: 3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: B_Colors.mainColor.withOpacity(0.7),
-                                  offset: Offset(0, 4),
-                                  blurRadius: 10,
-                                ),
-                              ],
+                              border: Border.all(color: B_Colors.background, width: 4),
                             ),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Dialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(12)),
-                                      ),
-                                      child: Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.95,
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.6,
-                                        decoration: BoxDecoration(
-                                          color: B_Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(
-                                              color: B_Colors.black, width: 4),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(24),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              Align(
-                                                alignment: Alignment.topRight,
-                                                child: IconButton(
-                                                  icon: Icon(
-                                                    Icons.close,
-                                                    color: B_Colors.black,
-                                                    size: MediaQuery.of(context)
-                                                            .size
-                                                            .width *
-                                                        0.1,
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Scrollbar(
-                                                  thumbVisibility: true,
-                                                  child: SingleChildScrollView(
-                                                    child: Text(
-                                                      inputText,
-                                                      style: TextStyle(
-                                                        color: B_Colors.black,
-                                                        fontSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.05,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 12, horizontal: 24),
+                            child: Text(
+                              'イオ',
+                              style: TextStyle(
+                                color: B_Colors.black,
+                                fontSize: MediaQuery.of(context).size.width * 0.06,
+                                fontWeight: FontWeight.bold,
                               ),
-                              child: Text(
-                                inputText,
-                                style: TextStyle(
-                                  color: B_Colors.black,
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.06,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                              ),
-                            ),
-                          ),
+                            ))),
 
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.25),
+                    // メニュー⇆チャット切替ボタン
+                    Positioned(
+                        top: MediaQuery.of(context).size.height * 0.12,
+                        right: MediaQuery.of(context).size.width * 0.15,
+                        child: MenuButton(
+                          icon: openMenu ? Icons.chat : Icons.menu,
+                          onPressed: () {
+                            setState(() {
+                              openMenu = !openMenu;
+                            });
+                          },
+                        )),
 
-                          // チャット部分
-                          if (!openMenu)
-                            Expanded(
-                              child: Stack(
-                                children: [
-                                  for (int i = (chatIndex > -1 ? 0 : 1);
-                                      i < 2;
-                                      i++)
-                                    Positioned(
-                                      top: chats[chatIndex + i].p != 0
-                                          ? 0
-                                          : null,
-                                      bottom: chats[chatIndex + i].p == 0
-                                          ? 0
-                                          : null,
-                                      left: 0,
-                                      right: 0,
-                                      child: Opacity(
-                                        opacity: i == 0 ? 0.6 : 1.0,
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 24),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                chats[chatIndex + i].p == 0
-                                                    ? MainAxisAlignment.end
-                                                    : MainAxisAlignment.start,
-                                            children: [
-                                              Stack(
-                                                clipBehavior: Clip.none,
-                                                children: [
-                                                  ConstrainedBox(
-                                                    constraints: BoxConstraints(
-                                                      maxWidth:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.9,
-                                                      minWidth:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.2,
-                                                      maxHeight:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .height *
-                                                              0.3,
-                                                    ),
-                                                    child: IntrinsicWidth(
-                                                      child: Container(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                vertical: 8,
-                                                                horizontal: 24),
-                                                        margin: EdgeInsets.only(
-                                                            bottom: 8,
-                                                            left: chats[chatIndex +
-                                                                            i]
-                                                                        .p ==
-                                                                    0
-                                                                ? 40
-                                                                : 8,
-                                                            right: chats[chatIndex +
-                                                                            i]
-                                                                        .p ==
-                                                                    0
-                                                                ? 8
-                                                                : 40),
-                                                        constraints:
-                                                            BoxConstraints(
-                                                                minWidth: 80),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          gradient:
-                                                              LinearGradient(
-                                                            colors: [
-                                                              chats[chatIndex +
-                                                                              i]
-                                                                          .p ==
-                                                                      0
-                                                                  ? B_Colors
-                                                                      .mainColor
-                                                                  : B_Colors
-                                                                      .subColor,
-                                                              chats[chatIndex +
-                                                                              i]
-                                                                          .p ==
-                                                                      0
-                                                                  ? B_Colors
-                                                                      .mainColor
-                                                                  : B_Colors
-                                                                      .white
-                                                            ],
-                                                            begin: Alignment
-                                                                .topLeft,
-                                                            end: Alignment
-                                                                .bottomRight,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(24),
-                                                        ),
-                                                        child:
-                                                            SingleChildScrollView(
-                                                          child: Text(
-                                                            chats[chatIndex + i]
-                                                                .str,
-                                                            style: TextStyle(
-                                                              color: chats[chatIndex +
-                                                                              i]
-                                                                          .p ==
-                                                                      0
-                                                                  ? B_Colors
-                                                                      .white
-                                                                  : B_Colors
-                                                                      .black,
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    bottom: chats[chatIndex + i]
-                                                                .p ==
-                                                            0
-                                                        ? 0
-                                                        : null,
-                                                    top: chats[chatIndex + i]
-                                                                .p !=
-                                                            0
-                                                        ? 0
-                                                        : null,
-                                                    right: chats[chatIndex + i]
-                                                                .p ==
-                                                            0
-                                                        ? 8
-                                                        : null,
-                                                    left: chats[chatIndex + i]
-                                                                .p ==
-                                                            0
-                                                        ? null
-                                                        : 8,
-                                                    child: CustomPaint(
-                                                      painter:
-                                                          ChatBubbleTriangle(
-                                                              p: chats[
-                                                                      chatIndex +
-                                                                          i]
-                                                                  .p),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-
-                          // メニュー部分
-                          if (openMenu)
-                            Expanded(
-                                child: Column(
-                              children: [
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.1,
-                                ),
-
-                                // ヘルプボタン
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.8,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    color: B_Colors.mainColor,
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                        color: B_Colors.white, width: 3),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            B_Colors.mainColor.withOpacity(0.7),
-                                        offset: Offset(0, 4),
-                                        blurRadius: 16,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return HelpDialog(mode: 'basic', content: 'chat',);
-                                        },
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'おしゃべりのしかた',
-                                      style: TextStyle(
-                                        color: B_Colors.white,
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.05,
-                                ),
-
-                                // ミュート切替ボタン －－－－－－－－－－－－－－－－－－－－－－
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.8,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        B_Colors.subColor,
-                                        B_Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                        color: B_Colors.white, width: 3),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            B_Colors.mainColor.withOpacity(0.7),
-                                        offset: Offset(0, 4),
-                                        blurRadius: 16,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      // トグルして UI を更新
-                                      await _ttsService.toggleMute();
-                                      setState(
-                                          () => _isMuted = _ttsService.isMuted);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _isMuted ? 'おとをださない' : 'おとをだす',
-                                      style: TextStyle(
-                                        color: B_Colors.white,
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.05,
-                                ),
-
-                                // ホームに戻るボタン
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.8,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        B_Colors.subColor,
-                                        B_Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                        color: B_Colors.black, width: 3),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: B_Colors.black.withOpacity(0.7),
-                                        offset: Offset(0, 4),
-                                        blurRadius: 16,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      Navigator.pushNamed(context, '/home');
-                                      await _ttsService.stop();
-                                    }, //画面遷移するときに読み上げ停止
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'ホームにもどる',
-                                      style: TextStyle(
-                                        color: B_Colors.black,
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.05,
-                                ),
-
-                                // 今の問題をやり直すボタン
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.8,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.06,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        B_Colors.subColor,
-                                        B_Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                        color: B_Colors.black, width: 3),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: B_Colors.black.withOpacity(0.7),
-                                        offset: Offset(0, 4),
-                                        blurRadius: 16,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        chats.clear();
-                                        chats.add(chat(0, inputText));
-                                        chatIndex =
-                                            chats.length - 2; // Indexを更新
-                                        openMenu = false;
-                                      });
-                                      AI.sendMessage(
-                                          Content.text('もう一度始めから教えて！'));
-                                      _getAIResponse(inputText);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'もんだいをやりなおす',
-                                      style: TextStyle(
-                                        color: B_Colors.black,
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )),
-
-                          // 入力部分
-                          if (!openMenu)
-                            Column(
-                              children: [
-                                // 矢印ボタンと？ボタン
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // 一つ前のチャットへ
-                                    Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.20,
-                                      height:
-                                          MediaQuery.of(context).size.width *
-                                              0.16,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            chatIndex > -1
-                                                ? B_Colors.accentColor
-                                                : B_Colors.white,
-                                            B_Colors.white
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        border: Border.all(
-                                            color: B_Colors.black, width: 3),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: chatIndex > -1
-                                                ? B_Colors.accentColor
-                                                    .withOpacity(0.7)
-                                                : Colors.transparent,
-                                            offset: Offset(0, 4),
-                                            blurRadius: 10,
-                                          ),
-                                        ],
-                                      ),
-                                      child: IconButton(
-                                        icon: Icon(Icons.arrow_back),
-                                        iconSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.1,
-                                        color: B_Colors.black,
-                                        onPressed: () {
-                                          setState(() {
-                                            if (chatIndex > -1) {
-                                              chatIndex -= 1;
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ),
-
-                                    SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.02),
-
-                                    // ？ボタン
-                                    Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.44,
-                                      height:
-                                          MediaQuery.of(context).size.width *
-                                              0.16,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            B_Colors.accentColor,
-                                            B_Colors.white
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        border: Border.all(
-                                            color: B_Colors.black, width: 3),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: B_Colors.accentColor
-                                                .withOpacity(0.7),
-                                            offset: Offset(0, 4),
-                                            blurRadius: 10,
-                                          ),
-                                        ],
-                                      ),
-                                      child: IconButton(
-                                        icon: Icon(Icons.question_mark),
-                                        iconSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.1,
-                                        color: B_Colors.black,
-                                        onPressed: () async {
-                                          setState(() {
-                                            _isSending = true;
-                                            chats.add(chat(
-                                                0, '？')); // ユーザーのメッセージを会話リストに追加
-                                            chatIndex =
-                                                chats.length - 2; // Indexを更新
-                                          });
-                                          await AI.sendMessage(Content.text(
-                                              '今のところがわからなかったから、もう一度分かりやすく教えて！'));
-                                          _getAIResponse(inputText);
-                                        },
-                                      ),
-                                    ),
-
-                                    SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.02),
-
-                                    // 一つ後のチャットへ
-                                    Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.20,
-                                      height:
-                                          MediaQuery.of(context).size.width *
-                                              0.16,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            chatIndex < chats.length - 2
-                                                ? B_Colors.accentColor
-                                                : B_Colors.white,
-                                            B_Colors.white
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        border: Border.all(
-                                            color: B_Colors.black, width: 3),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: chatIndex < chats.length - 2
-                                                ? B_Colors.accentColor
-                                                    .withOpacity(0.7)
-                                                : Colors.transparent,
-                                            offset: Offset(0, 4),
-                                            blurRadius: 10,
-                                          ),
-                                        ],
-                                      ),
-                                      child: IconButton(
-                                        icon: Icon(Icons.arrow_forward),
-                                        iconSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.1,
-                                        color: B_Colors.black,
-                                        onPressed: () {
-                                          setState(() {
-                                            if (chatIndex < chats.length - 2) {
-                                              chatIndex += 1;
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          cursorColor: _isSending
-                                              ? B_Colors.subColor
-                                              : B_Colors.mainColor,
-                                          controller: _textController,
-                                          enabled: !_isSending,
-                                          decoration: InputDecoration(
-                                            hintText: _isSending
-                                                ? "イオの応答を待っています..."
-                                                : "メッセージを入力...",
-                                            hintStyle: TextStyle(
-                                                color: B_Colors.mainColor),
-                                            enabledBorder: OutlineInputBorder(
-                                              // 未フォーカス時
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide(
-                                                color: _isSending
-                                                    ? B_Colors.white
-                                                    : B_Colors.mainColor,
-                                                width: 3,
-                                              ),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              // フォーカス時
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide(
-                                                color: _isSending
-                                                    ? B_Colors.white
-                                                    : B_Colors.mainColor,
-                                                width: 4,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      FloatingActionButton(
-                                        onPressed:
-                                            _isSending ? null : _sendMessage,
-                                        child: Icon(Icons.send,
-                                            color: _isSending
-                                                ? B_Colors.black
-                                                : B_Colors.white),
-                                        backgroundColor: _isSending
-                                            ? B_Colors.white
-                                            : B_Colors.mainColor,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.05),
-                        ],
-                      ),
-
-                      // チャット終了ボタン
-                      Positioned(
-                        top: MediaQuery.of(context).size.height * 0.30,
-                        left: MediaQuery.of(context).size.width * 0.5,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          height: MediaQuery.of(context).size.height * 0.08,
+                    // 会話部分
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // 問題文を表示するボタン
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: MediaQuery.of(context).size.height * 0.12,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [B_Colors.accentColor, B_Colors.white],
+                              colors: [B_Colors.subColor, B_Colors.white],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(40),
-                            border: Border.all(color: B_Colors.black, width: 3),
+                            border: Border.all(color: B_Colors.mainColor, width: 4),
                             boxShadow: [
                               BoxShadow(
-                                color: B_Colors.accentColor.withOpacity(0.7),
+                                color: B_Colors.mainColor.withOpacity(0.7),
                                 offset: Offset(0, 4),
                                 blurRadius: 10,
                               ),
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: () async {
-                              //フィードバックへ遷移
-                              await _ttsService.stop();
-                              try {
-                                final feedback = await AI.sendMessage(Content.text(
-                                    //簡単なフィードバック
-                                    'これまでの会話でよかったところをほめて！ また別の問題にも一緒に取り組みたくなるようなメッセージを一言で教えてほしいな'));
-                                final feedbackMessage = feedback.text ??
-                                    'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！';
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => MessageDialog(
-                                    feedbackMessage: feedbackMessage,
-                                  ),
-                                  barrierDismissible: false,
-                                );
-                              } catch (e) {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => MessageDialog(
-                                    feedbackMessage:
-                                        'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！',
-                                  ),
-                                  barrierDismissible: false,
-                                );
-                              }
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                                    ),
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width * 0.95,
+                                      height: MediaQuery.of(context).size.height * 0.6,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [A_Colors.white, A_Colors.subColor, A_Colors.white],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: B_Colors.black, width: 4),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.topRight,
+                                              child: IconButton(
+                                                icon: Icon(
+                                                  Icons.close,
+                                                  color: B_Colors.black,
+                                                  size: MediaQuery.of(context).size.width * 0.1,
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Scrollbar(
+                                                thumbVisibility: true,
+                                                child: SingleChildScrollView(
+                                                  child: Text(
+                                                    inputText,
+                                                    style: TextStyle(
+                                                      color: B_Colors.black,
+                                                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius: BorderRadius.circular(50),
                               ),
+                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                             ),
                             child: Text(
-                              'できた！',
+                              inputText,
                               style: TextStyle(
                                 color: B_Colors.black,
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.06,
+                                fontSize: MediaQuery.of(context).size.width * 0.06,
                                 fontWeight: FontWeight.bold,
                               ),
                               overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                              maxLines: 2,
                             ),
                           ),
                         ),
+
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          width: MediaQuery.of(context).size.width,
+                        ),
+
+                        // チャット部分
+                        if (!openMenu)
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                for (int i = (chatIndex > -1 ? 0 : 1); i < 2; i++)
+                                  Positioned(
+                                    top: chats[chatIndex + i].p != 0 ? 0 : null,
+                                    bottom: chats[chatIndex + i].p == 0 ? 0 : null,
+                                    left: 0,
+                                    right: 0,
+                                    child: Opacity(
+                                      opacity: i == 0 ? 0.6 : 1.0,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 24),
+                                        child: Row(
+                                          mainAxisAlignment: chats[chatIndex + i].p == 0 ? MainAxisAlignment.end : MainAxisAlignment.start,
+                                          children: [
+                                            Stack(
+                                              clipBehavior: Clip.none,
+                                              children: [
+                                                ConstrainedBox(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                                    minWidth: MediaQuery.of(context).size.width * 0.2,
+                                                    maxHeight: MediaQuery.of(context).size.height * 0.3,
+                                                  ),
+                                                  child: IntrinsicWidth(
+                                                    child: Container(
+                                                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                                                      margin: EdgeInsets.only(bottom: 8, left: chats[chatIndex + i].p == 0 ? 40 : 8, right: chats[chatIndex + i].p == 0 ? 8 : 40),
+                                                      constraints: BoxConstraints(minWidth: 80),
+                                                      decoration: BoxDecoration(
+                                                        gradient: LinearGradient(
+                                                          colors: [
+                                                            chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.subColor,
+                                                            chats[chatIndex + i].p == 0 ? B_Colors.mainColor : B_Colors.white
+                                                          ],
+                                                          begin: Alignment.topLeft,
+                                                          end: Alignment.bottomRight,
+                                                        ),
+                                                        borderRadius: BorderRadius.circular(24),
+                                                      ),
+                                                      child: SingleChildScrollView(
+                                                        child: Text(
+                                                          chats[chatIndex + i].str,
+                                                          style: TextStyle(
+                                                            color: chats[chatIndex + i].p == 0 ? B_Colors.white : B_Colors.black,
+                                                            fontSize: 20,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  bottom: chats[chatIndex + i].p == 0 ? 0 : null,
+                                                  top: chats[chatIndex + i].p != 0 ? 0 : null,
+                                                  right: chats[chatIndex + i].p == 0 ? 8 : null,
+                                                  left: chats[chatIndex + i].p == 0 ? null : 8,
+                                                  child: CustomPaint(
+                                                    painter: ChatBubbleTriangle(p: chats[chatIndex + i].p),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
+                        // メニュー部分
+                        if (openMenu)
+                          Expanded(
+                              child: Column(
+                            children: [
+                              // ヘルプボタン
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.height * 0.06,
+                                decoration: BoxDecoration(
+                                  color: B_Colors.mainColor,
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: B_Colors.white, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: B_Colors.mainColor.withOpacity(0.7),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 16,
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return HelpDialog(
+                                          mode: 'basic',
+                                          content: 'chat',
+                                        );
+                                      },
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'おしゃべりのしかた',
+                                    style: TextStyle(
+                                      color: B_Colors.white,
+                                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.05,
+                              ),
+
+                              // ミュート切替ボタン －－－－－－－－－－－－－－－－－－－－－－
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.height * 0.06,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [B_Colors.subColor, B_Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: B_Colors.black, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: B_Colors.subColor.withOpacity(0.7),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 16,
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    // トグルして UI を更新
+                                    await _ttsService.toggleMute();
+                                    setState(() => _isMuted = _ttsService.isMuted);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    _isMuted ? 'おとをださない' : 'おとをだす',
+                                    style: TextStyle(
+                                      color: B_Colors.black,
+                                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.05,
+                              ),
+
+                              // 今の問題をやり直すボタン
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.height * 0.06,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [B_Colors.subColor, B_Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: B_Colors.black, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: B_Colors.subColor.withOpacity(0.7),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 16,
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      chats.clear();
+                                      chats.add(chat(0, inputText));
+                                      chatIndex = chats.length - 2; // Indexを更新
+                                      openMenu = false;
+                                    });
+                                    AI.sendMessage(Content.text('もう一度始めから教えて！'));
+                                    _getAIResponse(inputText);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'もんだいをやりなおす',
+                                    style: TextStyle(
+                                      color: B_Colors.black,
+                                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.05,
+                              ),
+
+                              // ホームに戻るボタン
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.height * 0.06,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [B_Colors.subColor, B_Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: B_Colors.black, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: B_Colors.subColor.withOpacity(0.7),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 16,
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    Navigator.pushNamed(context, '/home');
+                                    await _ttsService.stop();
+                                  }, //画面遷移するときに読み上げ停止
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'ホームにもどる',
+                                    style: TextStyle(
+                                      color: B_Colors.black,
+                                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )),
+
+                        // 入力部分
+                        if (!openMenu)
+                          Column(
+                            children: [
+                              // 矢印ボタンと？ボタン
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // 一つ前のチャットへ
+                                  Container(
+                                    width: MediaQuery.of(context).size.width * 0.20,
+                                    height: MediaQuery.of(context).size.width * 0.16,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [chatIndex > -1 ? B_Colors.accentColor : B_Colors.white, B_Colors.white],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(100),
+                                      border: Border.all(color: B_Colors.black, width: 3),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: chatIndex > -1 ? B_Colors.accentColor.withOpacity(0.7) : Colors.transparent,
+                                          offset: Offset(0, 4),
+                                          blurRadius: 10,
+                                        ),
+                                      ],
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.arrow_back),
+                                      iconSize: MediaQuery.of(context).size.width * 0.1,
+                                      color: B_Colors.black,
+                                      onPressed: () {
+                                        setState(() {
+                                          if (chatIndex > -1) {
+                                            chatIndex -= 1;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ),
+
+                                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+
+                                  // ？ボタン
+                                  Container(
+                                    width: MediaQuery.of(context).size.width * 0.44,
+                                    height: MediaQuery.of(context).size.width * 0.16,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [B_Colors.accentColor, B_Colors.white],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(100),
+                                      border: Border.all(color: B_Colors.black, width: 3),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: B_Colors.accentColor.withOpacity(0.7),
+                                          offset: Offset(0, 4),
+                                          blurRadius: 10,
+                                        ),
+                                      ],
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.question_mark),
+                                      iconSize: MediaQuery.of(context).size.width * 0.1,
+                                      color: B_Colors.black,
+                                      onPressed: () async {
+                                        setState(() {
+                                          _isSending = true;
+                                          chats.add(chat(0, '？')); // ユーザーのメッセージを会話リストに追加
+                                          chatIndex = chats.length - 2; // Indexを更新
+                                        });
+                                        await AI.sendMessage(Content.text('今のところがわからなかったから、もう一度分かりやすく教えて！'));
+                                        _getAIResponse(inputText);
+                                      },
+                                    ),
+                                  ),
+
+                                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+
+                                  // 一つ後のチャットへ
+                                  Container(
+                                    width: MediaQuery.of(context).size.width * 0.20,
+                                    height: MediaQuery.of(context).size.width * 0.16,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [chatIndex < chats.length - 2 ? B_Colors.accentColor : B_Colors.white, B_Colors.white],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(100),
+                                      border: Border.all(color: B_Colors.black, width: 3),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: chatIndex < chats.length - 2 ? B_Colors.accentColor.withOpacity(0.7) : Colors.transparent,
+                                          offset: Offset(0, 4),
+                                          blurRadius: 10,
+                                        ),
+                                      ],
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.arrow_forward),
+                                      iconSize: MediaQuery.of(context).size.width * 0.1,
+                                      color: B_Colors.black,
+                                      onPressed: () {
+                                        setState(() {
+                                          if (chatIndex < chats.length - 2) {
+                                            chatIndex += 1;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        cursorColor: _isSending ? B_Colors.subColor : B_Colors.mainColor,
+                                        controller: _textController,
+                                        enabled: !_isSending,
+                                        decoration: InputDecoration(
+                                          hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
+                                          hintStyle: TextStyle(color: B_Colors.mainColor),
+                                          enabledBorder: OutlineInputBorder(
+                                            // 未フォーカス時
+                                            borderRadius: BorderRadius.circular(12),
+                                            borderSide: BorderSide(
+                                              color: _isSending ? B_Colors.white : B_Colors.mainColor,
+                                              width: 3,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            // フォーカス時
+                                            borderRadius: BorderRadius.circular(12),
+                                            borderSide: BorderSide(
+                                              color: _isSending ? B_Colors.white : B_Colors.mainColor,
+                                              width: 4,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    FloatingActionButton(
+                                      onPressed: _isSending ? null : _sendMessage,
+                                      child: Icon(Icons.send, color: _isSending ? B_Colors.black : B_Colors.white),
+                                      backgroundColor: _isSending ? B_Colors.white : B_Colors.mainColor,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                      ],
+                    ),
+
+                    // チャット終了ボタン
+                    Positioned(
+                      top: MediaQuery.of(context).size.height * 0.30,
+                      left: MediaQuery.of(context).size.width * 0.5,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: MediaQuery.of(context).size.height * 0.08,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [B_Colors.accentColor, B_Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(color: B_Colors.black, width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: B_Colors.accentColor.withOpacity(0.7),
+                              offset: Offset(0, 4),
+                              blurRadius: 10,
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            //フィードバックへ遷移
+                            await _ttsService.stop();
+                            try {
+                              final feedback = await AI.sendMessage(Content.text(
+                                  //簡単なフィードバック
+                                  'これまでの会話でよかったところをほめて！ また別の問題にも一緒に取り組みたくなるようなメッセージを一言で教えてほしいな'));
+                              final feedbackMessage = feedback.text ?? 'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！';
+                              showDialog(
+                                context: context,
+                                builder: (context) => MessageDialog(
+                                  feedbackMessage: feedbackMessage,
+                                ),
+                                barrierDismissible: false,
+                              );
+                            } catch (e) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => MessageDialog(
+                                  feedbackMessage: 'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！',
+                                ),
+                                barrierDismissible: false,
+                              );
+                            }
+                            adddatabase();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(
+                            'できた！',
+                            style: TextStyle(
+                              color: B_Colors.black,
+                              fontSize: MediaQuery.of(context).size.width * 0.06,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             );
