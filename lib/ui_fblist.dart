@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
 import 'package:ps_hacku_osaka/widget_fbsheet.dart';
-import 'subject_categories.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'subject_categories.dart';
 
 class feedback {
   //フィードバック一つのデータ
@@ -24,6 +25,7 @@ class FblistPage extends StatefulWidget {
 
 class _FblistPageState extends State<FblistPage> {
   List<feedback> fblist = [];
+
   /*
   List<feedback> fblist = [
     //仮データ
@@ -49,8 +51,8 @@ class _FblistPageState extends State<FblistPage> {
     ),
     feedback(
       3,
-      ['数学','数学'],
-      ['二次関数','極限'],
+      ['数学', '数学'],
+      ['二次関数', '極限'],
       'ccccccccc',
       'f(x)=x²-4x+3において、xが 2 に近づくときのf(x)の極限値',
       'ccccccccc',
@@ -68,7 +70,8 @@ class _FblistPageState extends State<FblistPage> {
       'ddddddddd',
     ),
   ];
-  */
+   */
+
   List<List<String>> allLabels = []; // 教科と分類を統合したリストのリスト(ラベル)
   String? selectedSubject; // 教科ドロップダウン選択
   String? selectedCategory; // 分類ドロップダウン選択
@@ -159,6 +162,7 @@ class _FblistPageState extends State<FblistPage> {
     }
     _filteredFbList = List.from(fblist); // 初期表示は全件
   }
+
   // ▲ ---------- データベース読み取り ---------- ▲ //
 
   // ▼ ---------- 絞り込み処理 ---------- ▼ //
@@ -192,7 +196,8 @@ class _FblistPageState extends State<FblistPage> {
     String filter = '$selectedSubject-';
     filter += selectedCategory ?? 'すべて';
 
-    if(selectedFilter.contains(filter)){ //すでに選択されているなら何もしない
+    if (selectedFilter.contains(filter)) {
+      //すでに選択されているなら何もしない
       //選択できないことを通知
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -202,16 +207,17 @@ class _FblistPageState extends State<FblistPage> {
       );
       return;
     }
-    
+
     //分類選択がすべての場合
     if (selectedCategory == null) {
       //教科が同じものは削除
       selectedFilter.removeWhere((e) => e.contains(selectedSubject!));
       //直前の検索で消されるので'教科-すべて'を追加
       selectedFilter.add(filter);
-    }
-    else { //分類も選択されている場合
-      if (selectedFilter.contains('$selectedSubject-すべて')) {//全てがある場合は追加しない
+    } else {
+      //分類も選択されている場合
+      if (selectedFilter.contains('$selectedSubject-すべて')) {
+        //全てがある場合は追加しない
         //全てがすでに追加されていることを通知
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -220,13 +226,12 @@ class _FblistPageState extends State<FblistPage> {
           ),
         );
         return;
-      }
-      else{
+      } else {
         //全てがないなら追加
         selectedFilter.add(filter);
       }
     }
-    setState((){});
+    setState(() {});
   }
 
   //フィルター削除時の処理
@@ -235,6 +240,7 @@ class _FblistPageState extends State<FblistPage> {
       selectedFilter.remove(filter);
     });
   }
+
   // ▲ ---------- 絞り込み処理 ---------- ▲ //
 
   // ▼ ---------- 絞り込みUI ---------- ▼ //
@@ -396,8 +402,10 @@ class _FblistPageState extends State<FblistPage> {
                         height: 40,
                         alignment: Alignment.center,
                         child: IconButton(
-                          alignment: Alignment.center, //中央に配置↓
-                          padding: EdgeInsets.zero, //デフォルト値があるらしい
+                          alignment: Alignment.center,
+                          //中央に配置↓
+                          padding: EdgeInsets.zero,
+                          //デフォルト値があるらしい
                           color: A_Colors.mainColor,
                           icon: Icon(Icons.add_circle, size: 40),
                           onPressed: addFilter,
@@ -411,7 +419,8 @@ class _FblistPageState extends State<FblistPage> {
                 //絞り込みフィルター表示
                 Container(
                   width: MediaQuery.of(context).size.width * 0.9,
-                  height: MediaQuery.of(context).size.height * 0.11, //フィルター二列が見える状態
+                  height: MediaQuery.of(context).size.height * 0.11,
+                  //フィルター二列が見える状態
                   padding: EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     border: Border.all(
@@ -442,9 +451,12 @@ class _FblistPageState extends State<FblistPage> {
                             color: A_Colors.black,
                             width: 0.5,
                           ),
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // 追加：上下の余計なmarginを削除
-                          labelPadding: EdgeInsets.symmetric(horizontal: 3), // 追加：文字左右の多すぎるpaddingを調整
-                          visualDensity: VisualDensity(horizontal: 1.0, vertical: -3), // 追加：文字上下の多すぎるpaddingを調整
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          // 追加：上下の余計なmarginを削除
+                          labelPadding: EdgeInsets.symmetric(horizontal: 3),
+                          // 追加：文字左右の多すぎるpaddingを調整
+                          visualDensity: VisualDensity(horizontal: 1.0, vertical: -3),
+                          // 追加：文字上下の多すぎるpaddingを調整
                           onDeleted: () => removeFilter(filter),
                         );
                       }).toList(),
@@ -462,7 +474,7 @@ class _FblistPageState extends State<FblistPage> {
                       onPressed: () async {
                         selectedFilter.clear();
                         _filteredFbList = List.from(fblist);
-                        setState((){});
+                        setState(() {});
                         // print(selectedFilter);
                       },
                       child: Text(
@@ -490,6 +502,7 @@ class _FblistPageState extends State<FblistPage> {
       ),
     );
   }
+
   // ▲ ---------- 絞り込みUI ---------- ▲ //
 
   // ▼ ---------- メインのbuildメソッド ---------- ▼ //
@@ -589,6 +602,7 @@ class _FblistPageState extends State<FblistPage> {
       ),
     );
   }
+
   // ▲ ---------- メインのbuildメソッド ---------- ▲ //
 
   // ▼ ---------- 問題文リスト ---------- ▼ //
@@ -603,22 +617,25 @@ class _FblistPageState extends State<FblistPage> {
           color: A_Colors.white,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.95,
-            child: Column(
-              children: [
-                SizedBox(height: 16),
-                for (int i = 0; i < _filteredFbList.length; i++)
-                  Column(
-                    children: [
-                      builderSummery(context, _filteredFbList[i].id, allLabels[i], _filteredFbList[i].summary), //1つの問題文
-                      SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
-                    ],
-                  ),
-                SizedBox(height: 16),
-              ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.95,
+              child: Column(
+                children: [
+                  SizedBox(height: 16),
+                  for (int i = 0; i < _filteredFbList.length; i++)
+                    Column(
+                      children: [
+                        builderSummery(context, _filteredFbList[i].id, allLabels[i], _filteredFbList[i].summary), //1つの問題文
+                        SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
+                      ],
+                    ),
+                  SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         ),
@@ -631,7 +648,7 @@ class _FblistPageState extends State<FblistPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.symmetric(vertical: 16),
-      width: MediaQuery.of(context).size.width * 0.9,
+      width: MediaQuery.of(context).size.width * 0.85,
       decoration: BoxDecoration(
         color: A_Colors.mainColor,
         borderRadius: BorderRadius.circular(24),
@@ -724,6 +741,7 @@ class _FblistPageState extends State<FblistPage> {
       ),
     );
   }
+
   // ▲ ---------- 問題文リスト ---------- ▲ //
 
   // ▼ ---------- フィードバック詳細 ---------- ▼ //
@@ -751,70 +769,71 @@ class _FblistPageState extends State<FblistPage> {
         return Padding(
           padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
           child: GestureDetector(
-              onHorizontalDragEnd: (fbdrag) {
-                if (fbdrag.primaryVelocity != null) {
-                  if (fbdrag.primaryVelocity! < 0 && targetNum < _filteredFbList.length - 1) {
-                    // 右→左 (fblistを1進める)
-                    setState(() {
-                      targetNum++;
-                    });
-                    // 中央配置
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
-                        Scrollable.ensureVisible(
-                          fbSheetKeys[targetNum].currentContext!,
-                          alignment: 0.5,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
-                      }
-                    });
-                  } else if (fbdrag.primaryVelocity! > 0 && targetNum > 0) {
-                    // 左→右 (fblistを1戻る)
-                    // target変更
-                    setState(() {
-                      targetNum--;
-                    });
+            onHorizontalDragEnd: (fbdrag) {
+              if (fbdrag.primaryVelocity != null) {
+                if (fbdrag.primaryVelocity! < 0 && targetNum < _filteredFbList.length - 1) {
+                  // 右→左 (fblistを1進める)
+                  setState(() {
+                    targetNum++;
+                  });
+                  // 中央配置
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
+                      Scrollable.ensureVisible(
+                        fbSheetKeys[targetNum].currentContext!,
+                        alignment: 0.5,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
+                } else if (fbdrag.primaryVelocity! > 0 && targetNum > 0) {
+                  // 左→右 (fblistを1戻る)
+                  // target変更
+                  setState(() {
+                    targetNum--;
+                  });
 
-                    // 中央配置
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
-                        Scrollable.ensureVisible(
-                          fbSheetKeys[targetNum].currentContext!,
-                          alignment: 0.5,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
-                      }
-                    });
-                  }
+                  // 中央配置
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (fbSheetKeys.length > targetNum && fbSheetKeys[targetNum].currentContext != null) {
+                      Scrollable.ensureVisible(
+                        fbSheetKeys[targetNum].currentContext!,
+                        alignment: 0.5,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
                 }
-              },
-              // fbSheetの一覧
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                    for (int i = 0; i < _filteredFbList.length; i++) ...[
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        child: FbSheet(
-                          key: fbSheetKeys[i],
-                          labels: allLabels[0], // 仮指定
-                          problem: _filteredFbList[i].problem,
-                          wrong: _filteredFbList[i].wrong,
-                          wrongpartans: _filteredFbList[i].wrongpartans,
-                          correctans: _filteredFbList[i].correctans,
-                        ),
-                      ),
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                    ]
-                  ],
-                ),
-              ),
+              }
+            },
+            // fbSheetの一覧
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                for (int i = 0; i < _filteredFbList.length; i++) ...[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    child: FbSheet(
+                      key: fbSheetKeys[i],
+                      labels: allLabels[0],
+                      // 仮指定
+                      problem: _filteredFbList[i].problem,
+                      wrong: _filteredFbList[i].wrong,
+                      wrongpartans: _filteredFbList[i].wrongpartans,
+                      correctans: _filteredFbList[i].correctans,
+                    ),
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                ]
+              ],
+            ),
+          ),
         );
       }),
     ));
   }
-  // ▲ ---------- フィードバック詳細 ---------- ▲ //
+// ▲ ---------- フィードバック詳細 ---------- ▲ //
 }
