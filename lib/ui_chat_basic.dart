@@ -73,13 +73,6 @@ class _ChatPageState extends State<ChatBasicPage> {
     また全ての出力において，理解しやすいように多くても出力文字数は80文字以内になるようにしてください.
     口調は友達（小学生）のような感じで大丈夫だよ！
     '''));
-
-    final AIsummary = await AI.sendMessage(Content.text('''
-    先ほどの問題文を10~15文字で要約してください
-    '''));
-    setState(() {
-      this.summary = AIsummary.text ?? '問題文の要約に失敗しました';
-    });
   }
 
   // AIへメッセージを送信
@@ -133,6 +126,20 @@ class _ChatPageState extends State<ChatBasicPage> {
       print('読み上げエラー');
       print(e);
     }
+  }
+
+  //問題文の要約を生成
+  Future<void> _getsummary() async
+  {
+    final AIsummary = await _model.generateContent([Content.text('''
+    $inputText
+    この問題文を10~15文字で要約してください．漢字は使わないでください．
+    余計な出力はいらないので，必ず要約した文章のみ出力してください．
+    ''')]);
+
+    setState(() {
+      summary = AIsummary.text ?? '問題文の要約に失敗しました';
+    });
   }
 
   //データベース初期化
@@ -243,6 +250,8 @@ class _ChatPageState extends State<ChatBasicPage> {
         _getAIResponse(receivedText);
         isFirstSend = true;
         inputText = receivedText;
+
+        _getsummary();
       }
     }
   }
