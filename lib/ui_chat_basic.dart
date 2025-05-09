@@ -607,7 +607,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                     ),
                                   ),
                                   child: Text(
-                                    _isMuted ? 'おとをださない' : 'おとをだす',
+                                    _isMuted ? '読みあげ：おとをださない' : '読みあげ：おとをだす',
                                     style: TextStyle(
                                       color: B_Colors.black,
                                       fontSize: MediaQuery.of(context).size.width * 0.06,
@@ -916,13 +916,14 @@ class _ChatPageState extends State<ChatBasicPage> {
                                   //簡単なフィードバック
                                   'これまでの会話でよかったところをほめて！ また別の問題にも一緒に取り組みたくなるようなメッセージを一言で教えてほしいな'));
                               final feedbackMessage = feedback.text ?? 'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！';
-                              showDialog(
+                              await showDialog(
                                 context: context,
                                 builder: (context) => MessageDialog(
                                   feedbackMessage: feedbackMessage,
                                 ),
                                 barrierDismissible: false,
-                              );
+                              ).then((_) => _ttsService.stop());
+                              await _ttsService.speak(feedbackMessage);
                             } catch (e) {
                               showDialog(
                                 context: context,

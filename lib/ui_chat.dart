@@ -622,7 +622,7 @@ class _ChatPageState extends State<ChatPage> {
                                     ),
                                   ),
                                   child: Text(
-                                    _isMuted ? '音声読み上げ:OFF' : '音声読み上げ:ON',
+                                    _isMuted ? '読み上げ機能:読み上げ中' : '読み上げ機能:ミュート中',
                                     style: TextStyle(
                                       color: A_Colors.black,
                                       fontSize: MediaQuery.of(context).size.width * 0.05,
