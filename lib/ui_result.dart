@@ -20,6 +20,7 @@ class _ResultPageState extends State<ResultPage> {
   String inputText = "";
   String feedbackText = "";
   List<String> labels = [];
+  String summary = "";
   String wrong = "";
   String wrongpartans = "";
   String correctans = "";
@@ -52,7 +53,7 @@ class _ResultPageState extends State<ResultPage> {
 
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();  
+    super.didChangeDependencies();
     // 引数を受け取る
     final Object? args = ModalRoute.of(context)?.settings.arguments;
 
@@ -66,8 +67,9 @@ class _ResultPageState extends State<ResultPage> {
 
         // labelsを取得
         labels = (args['labels'] as List<dynamic>?)
-            ?.map((e) => e.toString())
-            .toList() ?? [];
+                ?.map((e) => e.toString())
+                .toList() ??
+            [];
 
         // inputTextとlabelsを基に類題を検索
         if (inputText.isNotEmpty && labels.isNotEmpty) {
@@ -84,7 +86,7 @@ class _ResultPageState extends State<ResultPage> {
       });
 
       if (feedbackText.isNotEmpty && !_hasReadFeedback) {
-        _hasReadFeedback = true;  //何回も読み上げることの防止
+        _hasReadFeedback = true; //何回も読み上げることの防止
         _ttsService.stop();
         _ttsService.speak(feedbackText); //フィードバックを読み上げ
       }
@@ -94,7 +96,7 @@ class _ResultPageState extends State<ResultPage> {
 
   //RAGによる問題生成
   Future<void> generateRAG() async {
-    try{
+    try {
       //出力制限
       await AI.sendMessage(Content.text('''
       これから伝える各情報ごとに，適切な学習問題の提示をお願いします．
@@ -103,7 +105,7 @@ class _ResultPageState extends State<ResultPage> {
       例えば，数式表現や文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
       '''));
       List<String> list = [];
-      for(int i=0;i<similarQuestions.length;i++){
+      for (int i = 0; i < similarQuestions.length; i++) {
         final response = await AI.sendMessage(Content.text('''
         ユーザーが解いた問題：$inputText
         ユーザーが間違えた部分：$wrong
@@ -113,11 +115,11 @@ class _ResultPageState extends State<ResultPage> {
         list.add(response.text ?? similarQuestions[i]['text']);
       }
       setState(() {
-        for(int i=0;i<similarQuestions.length;i++){
+        for (int i = 0; i < similarQuestions.length; i++) {
           similarQuestions[i]['ragtext'] = list[i];
         }
       });
-    }catch(e){
+    } catch (e) {
       print('AI生成エラー');
       print(e);
     }
@@ -198,7 +200,7 @@ class _ResultPageState extends State<ResultPage> {
               //フィードバックを表示する吹き出し
               FeedbackBubble(
                 feedbackText:
-                feedbackText.isEmpty ? 'フィードバック内容がありません。' : feedbackText,
+                    feedbackText.isEmpty ? 'フィードバック内容がありません。' : feedbackText,
               ),
 
               // ▼ ---------- フィードバックシート ---------- ▼ //
@@ -225,17 +227,19 @@ class _ResultPageState extends State<ResultPage> {
               // フィードバックシート(widget_fbsheet.dart)
               Visibility(
                 visible: _isFbsheetVisible, //ボタンが押されるたびに可視/不可視を切り替え
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    child: Stack(clipBehavior: Clip.none,children: [
-                      FbSheet(
-                        labels: labels,
-                        problem: inputText,
-                        wrong: wrong,
-                        wrongpartans: wrongpartans,
-                        correctans: correctans,
-                        )]),
-                  ),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: Stack(clipBehavior: Clip.none, children: [
+                    FbSheet(
+                      labels: labels,
+                      problem: inputText,
+                      summary: summary,
+                      wrong: wrong,
+                      wrongpartans: wrongpartans,
+                      correctans: correctans,
+                    )
+                  ]),
+                ),
               ),
               // ▲ ---------- フィードバックシート ---------- ▲ //
 
@@ -251,110 +255,153 @@ class _ResultPageState extends State<ResultPage> {
                 ),
                 child: Column(
                   children: [
-                    Center(child: Text('類題も解いてみよう！', style: TextStyle(color: A_Colors.black, fontSize: 16, fontWeight: FontWeight.bold),),),
-                    SizedBox(height: 16,),
+                    Center(
+                      child: Text(
+                        '類題も解いてみよう！',
+                        style: TextStyle(
+                            color: A_Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
                     similarQuestions.isNotEmpty
                         ? Column(
-                      children: similarQuestions.map((item) {
-                        // labelsの部分をList<String>に変換
-                        List<String> itemLabels = (item['labels'] as List<dynamic>)
-                            .map((e) => e.toString())
-                            .toList();
+                            children: similarQuestions.map((item) {
+                              // labelsの部分をList<String>に変換
+                              List<String> itemLabels =
+                                  (item['labels'] as List<dynamic>)
+                                      .map((e) => e.toString())
+                                      .toList();
 
-                        return ElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Dialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                                  ),
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width * 0.95,
-                                    height: MediaQuery.of(context).size.height * 0.6,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [A_Colors.subColor, A_Colors.white],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: A_Colors.white, width: 4),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.topRight,
-                                            child: IconButton(
-                                              icon: Icon(Icons.close, color: A_Colors.white,),
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
+                              return ElevatedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Dialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(12)),
+                                        ),
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.95,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.6,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                A_Colors.subColor,
+                                                A_Colors.white
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
                                             ),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                                color: A_Colors.white,
+                                                width: 4),
                                           ),
-                                          Expanded(
-                                            child: SingleChildScrollView(
-                                              child: Text(
-                                                item['ragtext'],
-                                                style: TextStyle(
-                                                  color: A_Colors.black,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(20),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Align(
+                                                  alignment: Alignment.topRight,
+                                                  child: IconButton(
+                                                    icon: Icon(
+                                                      Icons.close,
+                                                      color: A_Colors.white,
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
                                                 ),
-                                              ),
+                                                Expanded(
+                                                  child: SingleChildScrollView(
+                                                    child: Text(
+                                                      item['ragtext'],
+                                                      style: TextStyle(
+                                                        color: A_Colors.black,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    // ボタンを押した時に渡すデータ
+                                                    final inputText =
+                                                        item['ragtext'];
+                                                    final remainingLabels =
+                                                        itemLabels;
+
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      '/chat',
+                                                      arguments: {
+                                                        'inputText': inputText,
+                                                        'labels':
+                                                            remainingLabels,
+                                                      },
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    'この類題を解く→',
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                      color: A_Colors.mainColor,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          TextButton(
-                                            onPressed: () {
-                                              // ボタンを押した時に渡すデータ
-                                              final inputText = item['ragtext'];
-                                              final remainingLabels = itemLabels;
-
-                                              Navigator.pushNamed(
-                                                context,
-                                                '/chat',
-                                                arguments: {
-                                                  'inputText': inputText,
-                                                  'labels': remainingLabels,
-                                                },
-                                              );
-                                            },child: Text('この類題を解く→',
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(color: A_Colors.mainColor, fontSize: 16,),
-                                          ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),),
-                                );
-                              },
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: A_Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: A_Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Text(
+                                    item['ragtext'],
+                                    style: TextStyle(
+                                      color: A_Colors.black,
+                                      fontSize: 16,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 5,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          )
+                        : const Text(
+                            '類題がありません。',
+                            style: TextStyle(color: A_Colors.black),
+                            textAlign: TextAlign.center,
                           ),
-                          child: Padding(padding: EdgeInsets.all(16),
-                            child: Text(
-                              item['ragtext'],
-                              style: TextStyle(
-                                color: A_Colors.black,
-                                fontSize: 16,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 5,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    )
-                        : const Text('類題がありません。', style: TextStyle(color: A_Colors.black), textAlign: TextAlign.center,),
                   ],
                 ),
               ),
@@ -367,8 +414,8 @@ class _ResultPageState extends State<ResultPage> {
                     backgroundColor: A_Colors.mainColor,
                     foregroundColor: A_Colors.white,
                   ),
-                  onPressed: () async{
-                     _ttsService.stop();   //なぜか止まらない
+                  onPressed: () async {
+                    _ttsService.stop(); //なぜか止まらない
                     // ルート指定でホーム画面へ戻る
                     Navigator.pushNamed(context, '/home');
                   },
