@@ -403,39 +403,97 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ],
                         ),
-
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-
-                        // ライセンスアイコンと利用規約ボタン
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // 利用規約ボタン (iマーク)
-                            const TermsButton(),
-
-                            // ライセンス表示ボタン
-                            IconButton(
-                              icon: Icon(Icons.handshake, size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
-                              onPressed: () {
-                                showLicensePage(
-                                  context: context,
-                                  applicationName: 'AIoLite',
-                                  applicationVersion: '1.0.0',
-                                );
-                              },
-                            ),
-
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-                          ],
-                        ),
                       ],
                     ),
                   ),
+                  // メニューボタン
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.02,
+                    right: MediaQuery.of(context).size.width * 0.06,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [A_Colors.accentColor, A_Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(40),
+                        border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: A_Colors.accentColor.withOpacity(0.7),
+                            offset: Offset(0, 4),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.menu),
+                        iconSize: MediaQuery.of(context).size.height * 0.04,
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                                backgroundColor: _isBasicMode ? B_Colors.background : A_Colors.background,
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-                  // ヘルプを表示するボタン
-                  HelpButton(
-                    mode: _isBasicMode ? 'basic' : 'advanced',
-                    content: 'home',
+                                        Text(
+                                          'メニュー',
+                                          style: TextStyle(
+                                            color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                            fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.07 : MediaQuery.of(context).size.width * 0.06,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+
+                                        SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
+                                        // ヘルプボタン
+                                        HelpButton(
+                                          mode: _isBasicMode ? 'basic' : 'advanced',
+                                          content: 'home',
+                                        ),
+
+                                        SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
+                                        // ミュート切替ボタン
+                                        MuteButton(),
+
+                                        SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
+                                        // 利用規約ボタン
+                                        TermsButton(),
+
+                                        SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
+                                        // ライセンスボタン
+                                        LicenseButton(),
+
+                                        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ]),
               ),
@@ -716,6 +774,7 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
   }
 }
 
+// ↓↓↓↓↓↓ メニュー内ボタン ↓↓↓↓↓↓ //
 // ヘルプを表示するボタン
 class HelpButton extends StatelessWidget {
   final String mode; // モード: 'basic' or 'advanced'
@@ -725,49 +784,39 @@ class HelpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBasic = mode == 'basic';
-    return Positioned(
-      top: MediaQuery.of(context).size.height * 0.02,
-      right: MediaQuery.of(context).size.width * 0.06,
-      child: Container(
-        width: MediaQuery.of(context).size.width * (_isBasicMode ? 0.4 : 0.3),
-        height: MediaQuery.of(context).size.height * 0.06,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [A_Colors.accentColor, A_Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.8,
+      height: _isBasicMode ? MediaQuery.of(context).size.height * 0.06 : MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        color: _isBasicMode ? B_Colors.mainColor : A_Colors.mainColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: A_Colors.white, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: _isBasicMode ? B_Colors.mainColor : A_Colors.mainColor.withOpacity(0.7),
+            offset: Offset(0, 4),
+            blurRadius: 10,
           ),
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: A_Colors.accentColor.withOpacity(0.7),
-              offset: Offset(0, 4),
-              blurRadius: 10,
-            ),
-          ],
-        ),
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            textStyle: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
-            ),
-          ),
-          label: Text(
-            isBasic ? 'つかいかた' : '使い方',
-            style: TextStyle(
-              color: _isBasicMode ? B_Colors.black : A_Colors.black,
-              fontSize: MediaQuery.of(context).size.width * 0.05,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          onPressed: () {
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
             _showHelpDialog(context);
           },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+        child: Text(
+          _isBasicMode ? 'つかいかた' : '使い方',
+          style: TextStyle(
+            color: A_Colors.white,
+            fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.06 : MediaQuery.of(context).size.width * 0.05,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -786,15 +835,130 @@ class HelpButton extends StatelessWidget {
   }
 }
 
+// ミュートを設定するボタン
+class MuteButton extends StatefulWidget {
+  const MuteButton({Key? key}) : super(key: key);
+
+  @override
+  _MuteButtonState createState() => _MuteButtonState();
+}
+
+class _MuteButtonState extends State<MuteButton> {
+  bool _isMuted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMuteSetting();
+  }
+
+  void _loadMuteSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isMuted = prefs.getBool('isMuted') ?? false;
+    });
+  }
+
+  void _toggleMute() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+    await prefs.setBool('isMuted', _isMuted);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = _isMuted
+        ? (_isBasicMode ? 'いま：おんせいOFF' : '現在：音声OFF')
+        : (_isBasicMode ? 'いま：おんせいON' : '現在：音声ON');
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.8,
+      height: _isBasicMode ? MediaQuery.of(context).size.height * 0.06 : MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [A_Colors.subColor, A_Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: _isBasicMode ? B_Colors.subColor.withOpacity(0.7) : A_Colors.black.withOpacity(0.7),
+            offset: Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _toggleMute,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: _isBasicMode ? B_Colors.black : A_Colors.black,
+            fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.06 : MediaQuery.of(context).size.width * 0.05,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // 利用規約を表示するボタン
 class TermsButton extends StatelessWidget {
   const TermsButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.info_outline, size: MediaQuery.of(context).size.width * 0.1, color: A_Colors.white),
-      onPressed: () => _showTermsDialog(context),
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.8,
+      height: _isBasicMode ? MediaQuery.of(context).size.height * 0.06 : MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [A_Colors.subColor, A_Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: _isBasicMode ? B_Colors.subColor.withOpacity(0.7) : A_Colors.black.withOpacity(0.7),
+            offset: Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          _showTermsDialog(context);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+        child: Text(
+          _isBasicMode ? 'りようきやく' : '利用規約',
+          style: TextStyle(
+            color: _isBasicMode ? B_Colors.black : A_Colors.black,
+            fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.06 : MediaQuery.of(context).size.width * 0.05,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 
@@ -885,6 +1049,61 @@ class TermsDialog extends StatelessWidget {
   }
 }
 
+// ライセンスを表示するボタン
+class LicenseButton extends StatelessWidget {
+  const LicenseButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.8,
+      height: _isBasicMode ? MediaQuery.of(context).size.height * 0.06 : MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [A_Colors.subColor, A_Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _isBasicMode ? B_Colors.black : A_Colors.black, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: _isBasicMode ? B_Colors.subColor.withOpacity(0.7) : A_Colors.black.withOpacity(0.7),
+            offset: Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          showLicensePage(
+            context: context,
+            applicationName: 'AIoLite',
+            applicationVersion: '1.0.0',
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+        child: Text(
+          'ライセンス',
+          style: TextStyle(
+            color: _isBasicMode ? B_Colors.black : A_Colors.black,
+            fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.06 : MediaQuery.of(context).size.width * 0.05,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+// ↑↑↑↑↑↑ メニュー内ボタン ↑↑↑↑↑↑ //
+
+// ↓↓↓↓↓↓ 送信方法選択ボタン ↓↓↓↓↓↓ //
 // カメラを起動するボタン
 class CameraButton extends StatelessWidget {
   final Function(String) onImagePicked;
@@ -1149,6 +1368,7 @@ class EmptyTextButton extends StatelessWidget {
     );
   }
 }
+// ↑↑↑↑↑↑ 送信方法選択ボタン ↑↑↑↑↑↑ //
 
 // 問題の送信方法を選択するダイアログ
 void showSendDialog(BuildContext context) {
