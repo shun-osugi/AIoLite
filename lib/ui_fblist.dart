@@ -170,6 +170,11 @@ class _FblistPageState extends State<FblistPage> {
   // ▼ ---------- 絞り込み処理 ---------- ▼ //
   // 絞り込み処理
   void _filterFeedbackList() {
+    if(selectedFilter.isEmpty){//何も絞り込んでないなら
+      _filteredFbList = List.from(fblist);
+      setState((){});
+      return;
+    }
     _filteredFbList.clear();
     //絞り込み検索
     for (int i = 0; i < fblist.length; i++) {
@@ -190,6 +195,7 @@ class _FblistPageState extends State<FblistPage> {
     //   print(_filteredFbList[i].id);
     // }
     // print('jdshfsd');
+    setState((){});
   }
 
   //フィルター追加時の処理
