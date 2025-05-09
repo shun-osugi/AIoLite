@@ -10,6 +10,7 @@ import 'api_service.dart';
 import 'colors.dart';
 import 'tts_service.dart';
 import 'widget_fbsheet.dart';
+import 'utility.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -389,9 +390,9 @@ class _ResultPageState extends State<ResultPage> {
                                                             ),
                                                             Expanded(
                                                               child: SingleChildScrollView(
-                                                                child: Text(
-                                                                  item['ragtext'],
-                                                                  style: TextStyle(
+                                                                child: TextTeX(
+                                                                  text: item['ragtext'],
+                                                                  textStyle: TextStyle(
                                                                     color: A_Colors.black,
                                                                     fontSize: 16,
                                                                     fontWeight: FontWeight.bold,
@@ -440,14 +441,14 @@ class _ResultPageState extends State<ResultPage> {
                                             ),
                                             child: Padding(
                                               padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.01),
-                                              child: Text(
-                                                item['ragtext'],
-                                                style: TextStyle(
+                                              child: TextTeX(
+                                                text: item['ragtext'],
+                                                textStyle: TextStyle(
                                                   color: A_Colors.black,
                                                   fontSize: MediaQuery.of(context).size.width * 0.04,
                                                 ),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 5,
+                                                // overflow: TextOverflow.ellipsis,
+                                                // maxLines: 5,
                                               ),
                                             ),
                                           ),
@@ -539,9 +540,9 @@ class FeedbackBubble extends StatelessWidget {
               color: A_Colors.subColor,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              feedbackText.isEmpty ? 'フィードバック内容がありません。' : feedbackText,
-              style: TextStyle(
+            child: TextTeX(
+              text: feedbackText.isEmpty ? 'フィードバック内容がありません。' : feedbackText,
+              textStyle: TextStyle(
                 color: A_Colors.black,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

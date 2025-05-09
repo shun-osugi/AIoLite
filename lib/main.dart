@@ -23,6 +23,7 @@ import 'ui_chat_basic.dart';
 import 'ui_result.dart';
 import 'ui_statistics.dart';
 import 'widget_help_dialog.dart';
+import 'utility.dart';
 
 bool _isBasicMode = false;
 
@@ -1301,67 +1302,6 @@ class _EditDialogState extends State<EditDialog> {
     super.dispose();
   }
 
-  //通常テキストと，texテキストを分割
-  List<InlineSpan> MixedTextSpans(String text, Color color) {
-    //$..$表現はr''にし，flutterが使える形に変換
-    text = text.replaceAllMapped(RegExp(r'\$(.+?)\$'), (match) {
-      return "r'${match.group(1)}'";
-    });
-    final List<InlineSpan> spans = [];
-    final RegExp pattern = RegExp(r"r'(.*?)'"); //texの構文
-    int currentIndex = 0; //現在の場所
-
-    for (final match in pattern.allMatches(text)) {
-      // texが見つかるところまでは，通常のテキスト部分
-      if (match.start > currentIndex) {
-        spans.add(TextSpan(
-          text: text.substring(currentIndex, match.start),
-          style: TextStyle(
-            color: color,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ));
-      }
-
-      // TeX部分 (r'...') の中身を取り出す
-      final String tex = match.group(1)!;
-      spans.add(WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Math.tex(
-          tex,
-          mathStyle: MathStyle.text,
-          textStyle: TextStyle(
-            color: color,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ));
-
-      currentIndex = match.end; //texの部分まで探索終了
-    }
-
-    // 残りの通常文字列
-    if (currentIndex < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(currentIndex),
-        style: TextStyle(
-          color: color,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ));
-    }
-
-    print('kfksdfsf');
-    for (int i = 0; i < spans.length; i++) {
-      print(spans[i].toPlainText());
-    }
-
-    return spans;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -1431,9 +1371,12 @@ class _EditDialogState extends State<EditDialog> {
                               )
                             : Padding(
                                 padding: EdgeInsets.all(12),
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: MixedTextSpans(_textController.text, _isBasicMode ? B_Colors.black : A_Colors.black),
+                                child: TextTeX(
+                                  text: _textController.text,
+                                  textStyle: TextStyle(
+                                    color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),

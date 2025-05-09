@@ -13,15 +13,11 @@ class TextTeX extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("oskkfjsds");
-    print(text);
     //$..$表現はr''にし，flutterが使える形に変換
     String texttex = text.replaceAllMapped(RegExp(r"(?<!\\)\$(.+?)(?<!\\)\$", dotAll: true), (match) {
       return "r'${match.group(1)}'";
     });
 
-    print("oskkfjsds2");
-    print(texttex);
     final List<InlineSpan> spans = [];
     final RegExp pattern = RegExp(r"r'(.+?)'");//texの構文
     int currentIndex = 0;//現在の場所
@@ -56,12 +52,6 @@ class TextTeX extends StatelessWidget {
         style: textStyle,
       ));
     }
-
-    // TextStyle(
-    //       color: color,
-    //       fontSize: 18,
-    //       fontWeight: FontWeight.bold,
-    //     ),
 
     return RichText(
       text: TextSpan(children: spans),

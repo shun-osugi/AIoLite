@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ps_hacku_osaka/colors.dart';
+import 'utility.dart';
 
 class FbSheet extends StatefulWidget {
   final List<String> labels; //ラベル
@@ -124,9 +125,9 @@ class _FbSheetState extends State<FbSheet> {
                                     child: Scrollbar(
                                       thumbVisibility: true,
                                       child: SingleChildScrollView(
-                                        child: Text(
-                                          widget.problem,
-                                          style: TextStyle(
+                                        child: TextTeX(
+                                          text: widget.problem,
+                                          textStyle: TextStyle(
                                             color: A_Colors.black,
                                             fontSize: MediaQuery.of(context)
                                                     .size
@@ -154,15 +155,15 @@ class _FbSheetState extends State<FbSheet> {
                     ),
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                   ),
-                  child: Text(
-                    widget.summary,
-                    style: TextStyle(
+                  child: TextTeX(
+                    text: widget.summary,
+                    textStyle: TextStyle(
                       color: A_Colors.black,
                       fontSize: MediaQuery.of(context).size.width * 0.05,
                       fontWeight: FontWeight.bold,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
+                    // overflow: TextOverflow.ellipsis,
+                    // maxLines: 2,
                   ),
                 ),
               ),
@@ -302,9 +303,9 @@ class FeedBackCard extends StatelessWidget {
               color: A_Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              content,
-              style: TextStyle(
+            child: TextTeX(
+              text: content,
+              textStyle: TextStyle(
                 color: A_Colors.black,
                 fontSize: 18,
               ),
