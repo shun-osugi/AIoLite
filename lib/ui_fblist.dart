@@ -4,6 +4,7 @@ import 'package:ps_hacku_osaka/widget_fbsheet.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'subject_categories.dart';
+import 'utility.dart';
 
 class feedback {
   //フィードバック一つのデータ
@@ -647,15 +648,15 @@ class _FblistPageState extends State<FblistPage> {
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  summary,
-                  style: TextStyle(
+                child: TextTeX(
+                  text: summary,
+                  textStyle: TextStyle(
                     color: A_Colors.white,
                     fontSize: MediaQuery.of(context).size.width * 0.05,
                     fontWeight: FontWeight.bold,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
+                  // overflow: TextOverflow.ellipsis,
+                  // maxLines: 2,
                 ),
               ),
             ),

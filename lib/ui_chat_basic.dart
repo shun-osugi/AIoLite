@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'colors.dart';
 import 'tts_service.dart';
 import 'widget_help_dialog.dart';
+import 'utility.dart';
 
 class chat {
   int p; //0:自分 1:相手
@@ -399,9 +400,9 @@ class _ChatPageState extends State<ChatBasicPage> {
                                               child: Scrollbar(
                                                 thumbVisibility: true,
                                                 child: SingleChildScrollView(
-                                                  child: Text(
-                                                    inputText,
-                                                    style: TextStyle(
+                                                  child: TextTeX(
+                                                    text: inputText,
+                                                    textStyle: TextStyle(
                                                       color: B_Colors.black,
                                                       fontSize: MediaQuery.of(context).size.width * 0.05,
                                                       fontWeight: FontWeight.bold,
@@ -426,15 +427,15 @@ class _ChatPageState extends State<ChatBasicPage> {
                               ),
                               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                             ),
-                            child: Text(
-                              summary,
-                              style: TextStyle(
+                            child: TextTeX(
+                              text: summary,
+                              textStyle: TextStyle(
                                 color: B_Colors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.06,
                                 fontWeight: FontWeight.bold,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
+                              // overflow: TextOverflow.ellipsis,
+                              // maxLines: 2,
                             ),
                           ),
                         ),
@@ -485,9 +486,9 @@ class _ChatPageState extends State<ChatBasicPage> {
                                                         borderRadius: BorderRadius.circular(24),
                                                       ),
                                                       child: SingleChildScrollView(
-                                                        child: Text(
-                                                          chats[chatIndex + i].str,
-                                                          style: TextStyle(
+                                                        child: TextTeX(
+                                                          text: chats[chatIndex + i].str,
+                                                          textStyle: TextStyle(
                                                             color: chats[chatIndex + i].p == 0 ? B_Colors.white : B_Colors.black,
                                                             fontSize: 20,
                                                             fontWeight: FontWeight.bold,
