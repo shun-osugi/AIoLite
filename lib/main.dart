@@ -15,7 +15,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import 'api_service.dart';
 import 'colors.dart';
-import 'math_popup.dart';
+import 'math_keyboard.dart';
 import 'subject_categories.dart';
 import 'terms_content.dart';
 import 'ui_chat.dart';
@@ -1385,6 +1385,7 @@ class _EditDialogState extends State<EditDialog> {
             });
           },
           child: Stack(
+            clipBehavior: Clip.none,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
@@ -1440,35 +1441,6 @@ class _EditDialogState extends State<EditDialog> {
                       ),
                     ),
 
-                    //ーーーーーーー数式入力セット(ここから)ーーーーーーーー
-                    SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => MathPopup(
-                            onInsert: (latex) {
-                              final selection = _textController.selection;
-                              final newText = _textController.text.replaceRange(
-                                selection.start,
-                                selection.end,
-                                latex,
-                              );
-                              setState(() {
-                                _textController.text = newText;
-                                _textController.selection = TextSelection.collapsed(
-                                  offset: selection.start + latex.length,
-                                );
-                              });
-                              Navigator.pop(context); // MathPopupを閉じる
-                            },
-                          ),
-                        );
-                      },
-                      child: Text("数式・単位を挿入"),
-                    ),
-                    //ーーーーーーー数式入力セット(ここまで)ーーーーーーーー
-
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -1499,6 +1471,82 @@ class _EditDialogState extends State<EditDialog> {
                   ],
                 ),
               ),
+
+              // 数式入力セット
+              if (_hasFocus)
+                Positioned(
+                  bottom: MediaQuery.of(context).viewInsets.bottom - MediaQuery.of(context).size.height * 0.15,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          A_Colors.white,
+                          A_Colors.accentColor,
+                          A_Colors.white
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      border:
+                      Border.all(color: A_Colors.black, width: 2),
+                    ),
+                    child: Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                        ),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            barrierColor: Colors.transparent,
+                            builder: (_) {
+                              return SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.4,
+                                child: MathKeyboard(
+                                  onInsert: (latex) {
+                                    final selection = _textController.selection;
+                                    final newText = _textController.text.replaceRange(
+                                      selection.start,
+                                      selection.end,
+                                      latex,
+                                    );
+                                    setState(() {
+                                      _textController.text = newText;
+                                      _textController.selection = TextSelection.collapsed(
+                                        offset: selection.start + latex.length,
+                                      );
+                                    });
+                                  },
+                                ),
+                              );
+
+                            },
+                          );
+                        },
+                        child: Text(
+                          '数式・単位を入力',
+                          style: TextStyle(
+                            color: A_Colors.black,
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
               // 左上の戻るボタン
               Positioned(
                 top: 24,
