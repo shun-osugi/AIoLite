@@ -78,13 +78,6 @@ class _ChatPageState extends State<ChatPage> {
     中高生（受験生）を対象とするので，必ず最初に「どこまで自力で解けるか解いてみて」などと聞いて，それに伴って会話を進めてください.
     口調は友達のような感じで大丈夫だよ！
     '''));
-
-    final AIsummary = await AI.sendMessage(Content.text('''
-    先ほどの問題文を10~15文字で要約してください
-    '''));
-    setState(() {
-      this.summary = AIsummary.text ?? '問題文の要約に失敗しました';
-    });
   }
 
   // AIへメッセージを送信
@@ -139,6 +132,20 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  //問題文の要約を生成
+  Future<void> _getsummary() async
+  {
+    final AIsummary = await _model.generateContent([Content.text('''
+    $inputText
+    この問題文を10~15文字で要約してください．
+    余計な出力はいらないので，必ず要約した文章のみ出力してください．
+    ''')]);
+
+    setState(() {
+      summary = AIsummary.text ?? '問題文の要約に失敗しました';
+    });
+  }
+
   // 前画面から引数を受け取る
   @override
   void didChangeDependencies() {
@@ -157,6 +164,8 @@ class _ChatPageState extends State<ChatPage> {
         isFirstSend = true;
         inputText = receivedText;
         _isSending = true;
+
+        _getsummary();
       }
 
       // labelsを取得
