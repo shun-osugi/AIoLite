@@ -51,8 +51,9 @@ class MathPopup extends StatelessWidget {
   }
 
   Widget _buildButton(String label, String value) {
+    final displayedText = "r'$value'"; // ← r'' を含めるようにする
     return ElevatedButton(
-      onPressed: () => onInsert(value),
+      onPressed: () => onInsert(displayedText),
       child: Text(label),
     );
   }
