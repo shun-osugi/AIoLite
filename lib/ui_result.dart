@@ -67,10 +67,7 @@ class _ResultPageState extends State<ResultPage> {
         feedbackText = args['feedbackText']?.toString() ?? "";
 
         // labelsを取得
-        labels = (args['labels'] as List<dynamic>?)
-                ?.map((e) => e.toString())
-                .toList() ??
-            [];
+        labels = (args['labels'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
 
         // inputTextとlabelsを基に類題を検索
         if (inputText.isNotEmpty && labels.isNotEmpty) {
@@ -78,6 +75,8 @@ class _ResultPageState extends State<ResultPage> {
         }
         print(similarQuestions);
 
+        // summaryを取得
+        summary = args['summary']?.toString() ?? "";
         // wrongを取得
         wrong = args['wrong']?.toString() ?? "";
         // wrongpartansを取得
@@ -284,6 +283,7 @@ class _ResultPageState extends State<ResultPage> {
                         FbSheet(
                           labels: labels,
                           problem: inputText,
+                          summary: summary,
                           wrong: wrong,
                           wrongpartans: wrongpartans,
                           correctans: correctans,
@@ -510,7 +510,6 @@ class _ResultPageState extends State<ResultPage> {
                     ),
                   ),
                 ],
-
               ),
             );
           },
