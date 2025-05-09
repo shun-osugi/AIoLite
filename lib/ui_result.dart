@@ -20,6 +20,7 @@ class _ResultPageState extends State<ResultPage> {
   String inputText = "";
   String feedbackText = "";
   List<String> labels = [];
+  String summary = "";
   String wrong = "";
   String wrongpartans = "";
   String correctans = "";
@@ -66,7 +67,10 @@ class _ResultPageState extends State<ResultPage> {
         feedbackText = args['feedbackText']?.toString() ?? "";
 
         // labelsを取得
-        labels = (args['labels'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+        labels = (args['labels'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [];
 
         // inputTextとlabelsを基に類題を検索
         if (inputText.isNotEmpty && labels.isNotEmpty) {
@@ -506,6 +510,7 @@ class _ResultPageState extends State<ResultPage> {
                     ),
                   ),
                 ],
+
               ),
             );
           },
