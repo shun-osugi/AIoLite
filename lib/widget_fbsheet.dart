@@ -54,7 +54,8 @@ class _FbSheetState extends State<FbSheet> {
               Container(
                 width: MediaQuery.of(context).size.width * 0.85,
                 height: MediaQuery.of(context).size.height * 0.1,
-                margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.02),
+                margin:
+                    EdgeInsets.all(MediaQuery.of(context).size.width * 0.02),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [A_Colors.subColor, A_Colors.white],
@@ -86,15 +87,21 @@ class _FbSheetState extends State<FbSheet> {
                             height: MediaQuery.of(context).size.height * 0.6,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [A_Colors.white, A_Colors.subColor, A_Colors.white],
+                                colors: [
+                                  A_Colors.white,
+                                  A_Colors.subColor,
+                                  A_Colors.white
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: A_Colors.black, width: 4),
+                              border:
+                                  Border.all(color: A_Colors.black, width: 4),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 12, 24, 24),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
@@ -104,7 +111,9 @@ class _FbSheetState extends State<FbSheet> {
                                       icon: Icon(
                                         Icons.close,
                                         color: A_Colors.black,
-                                        size: MediaQuery.of(context).size.width * 0.1,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.1,
                                       ),
                                       onPressed: () {
                                         Navigator.of(context).pop();
@@ -119,7 +128,10 @@ class _FbSheetState extends State<FbSheet> {
                                           widget.problem,
                                           style: TextStyle(
                                             color: A_Colors.black,
-                                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                                            fontSize: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.04,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -160,19 +172,6 @@ class _FbSheetState extends State<FbSheet> {
                   child: SingleChildScrollView(
                 controller: _scrollController,
                 child: Column(children: [
-                  // 問題文(problem)
-                  ProblemCard(
-                    title: '問題文',
-                    problem: widget.problem,
-                    labels: widget.labels,
-                  ),
-
-                  // ラベル
-                  FeedBackCard(
-                    title: 'ラベル',
-                    content: widget.labels[0],
-                  ),
-
                   // 間違えた部分(wrong)
                   FeedBackCard(
                     title: 'つまづきポイント',
@@ -278,7 +277,7 @@ class ProblemCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           SizedBox(
             height: 8,
           ),
