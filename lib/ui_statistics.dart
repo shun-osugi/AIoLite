@@ -76,6 +76,7 @@ class _StatsPageState extends State<StatsPage> {
   String _selected = '国語';                                //ラベル使用回数ランキング表示で最初に選択してある教科
   late Database _database;
   bool _isLoading = true;                                  //読み込みが終わらない問題の対策
+  bool _hasData = false; //レコードが存在するか
 
   final List<Map<String, int>> _fbbasicList = [];          //basicモードのレコード　{教科：解いた数}の配列
 
@@ -159,12 +160,13 @@ class _StatsPageState extends State<StatsPage> {
 
   //データ集計
   void _calcStats() {
-    //データがなかったらなしと書いたグラフを表示
-    if (_fbList.isEmpty) {
+    _hasData = _fbList.isNotEmpty;
+
+    //データがなかったらグラフを表示しない
+    if (!_hasData) {
       _pieData.clear();
-      _pieData['なし'] = 1;
       _details.clear();
-      _selected = _pieData.keys.first;
+      _selected = "";
       return;
     }
 
@@ -234,7 +236,7 @@ class _StatsPageState extends State<StatsPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              _buildPieArea(isBasicMode),//円グラフと凡例用
+              if (_hasData)_buildPieArea(isBasicMode),//円グラフと凡例用
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               if(!isBasicMode)
                 _buildLabelArea(isBasicMode),//ラベルランキング用
