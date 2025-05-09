@@ -1825,6 +1825,27 @@ class _LabelDialogState extends State<LabelDialog> {
     });
   }
 
+  List<Map<String?, String?>> _getSortedLabelPairs() {
+    List<Map<String?, String?>> pairs = [];
+
+    // ペアを収集
+    for (int i = 0; i < 4; i++) {
+      pairs.add({
+        'subject': selectedSubjects[i],
+        'category': selectedCategories[i],
+      });
+    }
+
+    // nullのペアを後ろに詰める
+    pairs.sort((a, b) {
+      bool aIsNull = a['subject'] == null && a['category'] == null;
+      bool bIsNull = b['subject'] == null && b['category'] == null;
+      return aIsNull == bIsNull ? 0 : (aIsNull ? 1 : -1);
+    });
+
+    return pairs;
+  }
+
   // 教科と分類のドロップダウンペア
   Widget buildDropdownPair(int index) {
     return Row(
@@ -1927,6 +1948,7 @@ class _LabelDialogState extends State<LabelDialog> {
   // ダイアログ部分
   @override
   Widget build(BuildContext context) {
+    List<Map<String?, String?>> sortedPairs = _getSortedLabelPairs();
     return Dialog(
       insetPadding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
       backgroundColor: A_Colors.background,
@@ -1962,15 +1984,18 @@ class _LabelDialogState extends State<LabelDialog> {
                       ),
                     ),
                     child: Column(
-                      children: [
-                        buildDropdownPair(0),
-                        for (int i = 1; i < 4; i++) ...[
-                          Divider(
-                            color: A_Colors.black,
-                          ),
-                          buildDropdownPair(i),
-                        ],
-                      ],
+                      children: List.generate(4, (i) {
+                        selectedSubjects[i] = sortedPairs[i]['subject'];
+                        selectedCategories[i] = sortedPairs[i]['category'];
+                        return i == 0
+                            ? buildDropdownPair(i)
+                            : Column(
+                          children: [
+                            Divider(color: A_Colors.black),
+                            buildDropdownPair(i),
+                          ],
+                        );
+                      }),
                     ),
                   ),
                   SizedBox(height: 20),
