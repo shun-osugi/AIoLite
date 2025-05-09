@@ -4,11 +4,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
 
 import 'colors.dart';
 import 'tts_service.dart';
 import 'widget_help_dialog.dart';
+import 'utility.dart';
 
 class chat {
   int p; //0:自分 1:相手
@@ -71,8 +71,9 @@ class _ChatPageState extends State<ChatPage> {
     これから送る問題を教えて欲しいのですが、解き方を一気に教えられても難しいので順序立てて出力し、こちらの解答を待ってから次にやることを出力するようにしてください.
     こちらが答えるとき，文章で説明し回答しなければならないような質問を，ときどきお願いします.
     そちらが話す文章は読み上げを行うので，そのまま読むとおかしくなるような文字は出力しないでください．
-    例えば，文字効果（**A**などの），絵文字，コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
-    ただし，texの数式表現はOKです．texの表現はr''にしてください．\$.\$のようなマーカー付きのLaTeX形式は使ってはいけません．
+    例えば，文字効果（**A**などの），コードフィールドなどの環境依存のものは無しでプレーンテキストでお願いします.
+    絵文字の使用もしてはいけません．
+    ただし，texの数式表現はOKです．必ず一文字でも\$x\$のように\$で囲んでください．
     出力文字数は,多くても100文字程度になるようにしてください.
     中高生（受験生）を対象とするので，必ず最初に「どこまで自力で解けるか解いてみて」などと聞いて，それに伴って会話を進めてください.
     口調は友達のような感じで大丈夫だよ！
@@ -254,68 +255,6 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  //通常テキストと，texテキストを分割
-  List<InlineSpan> MixedTextSpans(String text, Color color)
-  {
-    //$..$表現はr''にし，flutterが使える形に変換
-    text = text.replaceAllMapped(RegExp(r'\$(.+?)\$'), (match) {
-      return "r'${match.group(1)}'";
-    });
-    final List<InlineSpan> spans = [];
-    final RegExp pattern = RegExp(r"r'(.*?)'");//texの構文
-    int currentIndex = 0;//現在の場所
-
-    for (final match in pattern.allMatches(text)) {
-      // texが見つかるところまでは，通常のテキスト部分
-      if (match.start > currentIndex) {
-        spans.add(TextSpan(
-          text: text.substring(currentIndex, match.start),
-          style: TextStyle(
-            color: color,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ));
-      }
-
-      // TeX部分 (r'...') の中身を取り出す
-      final String tex = match.group(1)!;
-      spans.add(WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Math.tex(
-          tex,
-          mathStyle: MathStyle.text,
-          textStyle: TextStyle(
-            color: color,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ));
-
-      currentIndex = match.end;//texの部分まで探索終了
-    }
-
-    // 残りの通常文字列
-    if (currentIndex < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(currentIndex),
-        style: TextStyle(
-          color: color,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ));
-    }
-
-    print('kfksdfsf');
-    for(int i=0;i<spans.length;i++){
-      print(spans[i].toPlainText());
-    }
-
-    return spans;
-  }
-
   @override
   Widget build(BuildContext context) {
     final safeAreaPadding = MediaQuery.of(context).padding;
@@ -459,9 +398,9 @@ class _ChatPageState extends State<ChatPage> {
                                               child: Scrollbar(
                                                 thumbVisibility: true,
                                                 child: SingleChildScrollView(
-                                                  child: Text(
-                                                    inputText,
-                                                    style: TextStyle(
+                                                  child: TextTeX(
+                                                    text: inputText,
+                                                    textStyle: TextStyle(
                                                       color: A_Colors.black,
                                                       fontSize: MediaQuery.of(context).size.width * 0.04,
                                                       fontWeight: FontWeight.bold,
@@ -486,15 +425,15 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                             ),
-                            child: Text(
-                              summary,
-                              style: TextStyle(
+                            child: TextTeX(
+                              text: summary,
+                              textStyle: TextStyle(
                                 color: A_Colors.black,
                                 fontSize: MediaQuery.of(context).size.width * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
+                              // overflow: TextOverflow.ellipsis,
+                              // maxLines: 2,
                             ),
                           ),
                         ),
@@ -544,9 +483,12 @@ class _ChatPageState extends State<ChatPage> {
                                                     ),
                                                     borderRadius: BorderRadius.circular(24),
                                                   ),
-                                                  child: RichText(//複数に分けて表示
-                                                    text: TextSpan(
-                                                      children: MixedTextSpans(chat.str, chat.p == 0 ? A_Colors.white : A_Colors.black),
+                                                  child: TextTeX(
+                                                    text: chat.str,
+                                                    textStyle: TextStyle(
+                                                      color: chat.p == 0 ? A_Colors.white : A_Colors.black,
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),
