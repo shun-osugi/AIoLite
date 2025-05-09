@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1279,12 +1280,18 @@ class EditDialog extends StatefulWidget {
 class _EditDialogState extends State<EditDialog> {
   late TextEditingController _textController;
   late FocusNode _focusNode;
+  bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.editedText);
     _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      setState(() {
+        _hasFocus = _focusNode.hasFocus;
+      });
+    });
   }
 
   @override
@@ -1292,6 +1299,67 @@ class _EditDialogState extends State<EditDialog> {
     _textController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  //通常テキストと，texテキストを分割
+  List<InlineSpan> MixedTextSpans(String text, Color color) {
+    //$..$表現はr''にし，flutterが使える形に変換
+    text = text.replaceAllMapped(RegExp(r'\$(.+?)\$'), (match) {
+      return "r'${match.group(1)}'";
+    });
+    final List<InlineSpan> spans = [];
+    final RegExp pattern = RegExp(r"r'(.*?)'"); //texの構文
+    int currentIndex = 0; //現在の場所
+
+    for (final match in pattern.allMatches(text)) {
+      // texが見つかるところまでは，通常のテキスト部分
+      if (match.start > currentIndex) {
+        spans.add(TextSpan(
+          text: text.substring(currentIndex, match.start),
+          style: TextStyle(
+            color: color,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ));
+      }
+
+      // TeX部分 (r'...') の中身を取り出す
+      final String tex = match.group(1)!;
+      spans.add(WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Math.tex(
+          tex,
+          mathStyle: MathStyle.text,
+          textStyle: TextStyle(
+            color: color,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ));
+
+      currentIndex = match.end; //texの部分まで探索終了
+    }
+
+    // 残りの通常文字列
+    if (currentIndex < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(currentIndex),
+        style: TextStyle(
+          color: color,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ));
+    }
+
+    print('kfksdfsf');
+    for (int i = 0; i < spans.length; i++) {
+      print(spans[i].toPlainText());
+    }
+
+    return spans;
   }
 
   @override
@@ -1305,13 +1373,16 @@ class _EditDialogState extends State<EditDialog> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         child: GestureDetector(
-          onLongPressStart: (details) {
-            _focusNode.unfocus();
-          },
           onTap: () {
-            FocusScope.of(context).requestFocus(_focusNode);
-            _textController.selection = TextSelection.collapsed(offset: _textController.text.length);
-            setState(() {});
+            setState(() {
+              _hasFocus = true;
+            });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              FocusScope.of(context).requestFocus(_focusNode);
+              _textController.selection = TextSelection.collapsed(
+                offset: _textController.text.length,
+              );
+            });
           },
           child: Stack(
             children: [
@@ -1327,6 +1398,7 @@ class _EditDialogState extends State<EditDialog> {
                     SizedBox(height: 16),
                     Container(
                       height: MediaQuery.of(context).size.height * 0.5,
+                      width: MediaQuery.of(context).size.width * 0.75,
                       decoration: BoxDecoration(
                         color: A_Colors.white,
                         borderRadius: BorderRadius.circular(10),
@@ -1336,24 +1408,35 @@ class _EditDialogState extends State<EditDialog> {
                         ),
                       ),
                       child: SingleChildScrollView(
-                        child: TextField(
-                          controller: _textController,
-                          focusNode: _focusNode,
-                          // FocusNodeを設定
-                          style: TextStyle(
-                              color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: _isBasicMode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
-                          minLines: null,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: A_Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: EdgeInsets.all(12),
-                          ),
-                        ),
+                        child: _hasFocus
+                            ? TextField(
+                                controller: _textController,
+                                focusNode: _focusNode,
+                                style: TextStyle(
+                                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                minLines: null,
+                                maxLines: null,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: A_Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: EdgeInsets.all(12),
+                                ),
+                              )
+                            : Padding(
+                                padding: EdgeInsets.all(12),
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: MixedTextSpans(_textController.text, _isBasicMode ? B_Colors.black : A_Colors.black),
+                                  ),
+                                ),
+                              ),
                       ),
                     ),
 
@@ -1429,6 +1512,7 @@ class _EditDialogState extends State<EditDialog> {
                 ),
               ),
 
+              // ×ボタン(キーボードを閉じる用)
               _focusNode.hasFocus
                   ? Positioned(
                       top: 24,

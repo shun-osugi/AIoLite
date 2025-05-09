@@ -54,7 +54,8 @@ class _FbSheetState extends State<FbSheet> {
               Container(
                 width: MediaQuery.of(context).size.width * 0.85,
                 height: MediaQuery.of(context).size.height * 0.1,
-                margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.02),
+                margin:
+                    EdgeInsets.all(MediaQuery.of(context).size.width * 0.02),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [A_Colors.subColor, A_Colors.white],
@@ -86,15 +87,21 @@ class _FbSheetState extends State<FbSheet> {
                             height: MediaQuery.of(context).size.height * 0.6,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [A_Colors.white, A_Colors.subColor, A_Colors.white],
+                                colors: [
+                                  A_Colors.white,
+                                  A_Colors.subColor,
+                                  A_Colors.white
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: A_Colors.black, width: 4),
+                              border:
+                                  Border.all(color: A_Colors.black, width: 4),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 12, 24, 24),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
@@ -104,7 +111,9 @@ class _FbSheetState extends State<FbSheet> {
                                       icon: Icon(
                                         Icons.close,
                                         color: A_Colors.black,
-                                        size: MediaQuery.of(context).size.width * 0.1,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.1,
                                       ),
                                       onPressed: () {
                                         Navigator.of(context).pop();
@@ -119,7 +128,10 @@ class _FbSheetState extends State<FbSheet> {
                                           widget.problem,
                                           style: TextStyle(
                                             color: A_Colors.black,
-                                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                                            fontSize: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.04,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -160,19 +172,8 @@ class _FbSheetState extends State<FbSheet> {
                   child: SingleChildScrollView(
                 controller: _scrollController,
                 child: Column(children: [
-                  // 問題文(problem)
-                  ProblemCard(
-                    title: '問題文',
-                    problem: widget.problem,
-                    labels: widget.labels,
-                  ),
-
-                  // ラベル
-                  FeedBackCard(
-                    title: 'ラベル',
-                    content: widget.labels[0],
-                  ),
-
+                  // ラベル(labels)
+                  LabelCard(labels: widget.labels),
                   // 間違えた部分(wrong)
                   FeedBackCard(
                     title: 'つまづきポイント',
@@ -199,108 +200,42 @@ class _FbSheetState extends State<FbSheet> {
 }
 
 // 各フィードバック内容
-class ProblemCard extends StatelessWidget {
-  final String title;
-  final String problem;
+class LabelCard extends StatelessWidget {
   final List<String> labels;
 
-  const ProblemCard({
+  const LabelCard({
     Key? key,
-    required this.title,
-    required this.problem,
     required this.labels,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.85,
-      alignment: Alignment.centerLeft,
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [A_Colors.subColor, A_Colors.background],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+    return
+
+        // テキスト枠(ラベル)
+        Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      padding: EdgeInsets.all(3),
+      child: Expanded(
+        child: Wrap(
+          spacing: 5,
+          runSpacing: 5,
+          children: labels.map((label) {
+            return Chip(
+              label: Text(
+                label,
+                style: TextStyle(
+                  color: A_Colors.black,
+                  fontSize: 15,
+                ),
+              ),
+              backgroundColor: A_Colors.subColor,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              labelPadding: EdgeInsets.symmetric(horizontal: 3),
+              visualDensity: VisualDensity(horizontal: 1.0, vertical: -3),
+            );
+          }).toList(),
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: A_Colors.white, width: 3),
-      ),
-      child: Column(
-        children: [
-          // タイトル
-          Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: A_Colors.white,
-                fontSize: MediaQuery.of(context).size.width * 0.05,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    blurRadius: 16,
-                    color: A_Colors.black,
-                    offset: Offset(1, 1),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          SizedBox(
-            height: 8,
-          ),
-
-          // テキスト枠(ラベル)
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            padding: EdgeInsets.all(3),
-            child: Expanded(
-              child: Wrap(
-                spacing: 5,
-                runSpacing: 5,
-                children: labels.map((label) {
-                  return Chip(
-                    label: Text(
-                      label,
-                      style: TextStyle(
-                        color: A_Colors.black,
-                        fontSize: 15,
-                      ),
-                    ),
-                    backgroundColor: A_Colors.white,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    labelPadding: EdgeInsets.symmetric(horizontal: 3),
-                    visualDensity: VisualDensity(horizontal: 1.0, vertical: -3),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-          
-          SizedBox(
-            height: 8,
-          ),
-
-          // テキスト枠(問題文)
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: A_Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              problem,
-              style: TextStyle(
-                color: A_Colors.black,
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
