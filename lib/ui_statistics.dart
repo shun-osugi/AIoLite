@@ -158,6 +158,44 @@ class _StatsPageState extends State<StatsPage> {
     }
   }
 
+  ///ダミーデータを追加　あとで消す
+  Future<void> _insertMockData() async {
+    // すでにデータが入っているなら何もしない
+    final cnt = Sqflite.firstIntValue(
+        await _database.rawQuery('SELECT COUNT(*) FROM feedback'))!;
+    if (cnt > 0) return;
+
+    // ------------------ advanced モード用ダミー ------------------
+    await _database.insert('feedback', {
+      'subject': '国語&&英語',
+      'field'  : '読解&&文法',
+      'problem': '問題文 A',
+      'summary': 'まとめ A',
+      'wrong'  : '誤答 A',
+      'wrongpartans': '正答 A1',
+      'correctans'  : '解説 A',
+    });
+    await _database.insert('feedback', {
+      'subject': '数学',
+      'field'  : '微分&&積分&&確率',
+      'problem': '問題文 B',
+      'summary': 'まとめ B',
+      'wrong'  : '誤答 B',
+      'wrongpartans': '正答 B1',
+      'correctans'  : '解説 B',
+    });
+
+    // ------------------ basic モード用ダミー ------------------
+    await _database.insert('feedbackbasic', {
+      'subject': '国語',
+      'count'  : 4,
+    });
+    await _database.insert('feedbackbasic', {
+      'subject': '数学',
+      'count'  : 2,
+    });
+  }
+
   //データ集計
   void _calcStats() {
     _hasData = _fbList.isNotEmpty;
@@ -209,6 +247,13 @@ class _StatsPageState extends State<StatsPage> {
     _selected = _pieData.keys.first;
   }
 
+  int _problemCount(bool isBasicMode) {
+    if (isBasicMode) {
+      return _fbbasicList.fold<int>(0, (sum, m) => sum + m.values.first);
+    }
+    return _fbList.length;
+  }
+
   //UI
   @override
   Widget build(BuildContext context) {
@@ -236,7 +281,8 @@ class _StatsPageState extends State<StatsPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              if (_hasData)_buildPieArea(isBasicMode),//円グラフと凡例用
+
+              _buildPieArea(isBasicMode),//円グラフと凡例用
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               if(!isBasicMode)
                 _buildLabelArea(isBasicMode),//ラベルランキング用
@@ -279,7 +325,10 @@ class _StatsPageState extends State<StatsPage> {
     ),
     padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
     margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
-    child: Column(
+
+    // ───────── ここから分岐 ─────────
+    child: _hasData
+        ? Column(                                // ← データがあるときは従来の UI
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
@@ -296,7 +345,7 @@ class _StatsPageState extends State<StatsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-            Expanded(child: DonutPieChart(data: _pieData)),
+            Expanded(child: _buildStackedChart(isBasicMode)),
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
             _buildLegend(isBasicMode),
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
@@ -304,7 +353,29 @@ class _StatsPageState extends State<StatsPage> {
         ),
         SizedBox(height: MediaQuery.of(context).size.height * 0.02),
       ],
+    )
+        : Padding(                               // ← データが不足しているとき
+      padding: const EdgeInsets.all(24),
+      child: Text(
+        'データが不足しています',
+        style: _tileTextStyle(context, isBasicMode),
+        textAlign: TextAlign.center,
+      ),
     ),
+  );
+
+  Widget _buildStackedChart(bool isBasicMode) => Stack(
+    alignment: Alignment.center,
+    children: [
+      DonutPieChart(data: _pieData),        // ← 元のグラフそのまま
+      Text(                                  // ← 中央に置く数字
+        '${_problemCount(isBasicMode)}',
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ],
   );
 
   //ラベル使用ランキング部分
