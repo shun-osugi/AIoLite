@@ -24,52 +24,7 @@ class FblistPage extends StatefulWidget {
 }
 
 class _FblistPageState extends State<FblistPage> {
-  // List<feedback> fblist = [];
-
-
-  List<feedback> fblist = [
-    //仮データ
-    feedback(
-      1,
-      ['数学'],
-      ['2次方程式'],
-      '問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文問題文',
-      '2次方程式。x² - 5x + 6 = 0',
-      'aaaaaaaaa',
-      'bbbbbbbbb',
-      'ccccccccc',
-    ),
-    feedback(
-      2,
-      ['数学'],
-      ['2次方程式'],
-      'bbbbbbbb',
-      'x² + 4x + 3 = 0 の解。小さい方',
-      'bbbbbbbb',
-      'bbbbbbbb',
-      'bbbbbbbb',
-    ),
-    feedback(
-      3,
-      ['数学', '数学'],
-      ['二次関数', '極限'],
-      'ccccccccc',
-      'f(x)=x²-4x+3において、xが 2 に近づくときのf(x)の極限値',
-      'ccccccccc',
-      'ccccccccc',
-      'ccccccccc',
-    ),
-    feedback(
-      4,
-      ['数学'],
-      ['二次関数'],
-      'ddddddddd',
-      'y=-x²+4x-3のグラフが開く向き。',
-      'ddddddddd',
-      'ddddddddd',
-      'ddddddddd',
-    ),
-  ];
+  List<feedback> fblist = [];
 
   List<List<String>> allLabels = []; // 教科と分類を統合したリストのリスト(ラベル)
   String? selectedSubject; // 教科ドロップダウン選択

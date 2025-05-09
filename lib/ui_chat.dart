@@ -107,10 +107,13 @@ class _ChatPageState extends State<ChatPage> {
   // AIからのメッセージを取得
   void _getAIResponse(String userMessage) async {
     String aiMessage = '';
+    String speechMessage = '';
     try {
-      final response =
-          await AI.sendMessage(Content.text(userMessage)); // AIにメッセージを送信
+      final response = await AI.sendMessage(Content.text(userMessage)); // AIにメッセージを送信
       aiMessage = response.text ?? 'イオからのメッセージが取得できませんでした'; // AIの返答を取得
+      speechMessage = toSpeechText(aiMessage); //読み上げ用テキスト変換
+      print('メッセージ: $aiMessage');
+      print('メッセージ2: $speechMessage');
       setState(() {
         chats.add(chat(1, aiMessage.trimRight())); // AIの返答を会話リストに追加
         _isSending = false;
@@ -125,7 +128,7 @@ class _ChatPageState extends State<ChatPage> {
     try {
       //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
       await _ttsService.stop();
-      await _ttsService.speak(aiMessage);
+      await _ttsService.speak(speechMessage);
     } catch (e) {
       print('読み上げエラー');
       print(e);
@@ -234,8 +237,7 @@ class _ChatPageState extends State<ChatPage> {
     String subject = 'なし'; //教科（sqliteでは文字列の状態で保存）
     String field = 'なし'; //ラベル（sqliteでは文字列の状態で保存）
     if (labels.isNotEmpty) {
-      List<String> s =
-          labels[0].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
+      List<String> s = labels[0].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
       subject = s[0];
       field = s[1];
       for (int i = 1; i < labels.length; i++) {
@@ -249,8 +251,7 @@ class _ChatPageState extends State<ChatPage> {
     } else {
       for (int i = 0; i < labels.length; i++) {
         //二つ目以降のラベルも保存
-        List<String> s =
-            labels[i].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
+        List<String> s = labels[i].replaceAll(RegExp(r'\s'), '').split('-'); //全ての空白を削除
         subject += '&&'; //教科1&&教科2&&...のフォーマットで保存
         subject += s[0];
         field += '&&'; //ラベル1&&ラベル2&&...のフォーマットで保存
@@ -260,15 +261,7 @@ class _ChatPageState extends State<ChatPage> {
     try {
       // var all = await _database.query('feedback');
       //recordId 主キー
-      await _database.insert('feedback', {
-        'subject': subject,
-        'field': field,
-        'problem': inputText,
-        'summary': summary,
-        'wrong': wrong,
-        'wrongpartans': wrongpartans,
-        'correctans': correctans
-      });
+      await _database.insert('feedback', {'subject': subject, 'field': field, 'problem': inputText, 'summary': summary, 'wrong': wrong, 'wrongpartans': wrongpartans, 'correctans': correctans});
     } catch (e) {
       print("データベース保存エラー");
       print(e);
@@ -285,9 +278,7 @@ class _ChatPageState extends State<ChatPage> {
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: Container(
-                height: MediaQuery.of(context).size.height -
-                    safeAreaPadding.top -
-                    safeAreaPadding.bottom,
+                height: MediaQuery.of(context).size.height - safeAreaPadding.top - safeAreaPadding.bottom,
                 width: MediaQuery.of(context).size.width,
                 child: Stack(
                   children: [
@@ -321,8 +312,7 @@ class _ChatPageState extends State<ChatPage> {
                         top: MediaQuery.of(context).size.height * 0.2,
                         left: MediaQuery.of(context).size.width * 0.05,
                         child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 16),
+                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [A_Colors.subColor, A_Colors.white],
@@ -330,15 +320,13 @@ class _ChatPageState extends State<ChatPage> {
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(40),
-                              border: Border.all(
-                                  color: A_Colors.background, width: 4),
+                              border: Border.all(color: A_Colors.background, width: 4),
                             ),
                             child: Text(
                               'イオ',
                               style: TextStyle(
                                 color: A_Colors.black,
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.05,
+                                fontSize: MediaQuery.of(context).size.width * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
                             ))),
@@ -387,28 +375,19 @@ class _ChatPageState extends State<ChatPage> {
                                 builder: (BuildContext context) {
                                   return Dialog(
                                     shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(12)),
+                                      borderRadius: BorderRadius.all(Radius.circular(12)),
                                     ),
                                     child: Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.95,
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.6,
+                                      width: MediaQuery.of(context).size.width * 0.95,
+                                      height: MediaQuery.of(context).size.height * 0.6,
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
-                                          colors: [
-                                            A_Colors.white,
-                                            A_Colors.subColor,
-                                            A_Colors.white
-                                          ],
+                                          colors: [A_Colors.white, A_Colors.subColor, A_Colors.white],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ),
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                            color: A_Colors.black, width: 4),
+                                        border: Border.all(color: A_Colors.black, width: 4),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(24),
@@ -421,10 +400,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 icon: Icon(
                                                   Icons.close,
                                                   color: A_Colors.black,
-                                                  size: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.1,
+                                                  size: MediaQuery.of(context).size.width * 0.1,
                                                 ),
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
@@ -439,13 +415,8 @@ class _ChatPageState extends State<ChatPage> {
                                                     text: inputText,
                                                     textStyle: TextStyle(
                                                       color: A_Colors.black,
-                                                      fontSize:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.04,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                                                      fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),
@@ -465,15 +436,13 @@ class _ChatPageState extends State<ChatPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 24),
+                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                             ),
                             child: TextTeX(
                               text: summary,
                               textStyle: TextStyle(
                                 color: A_Colors.black,
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.05,
+                                fontSize: MediaQuery.of(context).size.width * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
                               // overflow: TextOverflow.ellipsis,
@@ -499,8 +468,7 @@ class _ChatPageState extends State<ChatPage> {
                                 itemBuilder: (context, index) {
                                   final chat = chats[chats.length - 1 - index];
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 4),
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
                                     child: Row(
                                       mainAxisAlignment: chat.p == 0
                                           ? MainAxisAlignment.end // ユーザー: 右寄せ
@@ -512,45 +480,21 @@ class _ChatPageState extends State<ChatPage> {
                                           children: [
                                             ConstrainedBox(
                                               constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.9,
-                                                minWidth: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.2,
+                                                maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                                minWidth: MediaQuery.of(context).size.width * 0.2,
                                               ),
                                               child: IntrinsicWidth(
                                                 child: Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                      vertical: 8,
-                                                      horizontal: 24),
-                                                  margin: EdgeInsets.only(
-                                                      bottom: 8,
-                                                      left:
-                                                          chat.p == 0 ? 40 : 8,
-                                                      right:
-                                                          chat.p == 0 ? 8 : 40),
-                                                  constraints: BoxConstraints(
-                                                      minWidth: 80),
+                                                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                                                  margin: EdgeInsets.only(bottom: 8, left: chat.p == 0 ? 40 : 8, right: chat.p == 0 ? 8 : 40),
+                                                  constraints: BoxConstraints(minWidth: 80),
                                                   decoration: BoxDecoration(
                                                     gradient: LinearGradient(
-                                                      colors: [
-                                                        chat.p == 0
-                                                            ? A_Colors.mainColor
-                                                            : A_Colors.subColor,
-                                                        chat.p == 0
-                                                            ? A_Colors.mainColor
-                                                            : A_Colors.white
-                                                      ],
+                                                      colors: [chat.p == 0 ? A_Colors.mainColor : A_Colors.subColor, chat.p == 0 ? A_Colors.mainColor : A_Colors.white],
                                                       begin: Alignment.topLeft,
-                                                      end:
-                                                          Alignment.bottomRight,
+                                                      end: Alignment.bottomRight,
                                                     ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            24),
+                                                    borderRadius: BorderRadius.circular(24),
                                                   ),
 
                                                   child: TextTeX(
@@ -572,8 +516,7 @@ class _ChatPageState extends State<ChatPage> {
                                               right: chat.p == 0 ? 8 : null,
                                               left: chat.p == 0 ? null : 8,
                                               child: CustomPaint(
-                                                painter: ChatBubbleTriangle(
-                                                    p: chat.p),
+                                                painter: ChatBubbleTriangle(p: chat.p),
                                               ),
                                             ),
                                           ],
@@ -592,24 +535,20 @@ class _ChatPageState extends State<ChatPage> {
                               child: Column(
                             children: [
                               SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.1,
+                                height: MediaQuery.of(context).size.height * 0.1,
                               ),
 
                               // ヘルプボタン
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.8,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
+                                height: MediaQuery.of(context).size.height * 0.05,
                                 decoration: BoxDecoration(
                                   color: A_Colors.mainColor,
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                      color: A_Colors.white, width: 3),
+                                  border: Border.all(color: A_Colors.white, width: 3),
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          A_Colors.mainColor.withOpacity(0.7),
+                                      color: A_Colors.mainColor.withOpacity(0.7),
                                       offset: Offset(0, 4),
                                       blurRadius: 10,
                                     ),
@@ -638,9 +577,7 @@ class _ChatPageState extends State<ChatPage> {
                                     'チャット画面の使い方',
                                     style: TextStyle(
                                       color: A_Colors.white,
-                                      fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.05,
+                                      fontSize: MediaQuery.of(context).size.width * 0.05,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -648,15 +585,13 @@ class _ChatPageState extends State<ChatPage> {
                               ),
 
                               SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
+                                height: MediaQuery.of(context).size.height * 0.05,
                               ),
 
                               // ミュート切替ボタン －－－－－－－－－－－－－－－－－－－－－－
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.8,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
+                                height: MediaQuery.of(context).size.height * 0.05,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [A_Colors.subColor, A_Colors.white],
@@ -664,8 +599,7 @@ class _ChatPageState extends State<ChatPage> {
                                     end: Alignment.bottomRight,
                                   ),
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                      color: A_Colors.black, width: 3),
+                                  border: Border.all(color: A_Colors.black, width: 3),
                                   boxShadow: [
                                     BoxShadow(
                                       color: A_Colors.black.withOpacity(0.7),
@@ -678,8 +612,7 @@ class _ChatPageState extends State<ChatPage> {
                                   onPressed: () async {
                                     // 音声の ON / OFF をトグル
                                     await _ttsService.toggleMute();
-                                    setState(
-                                        () => _isMuted = _ttsService.isMuted);
+                                    setState(() => _isMuted = _ttsService.isMuted);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
@@ -692,9 +625,7 @@ class _ChatPageState extends State<ChatPage> {
                                     _isMuted ? '音声読み上げ:OFF' : '音声読み上げ:ON',
                                     style: TextStyle(
                                       color: A_Colors.black,
-                                      fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.05,
+                                      fontSize: MediaQuery.of(context).size.width * 0.05,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -702,15 +633,13 @@ class _ChatPageState extends State<ChatPage> {
                               ),
 
                               SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
+                                height: MediaQuery.of(context).size.height * 0.05,
                               ),
 
                               // 今の問題をやり直すボタン
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.8,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
+                                height: MediaQuery.of(context).size.height * 0.05,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [A_Colors.subColor, A_Colors.white],
@@ -718,8 +647,7 @@ class _ChatPageState extends State<ChatPage> {
                                     end: Alignment.bottomRight,
                                   ),
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                      color: A_Colors.black, width: 3),
+                                  border: Border.all(color: A_Colors.black, width: 3),
                                   boxShadow: [
                                     BoxShadow(
                                       color: A_Colors.black.withOpacity(0.7),
@@ -735,8 +663,7 @@ class _ChatPageState extends State<ChatPage> {
                                       chats.add(chat(0, inputText));
                                       openMenu = false;
                                     });
-                                    await AI.sendMessage(
-                                        Content.text('もう一度始めから教えて！'));
+                                    await AI.sendMessage(Content.text('もう一度始めから教えて！'));
                                     _getAIResponse(inputText);
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -750,9 +677,7 @@ class _ChatPageState extends State<ChatPage> {
                                     '今の問題をやりなおす',
                                     style: TextStyle(
                                       color: A_Colors.black,
-                                      fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.05,
+                                      fontSize: MediaQuery.of(context).size.width * 0.05,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -760,15 +685,13 @@ class _ChatPageState extends State<ChatPage> {
                               ),
 
                               SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
+                                height: MediaQuery.of(context).size.height * 0.05,
                               ),
 
                               // ホームに戻るボタン
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.8,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
+                                height: MediaQuery.of(context).size.height * 0.05,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [A_Colors.subColor, A_Colors.white],
@@ -776,8 +699,7 @@ class _ChatPageState extends State<ChatPage> {
                                     end: Alignment.bottomRight,
                                   ),
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                      color: A_Colors.black, width: 3),
+                                  border: Border.all(color: A_Colors.black, width: 3),
                                   boxShadow: [
                                     BoxShadow(
                                       color: A_Colors.black.withOpacity(0.7),
@@ -802,9 +724,7 @@ class _ChatPageState extends State<ChatPage> {
                                     'ホームに戻る',
                                     style: TextStyle(
                                       color: A_Colors.black,
-                                      fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.05,
+                                      fontSize: MediaQuery.of(context).size.width * 0.05,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -821,24 +741,17 @@ class _ChatPageState extends State<ChatPage> {
                               children: [
                                 Expanded(
                                   child: TextField(
-                                    cursorColor: _isSending
-                                        ? A_Colors.subColor
-                                        : A_Colors.mainColor,
+                                    cursorColor: _isSending ? A_Colors.subColor : A_Colors.mainColor,
                                     controller: _textController,
                                     enabled: !_isSending,
                                     decoration: InputDecoration(
-                                      hintText: _isSending
-                                          ? "イオの応答を待っています..."
-                                          : "メッセージを入力...",
-                                      hintStyle:
-                                          TextStyle(color: A_Colors.mainColor),
+                                      hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
+                                      hintStyle: TextStyle(color: A_Colors.mainColor),
                                       enabledBorder: OutlineInputBorder(
                                         // 未フォーカス時
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide(
-                                          color: _isSending
-                                              ? A_Colors.white
-                                              : A_Colors.mainColor,
+                                          color: _isSending ? A_Colors.white : A_Colors.mainColor,
                                           width: 3,
                                         ),
                                       ),
@@ -846,9 +759,7 @@ class _ChatPageState extends State<ChatPage> {
                                         // フォーカス時
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide(
-                                          color: _isSending
-                                              ? A_Colors.white
-                                              : A_Colors.mainColor,
+                                          color: _isSending ? A_Colors.white : A_Colors.mainColor,
                                           width: 4,
                                         ),
                                       ),
@@ -858,20 +769,14 @@ class _ChatPageState extends State<ChatPage> {
                                 SizedBox(width: 8),
                                 FloatingActionButton(
                                   onPressed: _isSending ? null : _sendMessage,
-                                  child: Icon(Icons.send,
-                                      color: _isSending
-                                          ? A_Colors.black
-                                          : A_Colors.white),
-                                  backgroundColor: _isSending
-                                      ? A_Colors.white
-                                      : A_Colors.mainColor,
+                                  child: Icon(Icons.send, color: _isSending ? A_Colors.black : A_Colors.white),
+                                  backgroundColor: _isSending ? A_Colors.white : A_Colors.mainColor,
                                 ),
                               ],
                             ),
                           ),
 
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.05),
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                       ],
                     ),
 
@@ -906,8 +811,7 @@ class _ChatPageState extends State<ChatPage> {
                               final feedback = await AI.sendMessage(Content.text(
                                   //簡単なフィードバック
                                   '今回の会話はどうだった？私が苦手なところとか分かったら短く(50文字程度)一文で教えてほしいな．'));
-                              final feedbackMessage =
-                                  feedback.text ?? 'フィードバックの作成に失敗しました';
+                              final feedbackMessage = feedback.text ?? 'フィードバックの作成に失敗しました';
 
                               //詳細のフィードバックを作成
                               final info = await AI.sendMessage(Content.text('''
@@ -920,9 +824,7 @@ class _ChatPageState extends State<ChatPage> {
                               '''));
 
                               String infotext = info.text ?? '&&なし&&なし&&なし';
-                              final B = infotext
-                                  .substring(infotext.indexOf('&&'))
-                                  .split('&&');
+                              final B = infotext.substring(infotext.indexOf('&&')).split('&&');
                               wrong = B[1]; //間違えてた部分
                               wrongpartans = B[2]; //間違えてた部分の正しい解き方
                               correctans = B[3]; //それの正しい解き方
@@ -974,8 +876,7 @@ class _ChatPageState extends State<ChatPage> {
                             '振り返りへ',
                             style: TextStyle(
                               color: A_Colors.black,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.05,
+                              fontSize: MediaQuery.of(context).size.width * 0.05,
                               fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -1068,4 +969,36 @@ class ChatBubbleTriangle extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+//読み上げ用テキスト変換関数
+String toSpeechText(String inputText) {
+  // 数学系
+  inputText = inputText.replaceAllMapped(RegExp(r'([a-zA-Z0-9])\^([a-zA-Z0-9])'), (m) => '${m[1]}${m[2]}乗');
+  inputText = inputText.replaceAllMapped(RegExp(r'([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)'), (m) => '${m[2]}分の${m[1]}');
+  inputText = inputText.replaceAll(r'=', 'イコール');
+  inputText = inputText.replaceAll(r'-', 'イコール');
+
+  // ネットスラング(笑)
+  inputText = inputText.replaceAll(RegExp(r'\b(w{2,})\b', caseSensitive: false), '笑');
+
+  // 三点リーダ→読点
+  inputText = inputText.replaceAll(RegExp(r'[.…]{2,}'), '、');
+
+  // 絵文字・記号の削除
+  final symbolEmojiRegex = RegExp(
+    r'''[
+    \u2300-\u23FF
+    \u2600-\u26FF
+    \u2700-\u27BF
+    \u{1F300}-\u{1F5FF}
+    \u{1F600}-\u{1F64F}
+    \u{1F680}-\u{1F6FF}
+    \u{1F900}-\u{1F9FF}
+  ]''',
+    unicode: true,
+  );
+  inputText = inputText.replaceAll(symbolEmojiRegex, '');
+  
+  return inputText;
 }
