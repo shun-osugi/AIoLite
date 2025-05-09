@@ -847,34 +847,35 @@ class _ChatPageState extends State<ChatPage> {
                               // print(correctans);
 
                               inputDatabase(); //データベースに追加
-
-                              Navigator.pushNamed(
-                                context,
-                                '/result',
-                                arguments: {
-                                  'inputText': inputText,
-                                  'feedbackText': feedbackMessage,
-                                  'labels': labels,
-                                  'summary': summary,
-                                  'wrong': wrong,
-                                  'wrongpartans': wrongpartans,
-                                  'correctans': correctans,
-                                },
-                              );
+                              
+                              await showDialog(
+                                context: context,
+                                builder: (context) => MessageDialog(
+                                  inputText: inputText,
+                                  feedbackMessage: feedbackMessage,
+                                  labels: labels,
+                                  summary: summary,
+                                  wrong: wrong,
+                                  wrongpartans: wrongpartans,
+                                  correctans: correctans,
+                                ),
+                                barrierDismissible: false,
+                              ).then((_) => _ttsService.stop());
+                              await _ttsService.speak(feedbackMessage);
                             } catch (e) {
-                              Navigator.pushNamed(
-                                context,
-                                '/result',
-                                arguments: {
-                                  'inputText': inputText,
-                                  'feedbackText': 'フィードバックの作成に失敗しました',
-                                  'labels': labels,
-                                  'summary': summary,
-                                  'wrong': wrong,
-                                  'wrongpartans': wrongpartans,
-                                  'correctans': correctans,
-                                },
-                              );
+                              await showDialog(
+                                context: context,
+                                builder: (context) => MessageDialog(
+                                  inputText: inputText,
+                                  feedbackMessage: 'フィードバックで苦手なところを確認しよう！',
+                                  labels: labels,
+                                  summary: summary,
+                                  wrong: wrong,
+                                  wrongpartans: wrongpartans,
+                                  correctans: correctans,
+                                ),
+                                barrierDismissible: false,
+                              ).then((_) => _ttsService.stop());
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -885,7 +886,7 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                           ),
                           child: Text(
-                            '振り返りへ',
+                            '解けた！',
                             style: TextStyle(
                               color: A_Colors.black,
                               fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -1013,4 +1014,184 @@ String toSpeechText(String inputText) {
   inputText = inputText.replaceAll(symbolEmojiRegex, '');
   
   return inputText;
+}
+
+class MessageDialog extends StatelessWidget {
+  final String inputText;
+  final String feedbackMessage;
+  final List<String> labels;
+  final String summary;
+  final String wrong;
+  final String wrongpartans;
+  final String correctans;
+  final String modelPath;
+
+  const MessageDialog({
+    super.key,
+    required this.inputText,
+    required this.feedbackMessage,
+    required this.labels,
+    required this.summary,
+    required this.wrong,
+    required this.wrongpartans,
+    required this.correctans,
+    this.modelPath = 'assets/avatar0.glb',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      child: Container(
+        width: size.width * 0.95,
+        height: size.height * 0.6,
+        decoration: BoxDecoration(
+          color: A_Colors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: A_Colors.accentColor, width: 4),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // アバター表示
+              SizedBox(
+                height: size.height * 0.2,
+                child: ModelViewer(
+                  src: modelPath,
+                  alt: 'A 3D model of AI avatar',
+                  cameraOrbit: "0deg 90deg 0deg",
+                  ar: false,
+                  autoRotate: false,
+                  disableZoom: true,
+                  disableTap: true,
+                  cameraControls: false,
+                  interactionPrompt: null,
+                  interactionPromptThreshold: 0,
+                  autoPlay: true,
+                  animationName: 'hello',
+                ),
+              ),
+
+              // 一言メッセージ
+              SizedBox(
+                height: size.height * 0.26,
+                child: SingleChildScrollView(
+                  child: FeedbackBubble(feedbackText: feedbackMessage),
+                ),
+              ),
+
+              //ホーム画面に戻るボタン
+              SizedBox(
+                width: size.width * 0.9,
+                height: size.height * 0.05,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: A_Colors.mainColor,
+                    foregroundColor: A_Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/result',
+                      arguments: {
+                        'inputText': inputText,
+                        'feedbackText': feedbackMessage,
+                        'labels': labels,
+                        'summary': summary,
+                        'wrong': wrong,
+                        'wrongpartans': wrongpartans,
+                        'correctans': correctans,
+                      },
+                    );
+                  },
+                  child: Text(
+                    'フィードバックへ',
+                    style: TextStyle(
+                      color: A_Colors.white,
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FeedbackBubble extends StatelessWidget {
+  final String feedbackText;
+
+  FeedbackBubble({required this.feedbackText});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 吹き出しの本体
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: A_Colors.subColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              feedbackText,
+              style: TextStyle(
+                color: A_Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // 吹き出しの上に表示する三角形
+          Positioned(
+            top: -10,
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: CustomPaint(
+                size: const Size(40, 20),
+                painter: TrianglePainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = A_Colors.subColor;
+
+    final Path path = Path()
+      ..moveTo(size.width / 2, 0) // 三角形の頂点（中央上）
+      ..lineTo(0, size.height) // 左下
+      ..lineTo(size.width, size.height) // 右下
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }
