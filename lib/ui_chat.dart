@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'colors.dart';
 import 'tts_service.dart';
@@ -64,6 +65,7 @@ class _ChatPageState extends State<ChatPage> {
     AI = _model.startChat();
     _initAsync();
     _initDatabase();
+    _loadMuteSetting();
   }
 
   Future<void> _initAsync() async {
@@ -266,6 +268,14 @@ class _ChatPageState extends State<ChatPage> {
       print("データベース保存エラー");
       print(e);
     }
+  }
+
+  void _loadMuteSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isMuted = prefs.getBool('isMuted') ?? false;
+    });
+    if(_isMuted) _ttsService.toggleMute();
   }
 
   @override
@@ -613,6 +623,8 @@ class _ChatPageState extends State<ChatPage> {
                                     // 音声の ON / OFF をトグル
                                     await _ttsService.toggleMute();
                                     setState(() => _isMuted = _ttsService.isMuted);
+                                    final prefs = await SharedPreferences.getInstance();
+                                    await prefs.setBool('isMuted', _isMuted);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
@@ -622,7 +634,7 @@ class _ChatPageState extends State<ChatPage> {
                                     ),
                                   ),
                                   child: Text(
-                                    _isMuted ? '読み上げ機能:読み上げ中' : '読み上げ機能:ミュート中',
+                                    _isMuted ? '現在：読み上げOFF' : '現在：読み上げON',
                                     style: TextStyle(
                                       color: A_Colors.black,
                                       fontSize: MediaQuery.of(context).size.width * 0.05,
