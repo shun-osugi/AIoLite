@@ -135,6 +135,20 @@ class _ChatPageState extends State<ChatBasicPage> {
     }
   }
 
+  //問題文の要約を生成
+  Future<void> _getsummary() async
+  {
+    final AIsummary = await _model.generateContent([Content.text('''
+    $inputText
+    この問題文を10~15文字で要約してください．
+    余計な出力はいらないので，必ず要約した文章のみ出力してください．
+    ''')]);
+
+    setState(() {
+      summary = AIsummary.text ?? '問題文の要約に失敗しました';
+    });
+  }
+
   //データベース初期化
   Future<void> _initDatabase() async {
     // データベースをオープン（存在しない場合は作成）
@@ -243,6 +257,8 @@ class _ChatPageState extends State<ChatBasicPage> {
         _getAIResponse(receivedText);
         isFirstSend = true;
         inputText = receivedText;
+
+        _getsummary();
       }
     }
   }
