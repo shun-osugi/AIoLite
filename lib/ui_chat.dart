@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'tts_service.dart';
 import 'widget_help_dialog.dart';
 import 'utility.dart';
+import 'math_keyboard.dart';
 
 class chat {
   int p; //0:自分 1:相手
@@ -42,6 +43,9 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  late FocusNode _focusNode;
+  bool _hasFocus = false;
+
   List<chat> chats = []; //会話リスト
 
   // AIモデル
@@ -66,6 +70,19 @@ class _ChatPageState extends State<ChatPage> {
     _initAsync();
     _initDatabase();
     _loadMuteSetting();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      setState(() {
+        _hasFocus = _focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _initAsync() async {
@@ -745,6 +762,89 @@ class _ChatPageState extends State<ChatPage> {
                             ],
                           )),
 
+                        // 数式入力セット
+                        if (_hasFocus)
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  A_Colors.white,
+                                  A_Colors.accentColor,
+                                  A_Colors.white
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                              border:
+                              Border.all(color: A_Colors.black, width: 2),
+                            ),
+                            child: Center(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    barrierColor: Colors.transparent,
+                                    builder: (_) {
+                                      return Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: Padding(
+                                            padding: EdgeInsets.all(16),
+                                            child: Container(
+                                              height: MediaQuery.of(context).size.height * 0.4,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(16),
+                                                border:
+                                                Border.all(color: A_Colors.black, width: 2),
+                                              ),
+                                              child: MathKeyboard(
+                                                onInsert: (latex) {
+                                                  final selection = _textController.selection;
+                                                  final newText = _textController.text.replaceRange(
+                                                    selection.start,
+                                                    selection.end,
+                                                    latex,
+                                                  );
+                                                  setState(() {
+                                                    _textController.text = newText;
+                                                    _textController.selection = TextSelection.collapsed(
+                                                      offset: selection.start + latex.length,
+                                                    );
+                                                  });
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Text(
+                                  '数式・単位を入力',
+                                  style: TextStyle(
+                                    color: A_Colors.black,
+                                    fontSize: MediaQuery.of(context).size.width * 0.04,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
                         // 入力部分
                         if (!openMenu)
                           Padding(
@@ -755,6 +855,7 @@ class _ChatPageState extends State<ChatPage> {
                                   child: TextField(
                                     cursorColor: _isSending ? A_Colors.subColor : A_Colors.mainColor,
                                     controller: _textController,
+                                    focusNode: _focusNode,
                                     enabled: !_isSending,
                                     decoration: InputDecoration(
                                       hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
