@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:characters/characters.dart';
 
-const String kVoiceVoxApiKey = 'AIzaSyAYHREhSflQFLkhUV4oGrLEIUI-M0m2i34';
+const String kVoiceVoxApiKey = 'G9705-F_55279-q';
 
 /// VoiceVox でテキストを読み上げるサービス
 class TTSService {
