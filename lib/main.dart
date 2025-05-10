@@ -1868,6 +1868,12 @@ class _LabelDialogState extends State<LabelDialog> {
 
   // 教科と分類のドロップダウンペア
   Widget buildDropdownPair(int index) {
+    final selectedPairs = List.generate(4, (i) {
+      if (selectedSubjects[i] != null && selectedCategories[i] != null) {
+        return "${selectedSubjects[i]} - ${selectedCategories[i]}";
+      }
+      return null;
+    }).whereType<String>().toList();
     return Row(
       children: [
         Container(
@@ -1947,7 +1953,17 @@ class _LabelDialogState extends State<LabelDialog> {
                       style: TextStyle(color: A_Colors.black),
                     ), // デフォルトのnull選択肢
                   ),
-                  ...(subjectCategories[selectedSubjects[index]] ?? []).map((String category) {
+                  ...(subjectCategories[selectedSubjects[index]] ?? []).where((category) {
+                    final selectedPairs = List.generate(4, (i) {
+                      if (selectedSubjects[i] != null && selectedCategories[i] != null) {
+                        return "${selectedSubjects[i]} - ${selectedCategories[i]}";
+                      }
+                      return null;
+                    }).whereType<String>().toList();
+
+                    final currentPair = "${selectedSubjects[index]} - $category";
+                    return !selectedPairs.contains(currentPair) || selectedCategories[index] == category;
+                  }).map((String category) {
                     return DropdownMenuItem<String>(
                       value: category,
                       child: Text(
