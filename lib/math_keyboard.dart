@@ -69,7 +69,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                   ),
                   child: SizedBox(
                     width: currentTab == 0
-                        ? MediaQuery.of(context).size.width * 0.24
+                        ? MediaQuery.of(context).size.width * 0.2
                         : MediaQuery.of(context).size.width * 0.12,
                     child: Text(
                       '123',
@@ -105,7 +105,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                   ),
                   child: SizedBox(
                     width: currentTab == 1
-                        ? MediaQuery.of(context).size.width * 0.24
+                        ? MediaQuery.of(context).size.width * 0.2
                         : MediaQuery.of(context).size.width * 0.12,
                     child: Text(
                       'f(x)',
@@ -141,7 +141,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                   ),
                   child: SizedBox(
                     width: currentTab == 2
-                        ? MediaQuery.of(context).size.width * 0.24
+                        ? MediaQuery.of(context).size.width * 0.2
                         : MediaQuery.of(context).size.width * 0.12,
                     child: Text(
                       'm/s',
@@ -177,7 +177,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                   ),
                   child: SizedBox(
                     width: currentTab == 3
-                        ? MediaQuery.of(context).size.width * 0.24
+                        ? MediaQuery.of(context).size.width * 0.2
                         : MediaQuery.of(context).size.width * 0.12,
                     child: Text(
                       '?',
