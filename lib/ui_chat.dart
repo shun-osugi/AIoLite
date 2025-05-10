@@ -485,7 +485,7 @@ class _ChatPageState extends State<ChatPage> {
                                   Expanded(
                                     flex: 1,
                                     child: Icon(
-                                      Icons.add,
+                                      Icons.zoom_out_map,
                                       color: A_Colors.black,
                                       size: MediaQuery.of(context).size.width * 0.08,
                                     ),

@@ -670,7 +670,7 @@ class _FblistPageState extends State<FblistPage> {
               Expanded(
                 flex: 1,
                 child: Icon(
-                  Icons.add,
+                  Icons.zoom_in,
                   color: A_Colors.white,
                   size: MediaQuery.of(context).size.width * 0.08,
                 ),
