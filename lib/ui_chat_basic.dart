@@ -607,7 +607,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                     ),
                                   ),
                                   child: Text(
-                                    _isMuted ? '読みあげ：おとをださない' : '読みあげ：おとをだす',
+                                    _isMuted ? '読みあげ：音をださない' : '読みあげ：音をだす',
                                     style: TextStyle(
                                       color: B_Colors.black,
                                       fontSize: MediaQuery.of(context).size.width * 0.06,
