@@ -102,8 +102,9 @@ class _FblistPageState extends State<FblistPage> {
       final records = await _database.query('feedback') as List<Map<String, dynamic>>;
        // subjectとfieldを取り出してlabelsを生成
       for (int i = 0; i < records.length; i++) { 
-        List<String> subjects = records[i]['subject'].split('&&'); // subject取り出し
-        List<String> fields = records[i]['subject'].split('&&');  // field取り出し
+        List<String> subjects = records[i]['subject'].split('&&'); // subject取り
+        List<String> fields = records[i]['field'].split('&&');  // field取り出し
+        List<List<String>> allLabels = [];  // labelのリスト
         // ラベルの生成
         List<String> tmpLabel = [];
         int labelLength = subjects.length < fields.length ? subjects.length : fields.length;

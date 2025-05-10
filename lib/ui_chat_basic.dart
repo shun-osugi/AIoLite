@@ -123,9 +123,13 @@ class _ChatPageState extends State<ChatBasicPage> {
   // AIからのメッセージを取得
   void _getAIResponse(String userMessage) async {
     String aiMessage = '';
+    String speechMessage = '';
     try {
       final response = await AI.sendMessage(Content.text(userMessage)); // AIにメッセージを送信
       aiMessage = (response.text ?? 'イオからのメッセージが取得できませんでした').trim(); // AIの返答を取得
+      speechMessage = toSpeechText(aiMessage); //読み上げ用テキスト変換
+      print('メッセージ: $aiMessage');
+      print('メッセージ2: $speechMessage');
       setState(() {
         chats.add(chat(1, aiMessage)); // AIの返答を会話リストに追加
         chatIndex = chats.length - 2; // Indexを更新
@@ -141,7 +145,7 @@ class _ChatPageState extends State<ChatBasicPage> {
     try {
       //AI側のメッセージを読み上げ（新しいメッセージがきたら新しい方を読み上げはじめる）
       await _ttsService.stop();
-      await _ttsService.speak(aiMessage);
+      await _ttsService.speak(speechMessage);
     } catch (e) {
       print('読み上げエラー');
       print(e);
@@ -1165,6 +1169,46 @@ class ChatBubbleTriangle extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
+//読み上げ用テキスト変換関数
+//読み上げ用テキスト変換関数
+String toSpeechText(String inputText) {
+  // 数学系
+  inputText = inputText.replaceAllMapped(RegExp(r'([a-zA-Z0-9])\^([a-zA-Z0-9])'), (m) => '${m[1]}${m[2]}乗');
+  inputText = inputText.replaceAllMapped(RegExp(r'([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)'), (m) => '${m[2]}分の${m[1]}');
+  inputText = inputText.replaceAll(r'=', 'イコール');
+  inputText = inputText.replaceAll(r'-', 'マイナス');
+
+  // ~形
+  inputText = inputText.replaceAll('現在形', '現在けい');
+  inputText = inputText.replaceAll('過去形', '過去けい');
+  inputText = inputText.replaceAll('進行形', '進行けい');
+
+  // www → 笑
+  inputText = inputText.replaceAll(RegExp(r'\b(w{2,})\b', caseSensitive: false), '笑');
+
+  // 記号
+  inputText = inputText.replaceAll(RegExp(r'[.…]{2,}'), ''); // 3点
+  inputText = inputText.replaceAll(RegExp(r'"'), ''); // アスタリスク
+  inputText = inputText.replaceAll(RegExp(r':'), ''); // コロン
+
+  // 絵文字の削除
+  final symbolEmojiRegex = RegExp(
+    r'''
+  (?:[\u2300-\u23FF]|
+     [\u2600-\u26FF]|
+     [\u2700-\u27BF]|
+     \u{1F300}-\u{1F5FF}|
+     \u{1F600}-\u{1F64F}|
+     \u{1F680}-\u{1F6FF}|
+     \u{1F900}-\u{1F9FF}
+    )
+  ''',
+    unicode: true,
+  );
+  inputText = inputText.replaceAll(symbolEmojiRegex, '');
+
+  return inputText;
+}
 class MessageDialog extends StatelessWidget {
   final String feedbackMessage;
   final String modelPath;

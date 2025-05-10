@@ -155,13 +155,14 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   //問題文の要約を生成
-  Future<void> _getsummary() async
-  {
-    final AIsummary = await _model.generateContent([Content.text('''
+  Future<void> _getsummary() async {
+    final AIsummary = await _model.generateContent([
+      Content.text('''
     $inputText
     この問題文を10~15文字で要約してください．
     余計な出力はいらないので，必ず要約した文章のみ出力してください．
-    ''')]);
+    ''')
+    ]);
 
     setState(() {
       summary = AIsummary.text ?? '問題文の要約に失敗しました';
@@ -292,7 +293,7 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _isMuted = prefs.getBool('isMuted') ?? false;
     });
-    if(_isMuted) _ttsService.toggleMute();
+    if (_isMuted) _ttsService.toggleMute();
   }
 
   @override
@@ -396,96 +397,101 @@ class _ChatPageState extends State<ChatPage> {
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Dialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                                    ),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width * 0.95,
-                                      height: MediaQuery.of(context).size.height * 0.6,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [A_Colors.white, A_Colors.subColor, A_Colors.white],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: A_Colors.black, width: 4),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(Radius.circular(12)),
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(24),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Align(
-                                              alignment: Alignment.topRight,
-                                              child: IconButton(
-                                                icon: Icon(
-                                                  Icons.close,
-                                                  color: A_Colors.black,
-                                                  size: MediaQuery.of(context).size.width * 0.1,
+                                      child: Container(
+                                        width: MediaQuery.of(context).size.width * 0.95,
+                                        height: MediaQuery.of(context).size.height * 0.6,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [A_Colors.white, A_Colors.subColor, A_Colors.white],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: A_Colors.black, width: 4),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              Align(
+                                                alignment: Alignment.topRight,
+                                                child: IconButton(
+                                                  icon: Icon(
+                                                    Icons.close,
+                                                    color: A_Colors.black,
+                                                    size: MediaQuery.of(context).size.width * 0.1,
+                                                  ),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
                                                 ),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
                                               ),
-                                            ),
-                                            Expanded(
-                                              child: Scrollbar(
-                                                thumbVisibility: true,
-                                                child: SingleChildScrollView(
-                                                  child: TextTeX(
-                                                    text: inputText,
-                                                    textStyle: TextStyle(
-                                                      color: A_Colors.black,
-                                                      fontSize: MediaQuery.of(context).size.width * 0.04,
-                                                      fontWeight: FontWeight.bold,
+                                              Expanded(
+                                                child: Scrollbar(
+                                                  thumbVisibility: true,
+                                                  child: SingleChildScrollView(
+                                                    child: TextTeX(
+                                                      text: inputText,
+                                                      textStyle: TextStyle(
+                                                        color: A_Colors.black,
+                                                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
+                                    );
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    flex: 6,
+                                    child: TextTeX(
+                                      text: summary,
+                                      textStyle: TextStyle(
+                                        color: A_Colors.black,
+                                        fontSize: MediaQuery.of(context).size.width * 0.05,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      // overflow: TextOverflow.ellipsis,
+                                      // maxLines: 2,
                                     ),
-                                  );
-                                },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                            ),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Expanded(
-                      flex: 6,
-                            child: TextTeX(
-                              text: summary,
-                              textStyle: TextStyle(
-                                color: A_Colors.black,
-                                fontSize: MediaQuery.of(context).size.width * 0.05,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              // overflow: TextOverflow.ellipsis,
-                              // maxLines: 2,
-                            ),),Expanded(
-                      flex: 1,
-                      child: Icon(
-                        Icons.add,
-                        color: A_Colors.black,
-                        size: MediaQuery.of(context).size.width * 0.08,
-                      ),
-                    ),],)
-                          ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Icon(
+                                      Icons.add,
+                                      color: A_Colors.black,
+                                      size: MediaQuery.of(context).size.width * 0.08,
+                                    ),
+                                  ),
+                                ],
+                              )),
                         ),
 
                         SizedBox(
@@ -533,7 +539,6 @@ class _ChatPageState extends State<ChatPage> {
                                                     ),
                                                     borderRadius: BorderRadius.circular(24),
                                                   ),
-
                                                   child: TextTeX(
                                                     text: chat.str,
                                                     textStyle: TextStyle(
@@ -778,17 +783,12 @@ class _ChatPageState extends State<ChatPage> {
                             width: MediaQuery.of(context).size.width * 0.8,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [
-                                  A_Colors.white,
-                                  A_Colors.accentColor,
-                                  A_Colors.white
-                                ],
+                                colors: [A_Colors.white, A_Colors.accentColor, A_Colors.white],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(24),
-                              border:
-                              Border.all(color: A_Colors.black, width: 2),
+                              border: Border.all(color: A_Colors.black, width: 2),
                             ),
                             child: Center(
                               child: ElevatedButton(
@@ -815,8 +815,7 @@ class _ChatPageState extends State<ChatPage> {
                                               height: MediaQuery.of(context).size.height * 0.4,
                                               decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.circular(16),
-                                                border:
-                                                Border.all(color: A_Colors.black, width: 2),
+                                                border: Border.all(color: A_Colors.black, width: 2),
                                               ),
                                               child: MathKeyboard(
                                                 onInsert: (latex) {
@@ -958,7 +957,7 @@ class _ChatPageState extends State<ChatPage> {
                               // print(correctans);
 
                               inputDatabase(); //データベースに追加
-                              
+
                               await showDialog(
                                 context: context,
                                 builder: (context) => MessageDialog(
@@ -1101,29 +1100,39 @@ String toSpeechText(String inputText) {
   inputText = inputText.replaceAllMapped(RegExp(r'([a-zA-Z0-9])\^([a-zA-Z0-9])'), (m) => '${m[1]}${m[2]}乗');
   inputText = inputText.replaceAllMapped(RegExp(r'([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)'), (m) => '${m[2]}分の${m[1]}');
   inputText = inputText.replaceAll(r'=', 'イコール');
-  inputText = inputText.replaceAll(r'-', 'イコール');
+  inputText = inputText.replaceAll(r'-', 'マイナス');
 
-  // ネットスラング(笑)
+  // ~形
+  inputText = inputText.replaceAll('現在形', '現在けい');
+  inputText = inputText.replaceAll('過去形', '過去けい');
+  inputText = inputText.replaceAll('進行形', '進行けい');
+
+  // www → 笑
   inputText = inputText.replaceAll(RegExp(r'\b(w{2,})\b', caseSensitive: false), '笑');
 
-  // 三点リーダ→読点
-  inputText = inputText.replaceAll(RegExp(r'[.…]{2,}'), '、');
+  // 記号
+  inputText = inputText.replaceAll(RegExp(r'[.…]{2,}'), ''); // 3点
+  inputText = inputText.replaceAll(RegExp(r'"'), ''); // ””
+  inputText = inputText.replaceAll(RegExp(r':'), ''); // コロン
+  inputText = inputText.replaceAll(RegExp(r'：'), ''); // コロン(全角)
+  inputText = inputText.replaceAll(RegExp(r'*'), ''); // アスタリスク
 
-  // 絵文字・記号の削除
+  // 絵文字の削除
   final symbolEmojiRegex = RegExp(
-    r'''[
-    \u2300-\u23FF
-    \u2600-\u26FF
-    \u2700-\u27BF
-    \u{1F300}-\u{1F5FF}
-    \u{1F600}-\u{1F64F}
-    \u{1F680}-\u{1F6FF}
-    \u{1F900}-\u{1F9FF}
-  ]''',
+    r'''
+  (?:[\u2300-\u23FF]|
+     [\u2600-\u26FF]|
+     [\u2700-\u27BF]|
+     \u{1F300}-\u{1F5FF}|
+     \u{1F600}-\u{1F64F}|
+     \u{1F680}-\u{1F6FF}|
+     \u{1F900}-\u{1F9FF}
+    )
+  ''',
     unicode: true,
   );
   inputText = inputText.replaceAll(symbolEmojiRegex, '');
-  
+
   return inputText;
 }
 
