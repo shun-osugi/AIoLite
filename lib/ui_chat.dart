@@ -1115,7 +1115,7 @@ String toSpeechText(String inputText) {
   inputText = inputText.replaceAll(RegExp(r'"'), ''); // ””
   inputText = inputText.replaceAll(RegExp(r':'), ''); // コロン
   inputText = inputText.replaceAll(RegExp(r'：'), ''); // コロン(全角)
-  inputText = inputText.replaceAll(RegExp(r'*'), ''); // アスタリスク
+  inputText = inputText.replaceAll(RegExp(r'\*'), ''); // アスタリスク
 
   // 絵文字の削除
   final symbolEmojiRegex = RegExp(
