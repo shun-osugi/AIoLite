@@ -446,25 +446,37 @@ class _ChatPageState extends State<ChatBasicPage> {
                                 },
                               );
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                               ),
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                            ),
-                            child: TextTeX(
-                              text: summary,
-                              textStyle: TextStyle(
-                                color: B_Colors.black,
-                                fontSize: MediaQuery.of(context).size.width * 0.06,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              // overflow: TextOverflow.ellipsis,
-                              // maxLines: 2,
-                            ),
-                          ),
+                              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Expanded(
+                                  flex: 6,
+                                  child: TextTeX(
+                                    text: summary,
+                                    textStyle: TextStyle(
+                                      color: B_Colors.black,
+                                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    // overflow: TextOverflow.ellipsis,
+                                    // maxLines: 2,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Icon(
+                                    Icons.add,
+                                    color: B_Colors.black,
+                                    size: MediaQuery.of(context).size.width * 0.08,
+                                  ),
+                                ),
+                              ])),
                         ),
 
                         SizedBox(

@@ -465,6 +465,9 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                             ),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Expanded(
+                      flex: 6,
                             child: TextTeX(
                               text: summary,
                               textStyle: TextStyle(
@@ -474,7 +477,14 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               // overflow: TextOverflow.ellipsis,
                               // maxLines: 2,
-                            ),
+                            ),),Expanded(
+                      flex: 1,
+                      child: Icon(
+                        Icons.add,
+                        color: A_Colors.black,
+                        size: MediaQuery.of(context).size.width * 0.08,
+                      ),
+                    ),],)
                           ),
                         ),
 
