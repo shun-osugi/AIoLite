@@ -336,13 +336,40 @@ class _MathKeyboardState extends State<MathKeyboard> {
               ),
             ],
 
-            if(currentTab == 3)
-              Text(
-                '',
-                style: TextStyle(
-
-                ),
+            if (currentTab == 3)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '使い方',
+                    style: TextStyle(
+                      color: A_Colors.black,
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '① 好きなタブを選んでボタンを押すと、数式が入力されます。\n'
+                        '② 入力された数式は、見た目もきれいに表示されるので安心！\n'
+                        '③ 例えば「分数」を押すと「分子」と「分母」の場所に好きな文字を入れるだけでOK！\n\n'
+                        '📘 タブの説明:\n'
+                        '・123：数字やアルファベット、よく使う記号\n'
+                        '・f(x)：計算記号（＋や√など）や関数（sinやcosなど）\n'
+                        '・m/s：物理や化学で使う単位\n'
+                        '・？：この説明タブ\n\n'
+                        '📝 コツ：\n'
+                        '・ボタンを押すと「\$…\$」で囲まれた数式が入力されます。\n'
+                        '・そのまま編集してもOK！例えば、x^2の「2」を「3」に変えればx³になります。',
+                    style: TextStyle(
+                      color: A_Colors.black,
+                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
+
           ],
         ),
       ),
