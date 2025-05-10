@@ -1658,7 +1658,7 @@ class _EditDialogState extends State<EditDialog> {
               // 数式入力セット
               if (_hasFocus)
                 Positioned(
-                  bottom: MediaQuery.of(context).viewInsets.bottom - MediaQuery.of(context).size.height * 0.15,
+                  bottom: MediaQuery.of(context).viewInsets.bottom - MediaQuery.of(context).size.height * 0.1,
                   left: 0,
                   right: 0,
                   child: Container(
