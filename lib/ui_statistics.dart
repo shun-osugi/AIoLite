@@ -80,6 +80,9 @@ class _StatsPageState extends State<StatsPage> {
 
   final List<Map<String, int>> _fbbasicList = [];          //basicモードのレコード　{教科：解いた数}の配列
 
+  int    _centerCount  = 0;                  // 真ん中に出す数字
+  String _centerLabel  = '解いた回数';        // その上に出すラベル
+
   @override
   void initState() {
     super.initState();
@@ -208,6 +211,10 @@ class _StatsPageState extends State<StatsPage> {
       return;
     }
 
+    _selected = _pieData.keys.first;
+    _centerCount = _problemCount(false);     //なにも選択してないときは全部の教科合計のといた数
+    _centerLabel = '解いた回数';
+
     //教科・分野をカウント
     final subjectCount = <String, int>{};
     final fieldCountBySubject = <String, Map<String, int>>{};
@@ -252,6 +259,18 @@ class _StatsPageState extends State<StatsPage> {
       return _fbbasicList.fold<int>(0, (sum, m) => sum + m.values.first);
     }
     return _fbList.length;
+  }
+  int _countOf(String subject, bool isBasicMode) {
+    if (isBasicMode) {
+      // basic モードは _fbbasicList に {教科: 件数} が複数入っている
+      return _fbbasicList
+          .where((m) => m.keys.first == subject)
+          .fold<int>(0, (sum, m) => sum + m.values.first);
+    }
+    // advanced モードは _fbList の subject 配列に含まれる件数を数える
+    return _fbList
+        .where((fb) => fb.subject.contains(subject))
+        .length;
   }
 
   //UI
@@ -345,7 +364,24 @@ class _StatsPageState extends State<StatsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-            Expanded(child: _buildStackedChart(isBasicMode)),
+            Expanded(
+              child: _buildStackedChart(
+                isBasicMode,
+                onSectionTouch: (String? subject) {
+                  if (subject == null) {                         // ← グラフ外タップ
+                    setState(() {
+                      _centerCount = _problemCount(isBasicMode);
+                      _centerLabel = '解いた回数';
+                    });
+                  } else {                                       // ← 教科をタップ
+                    setState(() {
+                      _centerCount = _countOf(subject, isBasicMode);
+                      _centerLabel = subject;
+                    });
+                  }
+                },
+              ),
+            ),
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
             _buildLegend(isBasicMode),
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
@@ -364,19 +400,30 @@ class _StatsPageState extends State<StatsPage> {
     ),
   );
 
-  Widget _buildStackedChart(bool isBasicMode) => Stack(
-    alignment: Alignment.center,
-    children: [
-      DonutPieChart(data: _pieData),        // ← 元のグラフそのまま
-      Text(                                  // ← 中央に置く数字
-        '${_problemCount(isBasicMode)}',
-        style: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ],
-  );
+  Widget _buildStackedChart(
+      bool isBasicMode, {
+        required void Function(String? subject) onSectionTouch,
+      }) =>
+      Stack(
+        alignment: Alignment.center,
+        children: [
+          DonutPieChart(
+            data           : _pieData,
+            onSectionTouch : onSectionTouch,   //おした部分を認識
+          ),
+          Column(                               //説明文字列と数字を2段表示
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_centerLabel,
+                  style:
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              Text('$_centerCount',
+                  style:
+                  const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      );
 
   //ラベル使用ランキング部分
   Widget _buildLabelArea(bool isBasicMode) => Container(
@@ -413,12 +460,13 @@ class _StatsPageState extends State<StatsPage> {
     children: _pieData.keys.toList().asMap().entries.map((entry) {
       final index = entry.key;
       final subject = entry.value;
+      final color = kSubjectColor[subject] ?? Subject_Colors.other;
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 14, height: 14, color: _getColor(index)),
+            Container(width: 14, height: 14, color: color),
             const SizedBox(width: 6),
             Text(
               subject,
@@ -437,12 +485,12 @@ class _StatsPageState extends State<StatsPage> {
       spacing: 8,
       children: _pieData.keys.map((subject) {
         final selected = _selected == subject;
+        final color = kSubjectColor[subject] ?? Subject_Colors.other;
         return ChoiceChip(
           label: Text(subject, style: _tileTextStyle(context, isBasicMode)),
           selected: selected,
           onSelected: (_) => setState(() => _selected = subject),
-          selectedColor: _getColor(_pieData.keys.toList().indexOf(subject))
-              .withOpacity(0.5),
+          selectedColor:color.withOpacity(0.5),
           backgroundColor: A_Colors.background.withOpacity(0.5),
         );
       }).toList(),
@@ -502,7 +550,9 @@ class _StatsPageState extends State<StatsPage> {
 //ドーナツグラフ
 class DonutPieChart extends StatefulWidget {
   final Map<String, double> data;
-  const DonutPieChart({super.key, required this.data});
+  final void Function(String? subject) onSectionTouch;
+
+  const DonutPieChart({super.key, required this.data, required this.onSectionTouch,});
 
   @override
   State<DonutPieChart> createState() => _DonutPieChartState();
@@ -525,9 +575,16 @@ class _DonutPieChartState extends State<DonutPieChart> {
           pieTouchData: PieTouchData(
             touchCallback: (event, response) {
               setState(() {
-                touchedIndex = response?.touchedSection?.touchedSectionIndex ??
-                    -1;
+                touchedIndex =
+                    response?.touchedSection?.touchedSectionIndex ?? -1;
               });
+              if (response?.touchedSection == null) {
+                widget.onSectionTouch(null);                 // ★外側タップ
+              } else {
+                final idx = response!.touchedSection!.touchedSectionIndex;
+                final sub = widget.data.keys.elementAt(idx);
+                widget.onSectionTouch(sub);                  // ★教科名通知
+              }
             },
           ),
           sections: List.generate(widget.data.length, (i) {
@@ -570,3 +627,13 @@ Color _getColor(int index) {
   ];
   return colors[index % colors.length];
 }
+
+const Map<String, Color> kSubjectColor = {
+  '国語'       : Subject_Colors.japanese,
+  '数学'       : Subject_Colors.math,
+  '理科'       : Subject_Colors.science,
+  '社会'       : Subject_Colors.socialstudies,
+  '英語'       : Subject_Colors.english,
+  '情報'       : Subject_Colors.information,
+  'その他'     : Subject_Colors.other,
+};
