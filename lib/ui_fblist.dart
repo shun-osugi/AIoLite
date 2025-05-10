@@ -634,6 +634,7 @@ class _FblistPageState extends State<FblistPage> {
           setState(() {
             targetNum = id;
             listOrDetail = false;
+            _showScrollToTopButton = false;
           });
         },
         style: ElevatedButton.styleFrom(
