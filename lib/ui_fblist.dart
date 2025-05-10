@@ -644,22 +644,35 @@ class _FblistPageState extends State<FblistPage> {
         child: Column(
           children: [
             // 問題文(summary)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextTeX(
-                  text: summary,
-                  textStyle: TextStyle(
-                    color: A_Colors.white,
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
-                    fontWeight: FontWeight.bold,
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Expanded(
+                flex: 6,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextTeX(
+                      text: summary,
+                      textStyle: TextStyle(
+                        color: A_Colors.white,
+                        fontSize: MediaQuery.of(context).size.width * 0.05,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      // overflow: TextOverflow.ellipsis,
+                      // maxLines: 2,
+                    ),
                   ),
-                  // overflow: TextOverflow.ellipsis,
-                  // maxLines: 2,
                 ),
               ),
-            ),
+              Expanded(
+                flex: 1,
+                child: Icon(
+                  Icons.add,
+                  color: A_Colors.white,
+                  size: MediaQuery.of(context).size.width * 0.08,
+                ),
+              ),
+            ]),
 
             SizedBox(height: MediaQuery.of(context).size.width * 0.02), //余白
 
