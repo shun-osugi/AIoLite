@@ -4,11 +4,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'colors.dart';
 import 'tts_service.dart';
 import 'widget_help_dialog.dart';
 import 'utility.dart';
+import 'math_keyboard.dart';
 
 class chat {
   int p; //0:自分 1:相手
@@ -42,6 +44,9 @@ class _ChatPageState extends State<ChatBasicPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  late FocusNode _focusNode;
+  bool _hasFocus = false;
+
   List<chat> chats = []; //会話リスト
   int chatIndex = 0; // チャット表示のインデックス
 
@@ -62,6 +67,20 @@ class _ChatPageState extends State<ChatBasicPage> {
     AI = _model.startChat();
     _initAsync();
     _initDatabase();
+    _loadMuteSetting();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      setState(() {
+        _hasFocus = _focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _initAsync() async {
@@ -257,6 +276,14 @@ class _ChatPageState extends State<ChatBasicPage> {
     }
   }
 
+  void _loadMuteSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isMuted = prefs.getBool('isMuted') ?? false;
+    });
+    if(_isMuted) _ttsService.toggleMute();
+  }
+
   @override
   Widget build(BuildContext context) {
     final safeAreaPadding = MediaQuery.of(context).padding;
@@ -371,7 +398,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                       height: MediaQuery.of(context).size.height * 0.6,
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
-                                          colors: [A_Colors.white, A_Colors.subColor, A_Colors.white],
+                                          colors: [B_Colors.white, B_Colors.subColor, B_Colors.white],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ),
@@ -419,25 +446,37 @@ class _ChatPageState extends State<ChatBasicPage> {
                                 },
                               );
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                               ),
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                            ),
-                            child: TextTeX(
-                              text: summary,
-                              textStyle: TextStyle(
-                                color: B_Colors.black,
-                                fontSize: MediaQuery.of(context).size.width * 0.06,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              // overflow: TextOverflow.ellipsis,
-                              // maxLines: 2,
-                            ),
-                          ),
+                              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Expanded(
+                                  flex: 6,
+                                  child: TextTeX(
+                                    text: summary,
+                                    textStyle: TextStyle(
+                                      color: B_Colors.black,
+                                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    // overflow: TextOverflow.ellipsis,
+                                    // maxLines: 2,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Icon(
+                                    Icons.add,
+                                    color: B_Colors.black,
+                                    size: MediaQuery.of(context).size.width * 0.08,
+                                  ),
+                                ),
+                              ])),
                         ),
 
                         SizedBox(
@@ -598,6 +637,8 @@ class _ChatPageState extends State<ChatBasicPage> {
                                     // トグルして UI を更新
                                     await _ttsService.toggleMute();
                                     setState(() => _isMuted = _ttsService.isMuted);
+                                    final prefs = await SharedPreferences.getInstance();
+                                    await prefs.setBool('isMuted', _isMuted);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
@@ -607,7 +648,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                     ),
                                   ),
                                   child: Text(
-                                    _isMuted ? '読みあげ：音をださない' : '読みあげ：音をだす',
+                                    _isMuted ? 'いま：よみあげOFF' : 'いま：よみあげON',
                                     style: TextStyle(
                                       color: B_Colors.black,
                                       fontSize: MediaQuery.of(context).size.width * 0.06,
@@ -724,7 +765,8 @@ class _ChatPageState extends State<ChatBasicPage> {
                           Column(
                             children: [
                               // 矢印ボタンと？ボタン
-                              Row(
+                              if (!_hasFocus)
+                                Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   // 一つ前のチャットへ
@@ -837,6 +879,89 @@ class _ChatPageState extends State<ChatBasicPage> {
                                 ],
                               ),
 
+                              // 数式入力セット
+                              if (_hasFocus)
+                                Container(
+                                  width: MediaQuery.of(context).size.width * 0.8,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        B_Colors.white,
+                                        B_Colors.accentColor,
+                                        B_Colors.white
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border:
+                                    Border.all(color: B_Colors.black, width: 2),
+                                  ),
+                                  child: Center(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(50),
+                                        ),
+                                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                      ),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          barrierColor: Colors.transparent,
+                                          builder: (_) {
+                                            return Align(
+                                              alignment: Alignment.topCenter,
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(16),
+                                                child: Container(
+                                                  height: MediaQuery.of(context).size.height * 0.4,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(16),
+                                                    border:
+                                                    Border.all(color: B_Colors.black, width: 2),
+                                                  ),
+                                                  child: MathKeyboard(
+                                                    onInsert: (latex) {
+                                                      final selection = _textController.selection;
+                                                      final newText = _textController.text.replaceRange(
+                                                        selection.start,
+                                                        selection.end,
+                                                        latex,
+                                                      );
+                                                      setState(() {
+                                                        _textController.text = newText;
+                                                        _textController.selection = TextSelection.collapsed(
+                                                          offset: selection.start + latex.length,
+                                                        );
+                                                      });
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                  ),
+                                                ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Text(
+                                        '数式・単位を入力',
+                                        style: TextStyle(
+                                          color: B_Colors.black,
+                                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
                               Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Row(
@@ -845,6 +970,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                       child: TextField(
                                         cursorColor: _isSending ? B_Colors.subColor : B_Colors.mainColor,
                                         controller: _textController,
+                                        focusNode: _focusNode,
                                         enabled: !_isSending,
                                         decoration: InputDecoration(
                                           hintText: _isSending ? "イオの応答を待っています..." : "メッセージを入力...",
@@ -879,8 +1005,6 @@ class _ChatPageState extends State<ChatBasicPage> {
                               ),
                             ],
                           ),
-
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                       ],
                     ),
 
@@ -1181,7 +1305,7 @@ class FeedbackBubble extends StatelessWidget {
 class TrianglePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()..color = A_Colors.subColor;
+    final Paint paint = Paint()..color = B_Colors.subColor;
 
     final Path path = Path()
       ..moveTo(size.width / 2, 0) // 三角形の頂点（中央上）

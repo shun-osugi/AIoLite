@@ -153,18 +153,31 @@ class _FbSheetState extends State<FbSheet> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                   ),
-                  child: TextTeX(
-                    text: widget.summary,
-                    textStyle: TextStyle(
-                      color: A_Colors.black,
-                      fontSize: MediaQuery.of(context).size.width * 0.05,
-                      fontWeight: FontWeight.bold,
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Expanded(
+                      flex: 6,
+                      child: TextTeX(
+                        text: widget.summary,
+                        textStyle: TextStyle(
+                          color: A_Colors.black,
+                          fontSize: MediaQuery.of(context).size.width * 0.05,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        // overflow: TextOverflow.ellipsis,
+                        // maxLines: 2,
+                      ),
                     ),
-                    // overflow: TextOverflow.ellipsis,
-                    // maxLines: 2,
-                  ),
+                    Expanded(
+                      flex: 1,
+                      child: Icon(
+                        Icons.add,
+                        color: A_Colors.black,
+                        size: MediaQuery.of(context).size.width * 0.08,
+                      ),
+                    ),
+                  ]),
                 ),
               ),
 
