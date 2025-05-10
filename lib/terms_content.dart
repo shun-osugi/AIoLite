@@ -156,8 +156,8 @@ class TermsContent {
 本規約のいずれかの条項が法令により無効または執行不能と判断された場合でも、その他の条項は継続して有効に存続します。
 本サービスに関して本規約に定めのない事項または疑義が生じた場合は、当社とユーザーは誠意をもって協議し、解決を図るものとします。
 本規約に関するお問い合わせは、以下の連絡先までお願いいたします。
-【問い合わせ窓口】〇〇
-【メールアドレス】support@xxxx.co.jp
+【問い合わせ窓口】https://docs.google.com/forms/d/e/1FAIpQLSeFVMT8ZYzBv12eJqaMCiSQTFwKL4v2EHxW2dhgp4JaPdOj_g/viewform?pli=1
+【メールアドレス】miakks2025@gmail.com
 以上
 '''
     },

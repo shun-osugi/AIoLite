@@ -39,7 +39,7 @@ class _HelpDialogState extends State<HelpDialog> {
       } else {
         helpPages = [
           // アドバンス用
-          {"image": "assets/help_home_advanced/help0.png", "head": "まずは、「START」ボタンを押して問題を送信しよう！", "text": "ここでは、このアプリの使用方法を確認することができます。\n右下のボタンからは、利用規約、ライセンス表示を確認することができます。"},
+          {"image": "assets/help_home_advanced/help0.png", "head": "まずは、「START」ボタンを押して問題を送信しよう！", "text": "ここでは、このアプリの使用方法を確認することができます。\n右上のハンバーガーメニューからは、本アプリの使い方のほか、利用規約やライセンス情報を確認できます。また、音声読み上げ機能のON/OFFの切り替えもこちらから行えます。"},
           {"image": "assets/help_home_advanced/help1.png", "head": "問題の送信方法を選んで、問題を送信しよう！", "text": "送信方法は、音声入力、画像入力(画像ファイルからor写真を撮影)、テキスト入力から選べます。\n音声や画像を送信した場合は、自動でテキストに変換されます。"},
           {"image": "assets/help_home_advanced/help2.png", "head": "問題文の編集をしよう！", "text": "テキスト入力の場合はここで入力、音声や画像で入力した場合は、問題文を修正できます。\n数式や単位は、専用入力ボタンを使うと簡単に入力できます。"},
           {"image": "assets/help_home_advanced/help3.png", "head": "問題のラベル(教科・単元)の編集をしよう！", "text": "\n送信された問題文を元に、自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。"},

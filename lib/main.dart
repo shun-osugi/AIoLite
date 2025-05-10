@@ -25,6 +25,7 @@ import 'ui_statistics.dart';
 import 'widget_help_dialog.dart';
 import 'utility.dart';
 import 'package:ruby_text/ruby_text.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 bool _isBasicMode = false;
@@ -1006,7 +1007,14 @@ class TermsDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("利用規約", style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+              "利用規約",
+              style: TextStyle(
+                color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             SizedBox(height: 16),
 
             // スクロール表示
@@ -1031,8 +1039,56 @@ class TermsDialog extends StatelessWidget {
                             ),
                           ),
                           SizedBox(height: 4),
-                          // 条文本文
-                          Text(
+
+                          //15条のリンクを飛べるように
+                          article['title'] == '第15条（その他）'
+                              ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '本規約に関するお問い合わせは、以下の連絡先までお願いいたします。',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                '【メールアドレス】miakks2025@gmail.com',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () async {
+                                  final Uri url = Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSeFVMT8ZYzBv12eJqaMCiSQTFwKL4v2EHxW2dhgp4JaPdOj_g/viewform?pli=1');
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(url);
+                                  } else {
+                                    print('Could not launch $url');
+                                  }
+                                },
+                                child: Text(
+                                  '【お問い合わせフォーム】',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                '以上',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                ),
+                              ),
+                            ],
+                          )
+                              : Text(
                             article['body'] ?? '',
                             style: TextStyle(
                               fontSize: 14,
