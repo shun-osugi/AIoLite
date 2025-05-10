@@ -1259,9 +1259,9 @@ class FeedbackBubble extends StatelessWidget {
               color: A_Colors.subColor,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              feedbackText,
-              style: TextStyle(
+            child: TextTeX(
+              text: feedbackText,
+              textStyle: TextStyle(
                 color: A_Colors.black,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

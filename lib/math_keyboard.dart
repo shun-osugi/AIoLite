@@ -75,7 +75,7 @@ class MathKeyboard extends StatelessWidget {
   }
 
   Widget _buildButton(String label, String value, BuildContext context) {
-    final displayedText = "r'$value'"; // ← r'' を含めるようにする
+    final displayedText = "\$$value\$"; // ← r'' を含めるようにする
     return ElevatedButton(
       onPressed: () => onInsert(displayedText),
       child: Text(

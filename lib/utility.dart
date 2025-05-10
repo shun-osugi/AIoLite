@@ -14,12 +14,13 @@ class TextTeX extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //$..$表現はr''にし，flutterが使える形に変換
-    String texttex = text.replaceAllMapped(RegExp(r"(?<!\\)\$(.+?)(?<!\\)\$", dotAll: true), (match) {
-      return "r'${match.group(1)}'";
-    });
+    // String texttex = text.replaceAllMapped(RegExp(r"(?<!\\)\$(.+?)(?<!\\)\$", dotAll: true), (match) {
+    //   return 'r"${match.group(1)}"';
+    // });
+    String texttex = text;
 
     final List<InlineSpan> spans = [];
-    final RegExp pattern = RegExp(r"r'(.+?)'");//texの構文
+    final RegExp pattern = RegExp(r"(?<!\\)\$(.+?)(?<!\\)\$", dotAll: true);//texの構文
     int currentIndex = 0;//現在の場所
 
     for (final match in pattern.allMatches(texttex)) {
