@@ -656,7 +656,7 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                                   RubyText(
                                     [
                                       RubyTextData('学', ruby: 'まな'),
-                                      RubyTextData('んだことが　'),
+                                      RubyTextData('んだことが'),
                                       RubyTextData('身', ruby: 'み'),
                                       RubyTextData('の'),
                                       RubyTextData('回', ruby: 'まわ'),
@@ -664,7 +664,10 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                                       RubyTextData('どんなことに'),
                                       RubyTextData('使', ruby: 'つか'),
                                       RubyTextData('われているか'),
-                                      RubyTextData('しりたいひとむけのモード'),
+                                      RubyTextData('知', ruby: 'し'),
+                                      RubyTextData('りたい'),
+                                      RubyTextData('人', ruby: 'ひと'),
+                                      RubyTextData('むけのモード'),
                                       RubyTextData('たのしく'),
                                       RubyTextData('学', ruby: 'まな'),
                                       RubyTextData('んでいこう！'),
