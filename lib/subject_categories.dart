@@ -77,7 +77,6 @@ const Map<String, List<String>> subjectCategories = {
     "人間の体の調節",
     "生物の多様性と生態系",
     "個体地球とその活動",
-    "大気と海洋",
     "移り変わる地球",
     "自然との共生",
     "生命現象と物質",
