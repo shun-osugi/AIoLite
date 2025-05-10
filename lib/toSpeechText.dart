@@ -38,20 +38,16 @@ String toSpeechText(String inputText) {
   inputText = inputText.replaceAll(RegExp(r'\b(w{2,})\b', caseSensitive: false), '笑');
 
   // 絵文字の削除
-  final symbolEmojiRegex = RegExp(
-    r'''
-  (?:[\u2300-\u23FF]|
-     [\u2600-\u26FF]|
-     [\u2700-\u27BF]|
-     \u{1F300}-\u{1F5FF}|
-     \u{1F600}-\u{1F64F}|
-     \u{1F680}-\u{1F6FF}|
-     \u{1F900}-\u{1F9FF}
-    )
-  ''',
-    unicode: true,
-  );
-  inputText = inputText.replaceAll(symbolEmojiRegex, '');
+  inputText = inputText.replaceAll(RegExp('[\u{2300}-\u{23FF}]'), '');
+  inputText = inputText.replaceAll(RegExp('[\u{2600}-\u{26FF}]'), '');
+  inputText = inputText.replaceAll(RegExp('[\u{2700}-\u{27BF}]'), '');
+  /* 5桁の絵文字はエラーっぽい
+  inputText = inputText.replaceAll(RegExp('[\u{1F300}-\u{1F3FF}]'), '');
+  inputText = inputText.replaceAll(RegExp('[\u{1F550}-\u{1F5FF}]'), '');
+  inputText = inputText.replaceAll(RegExp('[\u{1F600}-\u{1F64F}]'), '');
+  inputText = inputText.replaceAll(RegExp('[\u{1F680}-\u{1F6FF}]'), '');
+  inputText = inputText.replaceAll(RegExp('[\u{1F900}-\u{1F9FF}]'), '');
+  */
 
   return inputText;
 }
