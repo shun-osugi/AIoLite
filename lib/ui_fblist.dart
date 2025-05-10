@@ -11,12 +11,13 @@ class feedback {
   int id; //id
   List<String> subject; //教科
   List<String> field; //分野
+  List<String> labels; //ラベル
   String problem; //問題文
   String summary; //問題文の要約
   String wrong; //間違えてた部分
   String wrongpartans; //間違えてた部分の正しい解き方
   String correctans; //それの正しい解き方
-  feedback(this.id, this.subject, this.field, this.problem, this.summary, this.wrong, this.wrongpartans, this.correctans);
+  feedback(this.id, this.subject, this.field, this.labels, this.problem, this.summary, this.wrong, this.wrongpartans, this.correctans);
 }
 
 class FblistPage extends StatefulWidget {
@@ -26,8 +27,6 @@ class FblistPage extends StatefulWidget {
 
 class _FblistPageState extends State<FblistPage> {
   List<feedback> fblist = [];
-
-  List<List<String>> allLabels = []; // 教科と分類を統合したリストのリスト(ラベル)
   String? selectedSubject; // 教科ドロップダウン選択
   String? selectedCategory; // 分類ドロップダウン選択
   List<String> selectedFilter = []; //選択した教科ラベル ["教科-ラベル",...
@@ -59,6 +58,7 @@ class _FblistPageState extends State<FblistPage> {
     // setState(() {
     //   _initDatabase();
     // });
+    _initDatabase();
   }
 
   @override
@@ -100,12 +100,23 @@ class _FblistPageState extends State<FblistPage> {
       );
       //全データを読み取り
       final records = await _database.query('feedback') as List<Map<String, dynamic>>;
-      //fblistに追加
-      for (int i = 0; i < records.length; i++) {
+       // subjectとfieldを取り出してlabelsを生成
+      for (int i = 0; i < records.length; i++) { 
+        List<String> subjects = records[i]['subject'].split('&&'); // subject取り出し
+        List<String> fields = records[i]['subject'].split('&&');  // field取り出し
+        List<List<String>> allLabels = [];  // labelのリスト
+        // ラベルの生成
+        List<String> tmpLabel = [];
+        int labelLength = subjects.length < fields.length ? subjects.length : fields.length;
+        for (int j = 0; j < labelLength; j++) {
+          tmpLabel.add('${subjects[j]} - ${fields[j]}');
+        }
+        allLabels.add(tmpLabel);  //labels保存
         fblist.add(feedback(
           records[i]['id'],
-          records[i]['subject'].split('&&'),
-          records[i]['field'].split('&&'),
+          subjects,
+          fields,
+          allLabels[i],
           records[i]['problem'],
           records[i]['summary'],
           records[i]['wrong'],
@@ -118,7 +129,10 @@ class _FblistPageState extends State<FblistPage> {
       print("データベース読み取りエラー");
       print(e);
     }
-    _filteredFbList = List.from(fblist); // 初期表示は全件
+
+    setState(() {
+      _filteredFbList = List.from(fblist); // 初期表示は全件
+    });
   }
 
   // ▲ ---------- データベース読み取り ---------- ▲ //
@@ -472,16 +486,6 @@ class _FblistPageState extends State<FblistPage> {
   // ▼ ---------- メインのbuildメソッド ---------- ▼ //
   @override
   Widget build(BuildContext context) {
-    int allLength = fblist.length;
-
-    for (int i = 0; i < allLength; i++) {
-      int labelLength = fblist[i].subject.length < fblist[i].field.length ? fblist[i].subject.length : fblist[i].field.length;
-      List<String> tmpLabel = []; // 各 fblist アイテムのラベルリスト
-      for (int j = 0; j < labelLength; j++) {
-        tmpLabel.add('${fblist[i].subject[j]} - ${fblist[i].field[j]}');
-      }
-      allLabels.add(tmpLabel);
-    }
     return Scaffold(
       // AppBar
       appBar: AppBar(
@@ -593,7 +597,7 @@ class _FblistPageState extends State<FblistPage> {
                   for (int i = 0; i < _filteredFbList.length; i++)
                     Column(
                       children: [
-                        builderSummery(context, _filteredFbList[i].id, allLabels[i], _filteredFbList[i].summary), //1つの問題文
+                        builderSummery(context, _filteredFbList[i].id, _filteredFbList[i].labels, _filteredFbList[i].summary), //1つの問題文
                         SizedBox(height: MediaQuery.of(context).size.width * 0.01), //余白
                       ],
                     ),
@@ -782,7 +786,7 @@ class _FblistPageState extends State<FblistPage> {
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: FbSheet(
                       key: fbSheetKeys[i],
-                      labels: allLabels[i],
+                      labels: _filteredFbList[i].labels,
                       problem: _filteredFbList[i].problem,
                       summary: _filteredFbList[i].summary,
                       wrong: _filteredFbList[i].wrong,
