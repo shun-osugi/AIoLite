@@ -11,7 +11,7 @@ import 'tts_service.dart';
 import 'widget_help_dialog.dart';
 import 'utility.dart';
 import 'math_keyboard.dart';
-import 'tpSpeechText.dart';
+import 'toSpeechText.dart';
 
 class chat {
   int p; //0:自分 1:相手
