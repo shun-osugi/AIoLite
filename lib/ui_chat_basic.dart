@@ -1046,6 +1046,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                   'これまでの会話でよかったところをほめて！ また別の問題にも一緒に取り組みたくなるようなメッセージを一言で教えてほしいな'));
                               final feedbackMessage = feedback.text ?? 'やったね！ また、べつのもんだいにもチャレンジしてみよう！ いっしょにがんばろうね！';
                               _ttsService.speak(feedbackMessage);
+                              adddatabase();
                               await showDialog(
                                 context: context,
                                 builder: (context) => MessageDialog(
@@ -1063,7 +1064,6 @@ class _ChatPageState extends State<ChatBasicPage> {
                                 barrierDismissible: false,
                               );
                             }
-                            adddatabase();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
