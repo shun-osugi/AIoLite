@@ -1,6 +1,8 @@
 // 全体統計画面（ホーム画面から統計ボタンクリックで遷移）
 // 教科別ドーナツグラフと "よく使う分野" リストを DB から動的生成
 
+// _pieData.keys が空 になっているのに .first を実行する問題を改善
+
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
