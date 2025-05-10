@@ -951,6 +951,7 @@ class _ChatPageState extends State<ChatPage> {
                                   //簡単なフィードバック
                                   '今回の会話はどうだった？私が苦手なところとか分かったら短く(50文字程度)一文で教えてほしいな．'));
                               final feedbackMessage = feedback.text ?? 'フィードバックの作成に失敗しました';
+                              _ttsService.speak(feedbackMessage);
 
                               //詳細のフィードバックを作成
                               final info = await AI.sendMessage(Content.text('''
