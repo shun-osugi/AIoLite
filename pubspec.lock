@@ -302,6 +302,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.2.1"
+  flutter_hooks:
+    dependency: transitive
+    description:
+      name: flutter_hooks
+      sha256: "6a126f703b89499818d73305e4ce1e3de33b4ae1c5512e3b8eab4b986f46774c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.6"
   flutter_image_gallery_saver:
     dependency: "direct main"
     description:
@@ -784,6 +792,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  ruby_text:
+    dependency: "direct main"
+    description:
+      name: ruby_text
+      sha256: c9fe49dfe703c240f2ef8274d75c33654ec893685fa7180fd0dcdaf32b850511
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.3"
   screenshot:
     dependency: "direct main"
     description:

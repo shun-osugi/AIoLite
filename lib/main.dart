@@ -24,6 +24,8 @@ import 'ui_result.dart';
 import 'ui_statistics.dart';
 import 'widget_help_dialog.dart';
 import 'utility.dart';
+import 'package:ruby_text/ruby_text.dart';
+
 
 bool _isBasicMode = false;
 
@@ -651,8 +653,23 @@ class _ModeSelectDialogState extends State<ModeSelectDialog> {
                                   SizedBox(height: MediaQuery.of(context).size.width * 0.05),
 
                                   // モード説明文
-                                  Text(
-                                    'まなんだことが みのまわりのどんなことにつかわれているか しりたいひとむけのモード\nたのしくまなんでいこう！',
+                                  RubyText(
+                                    [
+                                      RubyTextData('学', ruby: 'まな'),
+                                      RubyTextData('んだことが　'),
+                                      RubyTextData('身', ruby: 'み'),
+                                      RubyTextData('の'),
+                                      RubyTextData('回', ruby: 'まわ'),
+                                      RubyTextData('りの'),
+                                      RubyTextData('どんなことに'),
+                                      RubyTextData('使', ruby: 'つか'),
+                                      RubyTextData('われているか'),
+                                      RubyTextData('しりたいひとむけのモード'),
+                                      RubyTextData('たのしく'),
+                                      RubyTextData('学', ruby: 'まな'),
+                                      RubyTextData('んでいこう！'),
+                                    ],
+                                    rubyStyle: TextStyle(fontSize: 10, color: Colors.white),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: A_Colors.white,
