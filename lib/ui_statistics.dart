@@ -94,9 +94,9 @@ class _StatsPageState extends State<StatsPage> {
     try {
       await _openDatabase();         //DBつくる
       await _readAllFeedback();      //全データ読み出す
-    } catch (e) {
+    } catch (e,st) {
       // エラー内容をデバッグ出力して無視（空データで継続）
-      debugPrint('DB Error: $e');
+      debugPrint('DB Error: $e\n$st');
     } finally {
       _calcStats();             //データが無くても必ず円グラフ用データを作る
       if (mounted) {
@@ -129,6 +129,12 @@ class _StatsPageState extends State<StatsPage> {
             wrongpartans TEXT,
             correctans TEXT
           )''');
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS feedbackbasic(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          subject TEXT,
+          count   INTEGER
+        ''');
       },
     );
   }//↑後で消すかもここまで
@@ -201,7 +207,7 @@ class _StatsPageState extends State<StatsPage> {
 
   //データ集計
   void _calcStats() {
-    _hasData = _fbList.isNotEmpty;
+    _hasData = _fbList.isNotEmpty || _fbbasicList.isNotEmpty;
 
     //データがなかったらグラフを表示しない
     if (!_hasData) {
@@ -211,7 +217,6 @@ class _StatsPageState extends State<StatsPage> {
       return;
     }
 
-    _selected = _pieData.keys.first;
     _centerCount = _problemCount(false);     //なにも選択してないときは全部の教科合計のといた数
     _centerLabel = '解いた回数';
 
@@ -250,8 +255,13 @@ class _StatsPageState extends State<StatsPage> {
         ..sort((a, b) => b.value.compareTo(a.value));
       _details[sub] = top3.take(3).map((e) => (e.key, e.value)).toList();
     }
-    //最初「国語」のタブを開く
-    _selected = _pieData.keys.first;
+
+    //データ不足（1つもない）時はここで終わる
+    if (_pieData.isEmpty){
+      _hasData = false;
+      return;
+    }
+    _selected = _pieData.keys.first;  //国語（最初の教科ラベルタブ）を開く
   }
 
   int _problemCount(bool isBasicMode) {
