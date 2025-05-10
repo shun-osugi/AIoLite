@@ -225,15 +225,16 @@ class _StatsPageState extends State<StatsPage> {
     //教科・分野をカウント
     final subjectCount = <String, int>{};
     final fieldCountBySubject = <String, Map<String, int>>{};
-    //複数ラベルが含まれていいる時用
     for (final fb in _fbList) {
-      for (final sub in fb.subject) {
-        subjectCount[sub] = (subjectCount[sub] ?? 0) + 1;
-        fieldCountBySubject.putIfAbsent(sub, () => {});
-        for (final fld in fb.field) {
-          fieldCountBySubject[sub]![fld] =
-              (fieldCountBySubject[sub]![fld] ?? 0) + 1;
-        }
+    //とりあえず各レコードの最初のラベルだけ取得するように変更
+    var sub = fb.subject.isNotEmpty ? fb.subject.first : 'その他';
+    //「なし」は「その他」に変換
+    if (sub == 'なし' || sub.trim().isEmpty) sub = 'その他';
+    subjectCount[sub] = (subjectCount[sub] ?? 0) + 1;
+    fieldCountBySubject.putIfAbsent(sub, () => {});
+    for (final fld in fb.field) {
+    fieldCountBySubject[sub]![fld] =
+    (fieldCountBySubject[sub]![fld] ?? 0) + 1;
       }
     }
 
@@ -601,12 +602,13 @@ class _DonutPieChartState extends State<DonutPieChart> {
           ),
           sections: List.generate(widget.data.length, (i) {
             final entry = widget.data.entries.elementAt(i);
+            final color      = kSubjectColor[entry.key] ?? Subject_Colors.other;
             final isTouched = i == touchedIndex;
             final radius = isTouched ? 78.0 : 65.0;
             final percentage = (entry.value / total * 100).toStringAsFixed(0);
 
             return PieChartSectionData(
-              color: _getColor(i),
+              color: color,
               value: entry.value,
               title: '$percentage%',
               radius: radius,
