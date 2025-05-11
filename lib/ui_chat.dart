@@ -835,6 +835,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 border: Border.all(color: A_Colors.black, width: 2),
                                               ),
                                               child: MathKeyboard(
+                                                mode: false,
                                                 onInsert: (latex) {
                                                   final selection = _textController.selection;
                                                   final newText = _textController.text.replaceRange(

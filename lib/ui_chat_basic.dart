@@ -931,6 +931,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                                     Border.all(color: B_Colors.black, width: 2),
                                                   ),
                                                   child: MathKeyboard(
+                                                    mode: true,
                                                     onInsert: (latex) {
                                                       final selection = _textController.selection;
                                                       final newText = _textController.text.replaceRange(
@@ -955,7 +956,7 @@ class _ChatPageState extends State<ChatBasicPage> {
                                         );
                                       },
                                       child: Text(
-                                        '数式・単位を入力',
+                                        'すうしき・たんい',
                                         style: TextStyle(
                                           color: B_Colors.black,
                                           fontSize: MediaQuery.of(context).size.width * 0.04,
