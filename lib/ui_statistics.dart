@@ -669,4 +669,10 @@ const Map<String, Color> kSubjectColor = {
   '英語'       : Subject_Colors.english,
   '情報'       : Subject_Colors.information,
   'その他'     : Subject_Colors.other,
+  'こくご'     : Subject_Colors.japanese,
+  'さんすう'    : Subject_Colors.math,
+  'りか'       : Subject_Colors.science,
+  'しゃかい'    : Subject_Colors.socialstudies,
+  'えいご'      : Subject_Colors.english,
+
 };
