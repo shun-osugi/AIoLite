@@ -623,7 +623,7 @@ class _DonutPieChartState extends State<DonutPieChart> {
             final entry = widget.data.entries.elementAt(i);
             final color      = kSubjectColor[entry.key] ?? Subject_Colors.other;
             final isTouched = i == touchedIndex;
-            final radius = isTouched ? 78.0 : 65.0;
+            final radius = isTouched ? MediaQuery.of(context).size.width * 0.17 : MediaQuery.of(context).size.width * 0.15;
             final percentage = (entry.value / total * 100).toStringAsFixed(0);
 
             return PieChartSectionData(
