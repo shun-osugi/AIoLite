@@ -1752,6 +1752,7 @@ class _EditDialogState extends State<EditDialog> {
                               return SizedBox(
                                 height: MediaQuery.of(context).size.height * 0.4,
                                 child: MathKeyboard(
+                                  mode: _isBasicMode,
                                   onInsert: (latex) {
                                     final selection = _textController.selection;
                                     final newText = _textController.text.replaceRange(
@@ -1773,7 +1774,7 @@ class _EditDialogState extends State<EditDialog> {
                           );
                         },
                         child: Text(
-                          '数式・単位を入力',
+                          _isBasicMode ? 'すうしき・たんい' : '数式・単位を入力',
                           style: TextStyle(
                             color: A_Colors.black,
                             fontSize: MediaQuery.of(context).size.width * 0.04,

@@ -3,8 +3,9 @@ import 'colors.dart';
 
 class MathKeyboard extends StatefulWidget {
   final void Function(String latex) onInsert;
+  final bool mode;
 
-  const MathKeyboard({super.key, required this.onInsert});
+  const MathKeyboard({super.key, required this.onInsert, required this.mode});
 
   @override
   _MathKeyboardState createState() => _MathKeyboardState();
@@ -53,14 +54,14 @@ class _MathKeyboardState extends State<MathKeyboard> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.background,
+                    backgroundColor: widget.mode ? B_Colors.background : A_Colors.background,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: A_Colors.black,
+                        color: widget.mode ? B_Colors.white : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -75,7 +76,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       '123',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 0 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 0 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -89,14 +90,14 @@ class _MathKeyboardState extends State<MathKeyboard> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.background,
+                    backgroundColor: widget.mode ? B_Colors.background : A_Colors.background,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: A_Colors.black,
+                        color: widget.mode ? B_Colors.white : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -111,7 +112,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       'f(x)',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 1 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 1 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -125,14 +126,14 @@ class _MathKeyboardState extends State<MathKeyboard> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.background,
+                    backgroundColor: widget.mode ? B_Colors.background : A_Colors.background,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: A_Colors.black,
+                        color: widget.mode ? B_Colors.white : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -147,7 +148,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       'm/s',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 2 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 2 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -161,14 +162,14 @@ class _MathKeyboardState extends State<MathKeyboard> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.background,
+                    backgroundColor: A_Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: A_Colors.black,
+                        color: widget.mode ? B_Colors.white : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -183,7 +184,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       '?',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 3 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 3 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -195,10 +196,10 @@ class _MathKeyboardState extends State<MathKeyboard> {
 
             if(currentTab == 0) ...[
               Text(
-                '数字 0~9',
+                widget.mode ? 'すうじ 0~9' : '数字 0~9',
                 style: TextStyle(
                   color: A_Colors.black,
-                  fontSize: MediaQuery.of(context).size.width * 0.04,
+                  fontSize: widget.mode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -221,10 +222,10 @@ class _MathKeyboardState extends State<MathKeyboard> {
               ),
               const SizedBox(height: 16),
               Text(
-                '基本文字',
+                widget.mode ? 'もじ' : '基本文字',
                 style: TextStyle(
                   color: A_Colors.black,
-                  fontSize: MediaQuery.of(context).size.width * 0.04,
+                  fontSize: widget.mode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -255,7 +256,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                 '基本計算',
                 style: TextStyle(
                   color: A_Colors.black,
-                  fontSize: MediaQuery.of(context).size.width * 0.04,
+                  fontSize: widget.mode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -263,18 +264,18 @@ class _MathKeyboardState extends State<MathKeyboard> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildButton('＋', r'\+', context),
-                  _buildButton('－', r'\-', context),
+                  _buildButton('＋', '+', context),
+                  _buildButton('－', '-', context),
                   _buildButton('×', r'\times', context),
                   _buildButton('÷', r'\div', context),
-                  _buildButton('＝', r'\=', context),
+                  _buildButton('＝', '=', context),
                   _buildButton('≡', r'\equiv', context),
-                  _buildButton('>', r'\>', context),
-                  _buildButton('<', r'\<', context),
+                  _buildButton('>', '>', context),
+                  _buildButton('<', '<', context),
                   _buildButton('≥', r'\ge', context),
                   _buildButton('≤', r'\le', context),
-                  _buildButton('（', r'\(', context),
-                  _buildButton('）', r'\)', context),
+                  _buildButton('(', '(', context),
+                  _buildButton(')', ')', context),
                   _buildButton('±', r'\pm', context),
                   _buildButton('∓', r'\mp', context),
                 ],
@@ -302,15 +303,14 @@ class _MathKeyboardState extends State<MathKeyboard> {
                   _buildButton('tan', r'\tan', context),
                 ],
               ),
-
             ],
 
             if(currentTab == 2) ...[
               Text(
-                '単位',
+                widget.mode ? 'たんい' : '単位',
                 style: TextStyle(
                   color: A_Colors.black,
-                  fontSize: MediaQuery.of(context).size.width * 0.04,
+                  fontSize: widget.mode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -341,16 +341,28 @@ class _MathKeyboardState extends State<MathKeyboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '使い方',
+                    widget.mode ? 'つかいかた' : '使い方',
                     style: TextStyle(
                       color: A_Colors.black,
-                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      fontSize: widget.mode ? MediaQuery.of(context).size.width * 0.06 : MediaQuery.of(context).size.width * 0.05,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '① 好きなタブを選んでボタンを押すと、数式が入力されます。\n'
+                    widget.mode
+                        ? '① 好きなタブをえらんで、ボタンをおすと数式がかんたんに入るよ！\n'
+                        '② 入れた式は、キレイに見えるから安心！\n'
+                        '③ 「分数」のボタンをおすと、「分子」と「分母」のところにすきなすうじやもじを入れるだけ！\n\n'
+                        '📘 タブのせつめい：\n'
+                        '・123：すうじやアルファベット、よく使うきごう\n'
+                        '・f(x)：たしざんやぶんすうなど\n'
+                        '・m/s：さんすうやりかで使うたんい（メートルなど）\n'
+                        '・？：このせつめいを見るタブ\n\n'
+                        '📝 コツ：\n'
+                        '・ボタンをおしたあとに「ちょっとだけ へんこう」もできるよ。\n'
+                        '　たとえば、x²の「2」を「3」にすれば、x³になるよ！'
+                        : '① 好きなタブを選んでボタンを押すと、数式が入力されます。\n'
                         '② 入力された数式は、見た目もきれいに表示されるので安心！\n'
                         '③ 例えば「分数」を押すと「分子」と「分母」の場所に好きな文字を入れるだけでOK！\n\n'
                         '📘 タブの説明:\n'
@@ -363,7 +375,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                         '・そのまま編集してもOK！例えば、x^2の「2」を「3」に変えればx³になります。',
                     style: TextStyle(
                       color: A_Colors.black,
-                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                      fontSize: widget.mode ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -384,7 +396,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
         label,
         style: TextStyle(
           color: A_Colors.black,
-          fontSize: MediaQuery.of(context).size.width * 0.05,
+          fontSize: widget.mode ? MediaQuery.of(context).size.width * 0.06 : MediaQuery.of(context).size.width * 0.05,
           fontWeight: FontWeight.bold,
         ),
       ),
