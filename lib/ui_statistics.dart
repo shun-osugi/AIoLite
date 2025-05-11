@@ -136,7 +136,7 @@ class _StatsPageState extends State<StatsPage> {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           subject TEXT,
           count   INTEGER
-        ''');
+        )''');
       },
     );
   }//↑後で消すかもここまで
@@ -234,7 +234,7 @@ class _StatsPageState extends State<StatsPage> {
     fieldCountBySubject.putIfAbsent(sub, () => {});
     for (final fld in fb.field) {
     fieldCountBySubject[sub]![fld] =
-    (fieldCountBySubject[sub]![fld] ?? 0) + 1;
+      (fieldCountBySubject[sub]![fld] ?? 0) + 1;
       }
     }
 
