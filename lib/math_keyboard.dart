@@ -61,7 +61,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: widget.mode ? B_Colors.white : A_Colors.black,
+                        color: widget.mode ? B_Colors.black : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -76,7 +76,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       '123',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 0 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.black : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 0 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -97,7 +97,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: widget.mode ? B_Colors.white : A_Colors.black,
+                        color: widget.mode ? B_Colors.black : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -112,7 +112,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       'f(x)',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 1 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.black : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 1 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -133,7 +133,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: widget.mode ? B_Colors.white : A_Colors.black,
+                        color: widget.mode ? B_Colors.black : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -148,7 +148,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       'm/s',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 2 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.black : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 2 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -162,14 +162,14 @@ class _MathKeyboardState extends State<MathKeyboard> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: A_Colors.white,
+                    backgroundColor: widget.mode ? B_Colors.background : A_Colors.background,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
                       ),
                       side: BorderSide(
-                        color: widget.mode ? B_Colors.white : A_Colors.black,
+                        color: widget.mode ? B_Colors.black : A_Colors.black,
                         width: 2,
                       ),
                     ),
@@ -184,7 +184,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       '?',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(color: widget.mode ? B_Colors.white : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 3 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
+                      TextStyle(color: widget.mode ? B_Colors.black : A_Colors.black, fontWeight: FontWeight.bold, fontSize: currentTab == 3 ? MediaQuery.of(context).size.width * 0.05 : MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
