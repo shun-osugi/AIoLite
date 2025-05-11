@@ -79,6 +79,7 @@ class _StatsPageState extends State<StatsPage> {
   late Database _database;
   bool _isLoading = true;                                  //読み込みが終わらない問題の対策
   bool _hasData = false; //レコードが存在するか
+  bool _isBasicMode = true;
 
   final List<Map<String, int>> _fbbasicList = [];          //basicモードのレコード　{教科：解いた数}の配列
 
@@ -144,6 +145,8 @@ class _StatsPageState extends State<StatsPage> {
   //フィードバックデータを読んで要素ごとに格納
   Future<void> _readAllFeedback() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    _isBasicMode = prefs.getBool('isBasicMode') ?? true;
+
     if(prefs.getBool('isBasicMode') ?? true){//basicモードの場合
       final rows = await _database.query('feedbackbasic');
       for(final r in rows){
@@ -219,6 +222,22 @@ class _StatsPageState extends State<StatsPage> {
       return;
     }
 
+    //basic用のグラフ作成処理
+    if (_isBasicMode) {
+      final total = _fbbasicList.fold<int>(0, (s, m) => s + m.values.first);
+      _pieData
+        ..clear()
+        ..addEntries(_fbbasicList.map((m) {
+          final sub = m.keys.first;
+          final cnt = m.values.first;
+          return MapEntry(sub, cnt / total * 100);
+        }));
+      _centerCount = total;
+      _centerLabel = '解いた回数';
+      _details.clear();
+      _selected = _pieData.keys.isNotEmpty ? _pieData.keys.first : '';
+      return;
+    }
     _centerCount = _problemCount(false);     //なにも選択してないときは全部の教科合計のといた数
     _centerLabel = '解いた回数';
 
