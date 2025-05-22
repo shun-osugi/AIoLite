@@ -691,30 +691,28 @@ class _FblistPageState extends State<FblistPage> {
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Expanded(
-                child: Wrap(
-                  spacing: 5,
-                  runSpacing: 5,
-                  children: labels.map((label) {
-                    return Chip(
-                      label: Text(
-                        label,
-                        style: TextStyle(
-                          color: A_Colors.black,
-                          fontSize: 15,
-                        ),
-                      ),
-                      backgroundColor: A_Colors.background,
-                      side: BorderSide(
+              child: Wrap(
+                spacing: 5,
+                runSpacing: 5,
+                children: labels.map((label) {
+                  return Chip(
+                    label: Text(
+                      label,
+                      style: TextStyle(
                         color: A_Colors.black,
-                        width: 0.5,
+                        fontSize: 15,
                       ),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      labelPadding: EdgeInsets.symmetric(horizontal: 3),
-                      visualDensity: VisualDensity(horizontal: 1.0, vertical: -3),
-                    );
-                  }).toList(),
-                ),
+                    ),
+                    backgroundColor: A_Colors.background,
+                    side: BorderSide(
+                      color: A_Colors.black,
+                      width: 0.5,
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    labelPadding: EdgeInsets.symmetric(horizontal: 3),
+                    visualDensity: VisualDensity(horizontal: 1.0, vertical: -3),
+                  );
+                }).toList(),
               ),
             )
           ],
