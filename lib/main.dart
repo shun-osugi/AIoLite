@@ -246,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           child: ElevatedButton(
                             onPressed: () {
-                              showSendDialog(context);
+                              showEditDialog(context, "");
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
@@ -1179,7 +1179,6 @@ class LicenseButton extends StatelessWidget {
 }
 // ↑↑↑↑↑↑ メニュー内ボタン ↑↑↑↑↑↑ //
 
-// ↓↓↓↓↓↓ 送信方法選択ボタン ↓↓↓↓↓↓ //
 // カメラを起動するボタン
 class CameraButton extends StatelessWidget {
   final Function(String) onImagePicked;
@@ -1295,9 +1294,17 @@ class CameraButton extends StatelessWidget {
             });
       },
       child: Container(
-        padding: EdgeInsets.all(screenWidth * 0.03),
+        padding: EdgeInsets.all(screenWidth * 0.022),
         decoration: BoxDecoration(
-          color: A_Colors.white,
+          gradient: LinearGradient(
+            colors: [
+              A_Colors.white,
+              A_Colors.accentColor,
+              A_Colors.white
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(screenWidth * 0.05),
           border: Border.all(
             color: _isBasicMode ? B_Colors.black : A_Colors.black,
@@ -1313,229 +1320,10 @@ class CameraButton extends StatelessWidget {
         ),
         child: Icon(
           Icons.camera_alt,
-          size: screenWidth * 0.15,
+          size: screenWidth * 0.09,
           color: _isBasicMode ? B_Colors.black : A_Colors.black,
         ),
       ),
-    );
-  }
-}
-
-// 音声入力を行うボタン
-class AudioButton extends StatefulWidget {
-  final Function(String) onTextPicked;
-
-  const AudioButton({Key? key, required this.onTextPicked}) : super(key: key);
-
-  @override
-  _AudioButtonState createState() => _AudioButtonState();
-}
-
-class _AudioButtonState extends State<AudioButton> {
-  SpeechToText _speech = SpeechToText();
-  bool _isListening = false;
-
-  // 音声認識開始・停止の制御
-  void _startListening() async {
-    bool available = await _speech.initialize();
-    if (available) {
-      setState(() {
-        _isListening = true;
-      });
-      _speech.listen(
-        onResult: (result) {
-          setState(() {
-            var speechText = result.recognizedWords;
-            print(speechText);
-            widget.onTextPicked(speechText); // 音声認識結果をコールバックに渡す
-          });
-        },
-      );
-    } else {
-      print("失敗");
-      widget.onTextPicked("音声認識の初期化に失敗しました");
-    }
-  }
-
-  //音声認識停止
-  void _stopListening() {
-    _speech.stop();
-    setState(() {
-      _isListening = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return GestureDetector(
-      onTap: () {
-        if (_isListening) {
-          _stopListening(); // すでに認識中なら停止
-          print("停止");
-        } else {
-          _startListening(); // 音声認識を開始
-          print("開始");
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.all(screenWidth * 0.03),
-        decoration: BoxDecoration(
-          color: A_Colors.white,
-          borderRadius: BorderRadius.circular(screenWidth * 0.05),
-          border: Border.all(
-            color: _isBasicMode ? B_Colors.black : A_Colors.black,
-            width: 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: _isBasicMode ? B_Colors.black : A_Colors.black,
-              blurRadius: 6,
-              offset: Offset(2, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          _isListening ? Icons.stop : Icons.mic, // 音声認識中は停止ボタン、認識していないときはマイクボタン
-          size: screenWidth * 0.15,
-          color: _isBasicMode ? B_Colors.black : A_Colors.black,
-        ),
-      ),
-    );
-  }
-}
-
-// 空の文字列を返すボタン
-class EmptyTextButton extends StatelessWidget {
-  final Function(String) onTextPicked;
-
-  const EmptyTextButton({Key? key, required this.onTextPicked}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return GestureDetector(
-      onTap: () {
-        onTextPicked("");
-      },
-      child: Container(
-        padding: EdgeInsets.all(screenWidth * 0.03),
-        decoration: BoxDecoration(
-          color: A_Colors.white,
-          borderRadius: BorderRadius.circular(screenWidth * 0.05),
-          border: Border.all(
-            color: _isBasicMode ? B_Colors.black : A_Colors.black,
-            width: 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: _isBasicMode ? B_Colors.black : A_Colors.black,
-              blurRadius: 6,
-              offset: Offset(2, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.text_snippet_outlined,
-          size: screenWidth * 0.15,
-          color: _isBasicMode ? B_Colors.black : A_Colors.black,
-        ),
-      ),
-    );
-  }
-}
-// ↑↑↑↑↑↑ 送信方法選択ボタン ↑↑↑↑↑↑ //
-
-// 問題の送信方法を選択するダイアログ
-void showSendDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => SendDialog(),
-  );
-}
-
-class SendDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
-      backgroundColor: _isBasicMode ? B_Colors.background : A_Colors.background,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Text(
-                      _isBasicMode ? "もんだいをおくる" : "問題を送る",
-                      style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  // アイコンオプションを並べる
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // マイクボタン
-                      _sendOption(context, AudioButton(onTextPicked: (String text) {
-                        print("音声認識: $text");
-                        if (text.isNotEmpty) {
-                          Navigator.pop(context);
-                          showEditDialog(context, text);
-                        }
-                      }), _isBasicMode ? "こえ" : "音声入力"),
-                      _sendOption(context, CameraButton(
-                        onImagePicked: (String text) {
-                          if (text.isNotEmpty) {
-                            Navigator.pop(context);
-                            showEditDialog(context, text);
-                          }
-                        },
-                      ), _isBasicMode ? "しゃしん" : "画像入力"),
-                      _sendOption(context, EmptyTextButton(
-                        onTextPicked: (String text) {
-                          Navigator.pop(context);
-                          showEditDialog(context, text);
-                        },
-                      ), _isBasicMode ? "もじ" : "テキスト"),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                ],
-              ),
-            ),
-            // 左上の戻るボタン
-            Positioned(
-              top: 24,
-              left: 10,
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: _isBasicMode ? B_Colors.black : A_Colors.black, size: 40),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _sendOption(BuildContext context, Widget sendButton, String label) {
-    return Column(
-      children: [
-        sendButton,
-        SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.05, color: _isBasicMode ? B_Colors.black : A_Colors.black, fontWeight: FontWeight.bold),
-        ),
-      ],
     );
   }
 }
@@ -1628,11 +1416,111 @@ class _EditDialogState extends State<EditDialog> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // タイトル
                     Text(
                       _isBasicMode ? "もんだいをかく" : "問題を編集",
                       style: TextStyle(color: _isBasicMode ? B_Colors.black : A_Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
+                    SizedBox(height: 24),
+
+                    Row(
+                      children: [
+                        // 数式入力ボタン
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.01),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  A_Colors.white,
+                                  A_Colors.accentColor,
+                                  A_Colors.white
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                  width: 3
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                  blurRadius: 6,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                ),
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    barrierColor: Colors.transparent,
+                                    builder: (_) {
+                                      return SizedBox(
+                                        height: MediaQuery.of(context).size.height * 0.4,
+                                        child: MathKeyboard(
+                                          mode: _isBasicMode,
+                                          onInsert: (latex) {
+                                            final selection = _textController.selection;
+                                            final newText = _textController.text.replaceRange(
+                                              selection.start,
+                                              selection.end,
+                                              latex,
+                                            );
+                                            setState(() {
+                                              _textController.text = newText;
+                                              _textController.selection = TextSelection.collapsed(
+                                                offset: selection.start + latex.length,
+                                              );
+                                            });
+                                          },
+                                        ),
+                                      );
+
+                                    },
+                                  );
+                                },
+                                child: Text(
+                                  _isBasicMode ? 'すうしき・たんい' : '数式・単位を入力',
+                                  style: TextStyle(
+                                    color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                                    fontSize: MediaQuery.of(context).size.width * 0.04,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(width: 16),
+
+                        // 画像入力ボタン
+                        CameraButton(
+                          onImagePicked: (String text) {
+                            if (text.isNotEmpty) {
+                              _textController.text += text;
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 16),
+
+                    // テキストフィールド
                     Container(
                       height: MediaQuery.of(context).size.height * 0.5,
                       width: MediaQuery.of(context).size.width * 0.75,
@@ -1679,8 +1567,9 @@ class _EditDialogState extends State<EditDialog> {
                               ),
                       ),
                     ),
+                    SizedBox(height: 10),
 
-                    SizedBox(height: 20),
+                    // 次へ進むボタン
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -1711,110 +1600,36 @@ class _EditDialogState extends State<EditDialog> {
                 ),
               ),
 
-              // 数式入力セット
-              if (_hasFocus)
-                Positioned(
-                  bottom: MediaQuery.of(context).viewInsets.bottom - MediaQuery.of(context).size.height * 0.1,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          A_Colors.white,
-                          A_Colors.accentColor,
-                          A_Colors.white
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      border:
-                      Border.all(color: A_Colors.black, width: 2),
-                    ),
-                    child: Center(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                        ),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            barrierColor: Colors.transparent,
-                            builder: (_) {
-                              return SizedBox(
-                                height: MediaQuery.of(context).size.height * 0.4,
-                                child: MathKeyboard(
-                                  mode: _isBasicMode,
-                                  onInsert: (latex) {
-                                    final selection = _textController.selection;
-                                    final newText = _textController.text.replaceRange(
-                                      selection.start,
-                                      selection.end,
-                                      latex,
-                                    );
-                                    setState(() {
-                                      _textController.text = newText;
-                                      _textController.selection = TextSelection.collapsed(
-                                        offset: selection.start + latex.length,
-                                      );
-                                    });
-                                  },
-                                ),
-                              );
-
-                            },
-                          );
-                        },
-                        child: Text(
-                          _isBasicMode ? 'すうしき・たんい' : '数式・単位を入力',
-                          style: TextStyle(
-                            color: A_Colors.black,
-                            fontSize: MediaQuery.of(context).size.width * 0.04,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
               // 左上の戻るボタン
               Positioned(
                 top: 24,
                 left: 10,
                 child: IconButton(
-                  icon: Icon(Icons.arrow_back, color: _isBasicMode ? B_Colors.black : A_Colors.black, size: 40),
+                  icon: Icon(Icons.arrow_back,
+                      color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                      size: MediaQuery.of(context).size.width * 0.08
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    showSendDialog(context);
                   },
                 ),
               ),
 
-              // ×ボタン(キーボードを閉じる用)
-              _focusNode.hasFocus
-                  ? Positioned(
-                      top: 24,
-                      right: 10,
-                      child: IconButton(
-                        icon: Icon(Icons.close),
-                        iconSize: MediaQuery.of(context).size.width * 0.08,
-                        onPressed: () {
-                          _focusNode.unfocus();
-                          setState(() {});
-                        },
-                      ),
-                    )
-                  : Container(),
+              // キーボードを閉じるボタン
+              if(_focusNode.hasFocus)
+                Positioned(
+                  top: 28,
+                  right: 16,
+                  child: IconButton(
+                    onPressed: () {
+                      FocusScope.of(context).unfocus(); // キーボードを閉じる
+                    },
+                    icon: Icon(Icons.keyboard_hide,
+                      color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                      size: MediaQuery.of(context).size.width * 0.08,
+                    ),
+                  ),
+                )
             ],
           ),
         ),

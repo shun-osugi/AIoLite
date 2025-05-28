@@ -30,9 +30,8 @@ class _HelpDialogState extends State<HelpDialog> {
         helpPages = [
           // ベーシック用
           {"image": "assets/help_home_basic/help0.png", "head": "はじめに", "text": "「START」ボタンをおして、もんだいをはじめよう！\nこのアプリのつかいかたがわからなくなったら、いつでもこのヘルプをみてね！"},
-          {"image": "assets/help_home_basic/help1.png", "head": "もんだいの おくりかた", "text": "もんだいを おくるほうほうは、こえ・しゃしん・もじ の３つ！\nこえやしゃしんは じどうで もじになるよ！"},
-          {"image": "assets/help_home_basic/help2.png", "head": "もんだいを かこう！", "text": "もんだいをもじでかこう！\nこえ・しゃしんでいれたもんだいが まちがっていたら、ここでなおすことができるよ。"},
-          {"image": "assets/help_home_basic/help3.png", "head": "イオと おしゃべりしながら といてみよう！", "text": "もんだいが できたら、イオが おてつだいしてくれるよ。\nこたえがわかったら「できた！」ボタンを おしてね。"},
+          {"image": "assets/help_home_basic/help1.png", "head": "もんだいを おくろう！", "text": "もんだいをもじでかこう！\nカメラのボタンをおすと、しゃしんでもんだいをおくることができるよ！\n「すうしき・たんい」ボタンでは、しきやたんいをボタンでにゅうりょくできるよ！"},
+          {"image": "assets/help_home_basic/help2.png", "head": "イオと おしゃべりしながら といてみよう！", "text": "もんだいが できたら、イオが おてつだいしてくれるよ。\nこたえがわかったら「できた！」ボタンを おしてね。"},
           {"image": "assets/help_home_basic/help4.png", "head": "もんだいがとけたら", "text": "もんだいがとけたら、「できた！」ボタンをおそう！イオからのメッセージがもらえるよ！\nさっそくもんだいをおくってはじめてみよう！"},
           {"image": "assets/help_home_basic/help5.png", "head": "おべんきょうのきろく", "text": "といたもんだいのかずは きょうかごとにきろくされているよ！\n「モードをえらぶ」ボタンのとなりのボタンからみてみよう！"},
         ];
@@ -40,9 +39,8 @@ class _HelpDialogState extends State<HelpDialog> {
         helpPages = [
           // アドバンス用
           {"image": "assets/help_home_advanced/help0.png", "head": "まずは、「START」ボタンを押して問題を送信しよう！", "text": "ここでは、このアプリの使用方法を確認することができます。\n右上のハンバーガーメニューからは、本アプリの使い方のほか、利用規約やライセンス情報を確認できます。また、音声読み上げ機能のON/OFFの切り替えもこちらから行えます。"},
-          {"image": "assets/help_home_advanced/help1.png", "head": "問題の送信方法を選んで、問題を送信しよう！", "text": "送信方法は、音声入力、画像入力(画像ファイルからor写真を撮影)、テキスト入力から選べます。\n音声や画像を送信した場合は、自動でテキストに変換されます。"},
-          {"image": "assets/help_home_advanced/help2.png", "head": "問題文の編集をしよう！", "text": "テキスト入力の場合はここで入力、音声や画像で入力した場合は、問題文を修正できます。\n数式や単位は、専用入力ボタンを使うと簡単に入力できます。"},
-          {"image": "assets/help_home_advanced/help3.png", "head": "問題のラベル(教科・単元)の編集をしよう！", "text": "\n送信された問題文を元に、自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。"},
+          {"image": "assets/help_home_advanced/help1.png", "head": "問題を送ろう！", "text": "問題をテキストで入力します。\nカメラのボタンを押すと、画像で問題を送ることができます。\n数式や単位は、専用入力ボタンを使うと簡単に入力できます。"},
+          {"image": "assets/help_home_advanced/help2.png", "head": "問題のラベル(教科・単元)の編集をしよう！", "text": "\n送信された問題文を元に、自動でいくつかのラベルが選択されます。問題にあったラベルを編集・追加してください。\n最大4つのラベルを選択することができます。"},
           {
             "image": "assets/help_home_advanced/help4.png",
             "head": "イオとのチャットを開始！\nイオの質問に答えながら、問題を解いていこう！",
@@ -65,7 +63,7 @@ class _HelpDialogState extends State<HelpDialog> {
           {"image": "assets/help_chat_basic/help0.png", "head": "イオとはなそう！", "text": "ここでは、「イオ」とはなしながらもんだいをとくことができるよ！\nイオからのしつもんにこたえたり、イオにしつもんしてみよう！"},
           {"image": "assets/help_chat_basic/help1.png", "head": "ボタンのつかいかた", "text": "はなしたことをふりかえりたいときには、やじるしボタン（← →）をおそう！かいわをふりかえることができるよ！\nイオのしつもんがわからないときは、はてなボタン(？)をおそう！イオがもういちどわかりやすくおしえてくれるよ！"},
           {"image": "assets/help_chat_basic/help2.png", "head": "もんだいをかくにんする", "text": "うえにもんだいのまとめがかいてあるよ！\nもんだいをかくにんしたいときは、ここをおしてかくにんしよう！"},
-          {"image": "assets/help_chat_basic/help3.png", "head": "もんだいがとけたら", "text": "もんだいがとけたら、「できた！」ボタンをおそう！イオからのメッセージがもらえるよ！"},
+          {"image": "assets/help_chat_basic/help2.png", "head": "もんだいがとけたら", "text": "もんだいがとけたら、「できた！」ボタンをおそう！イオからのメッセージがもらえるよ！"},
           {"image": "assets/help_chat_basic/help4.png", "head": "メニューをひらく", "text": "みぎうえのボタンでメニューにきりかえられるよ！\nメニューでは、イオのこえをオフにしたり、もんだいをやりなおすことができるよ！"},
           {
             "image": "assets/help_chat_basic/help5.png",
@@ -83,7 +81,7 @@ class _HelpDialogState extends State<HelpDialog> {
             "head": "問題が解けたら",
             "text": "問題が解けたら、「解けた」ボタンを押して、イオからのフィードバックをもらいましょう！\nフィードバックでは、つまづいたポイントや問題の解説を見ることができます。フィードバックは保存され、ホーム画面から一覧を見ることができます。"
           },
-          {"image": "assets/help_chat_advanced/help3.png", "head": "メニューを開く", "text": "右上のボタンから、チャットとメニューを切り替えることができます。\nメニューでは、音声読み上げのミュート設定や問題のやり直しができます。"},
+          {"image": "assets/help_chat_advanced/help2.png", "head": "メニューを開く", "text": "右上のボタンから、チャットとメニューを切り替えることができます。\nメニューでは、音声読み上げのミュート設定や問題のやり直しができます。"},
           {
             "image": "assets/help_chat_advanced/help4.png",
             "head": "メニュー内容",
