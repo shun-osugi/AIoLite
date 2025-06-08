@@ -1,8 +1,6 @@
 // 全体統計画面（ホーム画面から統計ボタンクリックで遷移）
 // 教科別ドーナツグラフと "よく使う分野" リストを DB から動的生成
 
-// _pieData.keys が空 になっているのに .first を実行する問題を改善
-
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -78,7 +76,7 @@ class _StatsPageState extends State<StatsPage> {
   String _selected = '国語';                                //ラベル使用回数ランキング表示で最初に選択してある教科
   late Database _database;
   bool _isLoading = true;                                  //読み込みが終わらない問題の対策
-  bool _hasData = false; //レコードが存在するか
+  bool _hasData = false;                                   //レコードが存在するか
   bool _isBasicMode = true;
 
   final List<Map<String, int>> _fbbasicList = [];          //basicモードのレコード　{教科：解いた数}の配列
@@ -108,7 +106,6 @@ class _StatsPageState extends State<StatsPage> {
     }
   }
 
-  //googleCromeで動作確認するための処理 後で消す？
   Future<void> _openDatabase() async {
     // Android/iOS: /data/data/<pkg>/databases
     // macOS/Windows/linux: getDatabasesPath() がホーム配下を返す
@@ -140,7 +137,7 @@ class _StatsPageState extends State<StatsPage> {
         )''');
       },
     );
-  }//↑後で消すかもここまで
+  }
 
   //フィードバックデータを読んで要素ごとに格納
   Future<void> _readAllFeedback() async {
@@ -172,44 +169,6 @@ class _StatsPageState extends State<StatsPage> {
     }
   }
 
-  ///ダミーデータを追加　あとで消す
-  Future<void> _insertMockData() async {
-    // すでにデータが入っているなら何もしない
-    final cnt = Sqflite.firstIntValue(
-        await _database.rawQuery('SELECT COUNT(*) FROM feedback'))!;
-    if (cnt > 0) return;
-
-    // ------------------ advanced モード用ダミー ------------------
-    await _database.insert('feedback', {
-      'subject': '国語&&英語',
-      'field'  : '読解&&文法',
-      'problem': '問題文 A',
-      'summary': 'まとめ A',
-      'wrong'  : '誤答 A',
-      'wrongpartans': '正答 A1',
-      'correctans'  : '解説 A',
-    });
-    await _database.insert('feedback', {
-      'subject': '数学',
-      'field'  : '微分&&積分&&確率',
-      'problem': '問題文 B',
-      'summary': 'まとめ B',
-      'wrong'  : '誤答 B',
-      'wrongpartans': '正答 B1',
-      'correctans'  : '解説 B',
-    });
-
-    // ------------------ basic モード用ダミー ------------------
-    await _database.insert('feedbackbasic', {
-      'subject': '国語',
-      'count'  : 4,
-    });
-    await _database.insert('feedbackbasic', {
-      'subject': '数学',
-      'count'  : 2,
-    });
-  }
-
   //データ集計
   void _calcStats() {
     _hasData = _fbList.isNotEmpty || _fbbasicList.isNotEmpty;
@@ -233,13 +192,14 @@ class _StatsPageState extends State<StatsPage> {
           return MapEntry(sub, cnt / total * 100);
         }));
       _centerCount = total;
-      _centerLabel = '解いた回数';
+      _centerLabel = 'といたかず';
       _details.clear();
       _selected = _pieData.keys.isNotEmpty ? _pieData.keys.first : '';
       return;
+    } else {
+      _centerLabel = '解いた回数';
     }
     _centerCount = _problemCount(false);     //なにも選択してないときは全部の教科合計のといた数
-    _centerLabel = '解いた回数';
 
     //教科・分野をカウント
     final subjectCount = <String, int>{};
@@ -292,6 +252,7 @@ class _StatsPageState extends State<StatsPage> {
     }
     return _fbList.length;
   }
+
   int _countOf(String subject, bool isBasicMode) {
     if (isBasicMode) {
       // basic モードは _fbbasicList に {教科: 件数} が複数入っている
@@ -316,7 +277,7 @@ class _StatsPageState extends State<StatsPage> {
     if (_isLoading) {
       return Scaffold(
         backgroundColor:
-        isBasicMode ? B_Colors.background : A_Colors.background,
+        isBasicMode ? B_Colors.accentColor : A_Colors.background,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -325,7 +286,7 @@ class _StatsPageState extends State<StatsPage> {
     return Scaffold(
       appBar: _buildAppBar(isBasicMode, context),
       backgroundColor:
-      isBasicMode ? B_Colors.background : A_Colors.background,
+      isBasicMode ? B_Colors.accentColor : A_Colors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -371,7 +332,9 @@ class _StatsPageState extends State<StatsPage> {
   Widget _buildPieArea(bool isBasicMode) => Container(
     width: MediaQuery.of(context).size.width * 0.9,
     decoration: BoxDecoration(
-      color: A_Colors.white,
+      color: _isBasicMode
+          ? B_Colors.background
+          : A_Colors.white,
       borderRadius: BorderRadius.circular(32),
     ),
     padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
@@ -391,11 +354,11 @@ class _StatsPageState extends State<StatsPage> {
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+        SizedBox(height: MediaQuery.of(context).size.width * 0.08),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.1),
             Expanded(
               child: _buildStackedChart(
                 isBasicMode,
@@ -403,7 +366,9 @@ class _StatsPageState extends State<StatsPage> {
                   if (subject == null) {                         // ← グラフ外タップ
                     setState(() {
                       _centerCount = _problemCount(isBasicMode);
-                      _centerLabel = '解いた回数';
+                      _centerLabel = _isBasicMode
+                          ? 'といたかず'
+                          : '解いた回数';
                     });
                   } else {                                       // ← 教科をタップ
                     setState(() {
@@ -414,24 +379,27 @@ class _StatsPageState extends State<StatsPage> {
                 },
               ),
             ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.1),
             _buildLegend(isBasicMode),
             SizedBox(width: MediaQuery.of(context).size.width * 0.05),
           ],
         ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+        SizedBox(height: MediaQuery.of(context).size.width * 0.06),
       ],
     )
         : Padding(                               // ← データが不足しているとき
       padding: const EdgeInsets.all(24),
       child: Text(
-        'データが不足しています',
+        _isBasicMode
+            ? 'イオともっとはなそう！'
+            : 'データが不足しています',
         style: _tileTextStyle(context, isBasicMode),
         textAlign: TextAlign.center,
       ),
     ),
   );
 
+  // ドーナツグラフと中央のテキスト
   Widget _buildStackedChart(
       bool isBasicMode, {
         required void Function(String? subject) onSectionTouch,
@@ -439,20 +407,41 @@ class _StatsPageState extends State<StatsPage> {
       Stack(
         alignment: Alignment.center,
         children: [
+          // ドーナツグラフ
           DonutPieChart(
             data           : _pieData,
             onSectionTouch : onSectionTouch,   //おした部分を認識
+            width : MediaQuery.of(context).size.width
           ),
-          Column(                               //説明文字列と数字を2段表示
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(_centerLabel,
-                  style:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              Text('$_centerCount',
-                  style:
-                  const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            ],
+          // テキスト部
+          IgnorePointer(    // タッチイベントを透過
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // インデックステキスト
+                Text(_centerLabel,
+                    style:
+                    TextStyle(
+                      color: _isBasicMode
+                          ? B_Colors.black
+                          : A_Colors.black,
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontWeight: FontWeight.w600
+                    ),
+                ),
+                // 回数表示テキスト
+                Text('$_centerCount',
+                    style:
+                    TextStyle(
+                        color: _isBasicMode
+                            ? B_Colors.black
+                            : A_Colors.black,
+                        fontSize: MediaQuery.of(context).size.width * 0.06,
+                        fontWeight: FontWeight.w600
+                    ),
+                ),
+              ],
+            ),
           ),
         ],
       );
@@ -514,7 +503,6 @@ class _StatsPageState extends State<StatsPage> {
   Widget _buildSubjectChips(bool isBasicMode) => SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: Wrap(
-      spacing: 8,
       children: _pieData.keys.map((subject) {
         final selected = _selected == subject;
         final color = kSubjectColor[subject] ?? Subject_Colors.other;
@@ -583,8 +571,9 @@ class _StatsPageState extends State<StatsPage> {
 class DonutPieChart extends StatefulWidget {
   final Map<String, double> data;
   final void Function(String? subject) onSectionTouch;
+  final double width;
 
-  const DonutPieChart({super.key, required this.data, required this.onSectionTouch,});
+  const DonutPieChart({super.key, required this.data, required this.onSectionTouch, required this.width,});
 
   @override
   State<DonutPieChart> createState() => _DonutPieChartState();
@@ -598,11 +587,11 @@ class _DonutPieChartState extends State<DonutPieChart> {
     final total = widget.data.values.fold<double>(0, (s, v) => s + v);
 
     return AspectRatio(
-      aspectRatio: 1.0,
+      aspectRatio: 0.8,
       child: PieChart(
         PieChartData(
           sectionsSpace: 2,
-          centerSpaceRadius: 60,
+          centerSpaceRadius: widget.width * 0.12,
           startDegreeOffset: -90,
           pieTouchData: PieTouchData(
             touchCallback: (event, response) {
@@ -623,7 +612,7 @@ class _DonutPieChartState extends State<DonutPieChart> {
             final entry = widget.data.entries.elementAt(i);
             final color      = kSubjectColor[entry.key] ?? Subject_Colors.other;
             final isTouched = i == touchedIndex;
-            final radius = isTouched ? MediaQuery.of(context).size.width * 0.17 : MediaQuery.of(context).size.width * 0.15;
+            final radius = isTouched ? MediaQuery.of(context).size.width * 0.16 : MediaQuery.of(context).size.width * 0.14;
             final percentage = (entry.value / total * 100).toStringAsFixed(0);
 
             return PieChartSectionData(
@@ -631,10 +620,10 @@ class _DonutPieChartState extends State<DonutPieChart> {
               value: entry.value,
               title: '$percentage%',
               radius: radius,
-              titleStyle: const TextStyle(
-                fontSize: 14,
+              titleStyle: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.05,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: A_Colors.white,
               ),
             );
           }),
