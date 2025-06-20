@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 // import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:file_picker/file_picker.dart';
@@ -1181,7 +1182,7 @@ class LicenseButton extends StatelessWidget {
 
 // カメラを起動するボタン
 class CameraButton extends StatelessWidget {
-  final Function(String) onImagePicked;
+  final Function(String, Uint8List?) onImagePicked;
 
   const CameraButton({Key? key, required this.onImagePicked}) : super(key: key);
 
@@ -1212,12 +1213,139 @@ class CameraButton extends StatelessWidget {
       // 画像から文字を読み取る（OCR処理）
       final recognizedText = await textRecognizer.processImage(inputImage);
 
-      onImagePicked(recognizedText.text);
+      onImagePicked(recognizedText.text, null);
       textRecognizer.close();
     } catch (e) {
       print('ファイル編集エラー');
       print(e);
     }
+  }
+
+  Future<void> handleImageInput({
+    required bool convertToText,
+    required bool fromCamera,
+    required BuildContext context,
+  }) async {
+    final picker = ImagePicker();
+    final pickedFile = fromCamera
+        ? await picker.pickImage(source: ImageSource.camera)
+        : await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if (pickedFile == null) return;
+
+    final path = fromCamera
+        ? (pickedFile as XFile).path
+        : (pickedFile as FilePickerResult).files.first.path;
+
+    if (path == null) return;
+
+    File file = File(path);
+    final data = await file.readAsBytes();
+
+    if (convertToText) {
+      file_to_text(file, context);
+    } else {
+      onImagePicked("", data);
+      // showLabelDialog(context, "", data);
+    }
+  }
+
+  //画像選択の仕方を選択（ダイアログ2）
+  void showSourceSelectDialog(BuildContext context, BuildContext currentContext, bool convertToText) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text(
+            '選択：',
+            style: TextStyle(
+              color: _isBasicMode ? B_Colors.black : A_Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          children: [
+            SimpleDialogOption(
+              child: Text(
+                '写真ライブラリから選択',
+                style: TextStyle(
+                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                handleImageInput(convertToText: convertToText, fromCamera: false, context: currentContext);
+              },
+            ),
+            SimpleDialogOption(
+              child: Text(
+                '写真を撮影',
+                style: TextStyle(
+                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                handleImageInput(convertToText: convertToText, fromCamera: true, context: currentContext);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //画像の使い方を選択（ダイアログ1）
+  void showSelectModeDialog(BuildContext context, BuildContext currentContext) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text(
+            '画像の使い方を選択：',
+            style: TextStyle(
+              color: _isBasicMode ? B_Colors.black : A_Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          children: [
+            SimpleDialogOption(
+              child: Text(
+                '画像をテキストに変換',
+                style: TextStyle(
+                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                showSourceSelectDialog(context, currentContext, true);
+              },
+            ),
+            SimpleDialogOption(
+              child: Text(
+                '画像をそのまま使用',
+                style: TextStyle(
+                  color: _isBasicMode ? B_Colors.black : A_Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                showSourceSelectDialog(context, currentContext, false);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -1226,72 +1354,7 @@ class CameraButton extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () async {
-        /*Step 1:Pick image*/
-        //Install image_picker
-        //Import the corresponding library
-        showDialog(
-            context: context,
-            builder: (context) {
-              return SimpleDialog(
-                title: Text(
-                  '選択：',
-                  style: TextStyle(
-                    color: _isBasicMode ? B_Colors.black : A_Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                children: [
-                  SimpleDialogOption(
-                    child: Text(
-                      '写真ライブラリから選択',
-                      style: TextStyle(
-                        color: _isBasicMode ? B_Colors.black : A_Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      FilePickerResult? file = await FilePicker.platform.pickFiles(
-                        type: FileType.image, //写真ファイルのみ抽出
-                        // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
-                      );
-
-                      if (file != null) {
-                        String filename = file.files.first.name;
-                        print(filename);
-
-                        // File型に変換し文字に変換
-                        file_to_text(File(file.files.first.path!), currentContext);
-                      }
-                    },
-                  ),
-                  SimpleDialogOption(
-                    child: Text(
-                      '写真を撮影',
-                      style: TextStyle(
-                        color: _isBasicMode ? B_Colors.black : A_Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      ImagePicker picker = ImagePicker();
-                      //写真を撮る
-                      final pickedFile = await picker.pickImage(source: ImageSource.camera);
-
-                      if (pickedFile != null) {
-                        print(pickedFile.path);
-                        // File型に変換し文字に変換
-                        file_to_text(File(pickedFile.path), currentContext);
-                      }
-                    },
-                  )
-                ],
-              );
-            });
+        showSelectModeDialog(context, currentContext);
       },
       child: Container(
         padding: EdgeInsets.all(screenWidth * 0.022),
@@ -1366,6 +1429,7 @@ class _EditDialogState extends State<EditDialog> {
   late TextEditingController _textController;
   late FocusNode _focusNode;
   bool _hasFocus = false;
+  Uint8List? imageData;
 
   @override
   void initState() {
@@ -1510,9 +1574,12 @@ class _EditDialogState extends State<EditDialog> {
 
                         // 画像入力ボタン
                         CameraButton(
-                          onImagePicked: (String text) {
+                          onImagePicked: (String text, Uint8List? image) {
                             if (text.isNotEmpty) {
                               _textController.text += text;
+                            }
+                            if(image != null){
+                              imageData = image;
                             }
                           },
                         ),
@@ -1586,7 +1653,7 @@ class _EditDialogState extends State<EditDialog> {
                                 },
                               );
                             } else {
-                              showLabelDialog(context, editedText);
+                              showLabelDialog(context, editedText, imageData);
                             }
                           },
                           child: Text(
@@ -1639,19 +1706,21 @@ class _EditDialogState extends State<EditDialog> {
 }
 
 // ラベルを編集するダイアログ
-void showLabelDialog(BuildContext context, String text) {
+void showLabelDialog(BuildContext context, String text, Uint8List? imageData) {
   showDialog(
     context: context,
     builder: (context) => LabelDialog(
       editedText: text,
+      imageData: imageData,
     ),
   );
 }
 
 class LabelDialog extends StatefulWidget {
   final String editedText;
+  final Uint8List? imageData;
 
-  const LabelDialog({Key? key, required this.editedText}) : super(key: key);
+  const LabelDialog({Key? key, required this.editedText, required this.imageData}) : super(key: key);
 
   @override
   _LabelDialogState createState() => _LabelDialogState();
@@ -1667,6 +1736,8 @@ class _LabelDialogState extends State<LabelDialog> {
   @override
   void initState() {
     super.initState();
+    print("fsadsfsdfdsfsdfsdaf");
+    print(widget.imageData != null ? 1:0);
     // 初期化時にテキストを元にラベルを取得
     _getSuggestedLabels(widget.editedText);
     // モード読込
